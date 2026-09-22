@@ -1,18 +1,18 @@
 # ZFLAG website
 
-Static site ready for Render or any static host.
+Static ZFLAG site ready for Render.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/MadeByZebra/zflag-site)
 
 Files:
 - `index.html` — the full website
-- `ZFLAG-Setup-v2.0.22.exe` — download linked by the site
-- `render.yaml` — optional Render blueprint
+- `ZFLAG-Setup-v2.0.22.exe` — installer linked by every Download button
+- `render.yaml` — Render Blueprint config
 
-## Render
-1. Put these files in a GitHub repository.
-2. In Render, choose **New + → Static Site**.
-3. Connect the repository.
-4. Build command: leave blank.
-5. Publish directory: `.`
-6. Deploy.
+## Deploy
 
-The Download buttons use the relative path `ZFLAG-Setup-v2.0.22.exe`, so keep the EXE beside `index.html`.
+Click **Deploy to Render** above.
+
+Render will read `render.yaml` from the repo root and create the static site. The installer stays beside `index.html`, and the Blueprint adds download headers for `/ZFLAG-Setup-v2.0.22.exe`.
+
+After the first deploy, pushes to `main` can automatically redeploy the site.
