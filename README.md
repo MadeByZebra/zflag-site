@@ -6,7 +6,9 @@ Static ZFLAG site ready for Render.
 
 Files:
 - `index.html` — the full website
-- `ZFLAG-Setup-v2.0.23.exe` — installer linked by every Download button
+- `ZFLAG-Setup-v2.0.23.exe` — prebuilt Windows installer linked by every Download button
+
+The installer is precompiled. End users do not need Node.js, Rust, Python, or Visual Studio Build Tools.
 - `render.yaml` — Render Blueprint config
 
 ## Deploy
