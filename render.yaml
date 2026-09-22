@@ -4,6 +4,10 @@ services:
     runtime: static
     buildCommand: echo "ZFLAG static site - no build required"
     staticPublishPath: .
+    routes:
+      - type: redirect
+        source: /ZFLAG-Setup-v2.0.22.exe
+        destination: /ZFLAG-Setup-v2.0.23.exe
     headers:
       - path: /ZFLAG-Setup-v2.0.23.exe
         name: Content-Disposition
