@@ -1,0 +1,18 @@
+ZFLAG — Render deployment files
+
+Keep these files together in the root of your GitHub repository:
+  index.html
+  ZFLAG-Setup-v2.0.22.exe
+  render.yaml
+
+Installer SHA-256:
+009d56c051ace8f7475da693b5b41b897d9cb8733f174def9ecebea3f00a1ae2
+
+Installer size (bytes):
+3155968
+
+Every visible Download button in index.html is wired directly to:
+  ZFLAG-Setup-v2.0.22.exe
+
+The render.yaml also sends Content-Disposition: attachment for the installer,
+so browsers download it instead of attempting to display it.

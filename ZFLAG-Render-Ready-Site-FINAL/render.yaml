@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: zflag
+    runtime: static
+    buildCommand: echo "ZFLAG static site - no build required"
+    staticPublishPath: .
+    headers:
+      - path: /ZFLAG-Setup-v2.0.22.exe
+        name: Content-Disposition
+        value: 'attachment; filename="ZFLAG-Setup-v2.0.22.exe"'
+      - path: /ZFLAG-Setup-v2.0.22.exe
+        name: Content-Type
+        value: application/octet-stream
