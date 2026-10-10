@@ -1,0 +1,56 @@
+name: Inspect ZFLAG source for repair
+on:
+  push:
+    paths:
+      - .github/workflows/zflag-source-inspect.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Recover original packaged source
+        run: |
+          python3 - <<'PYINNER'
+          import subprocess, pathlib, struct, io, zipfile
+          commit='5eac1d1773099ff5e86dcb89b9796eab674b35a2'
+          blob=subprocess.check_output(['git','show',f'{commit}:ZFLAG-Setup-v2.0.22.exe'])
+          eocd=blob.rfind(b'PK\x05\x06')
+          if eocd<0: raise RuntimeError('No ZIP central directory found')
+          sig,disk,cd_disk,n_disk,n_total,cd_size,cd_offset,comment_len=struct.unpack_from('<4s4H2LH',blob,eocd)
+          start=eocd-cd_size-cd_offset;end=eocd+22+comment_len
+          out=pathlib.Path('recovered')
+          with zipfile.ZipFile(io.BytesIO(blob[start:end])) as z:
+            for entry in z.infolist():
+              target=(out/entry.filename).resolve()
+              if not target.is_relative_to(out.resolve()): raise RuntimeError('Unsafe ZIP name')
+            z.extractall(out)
+          files=[p for p in out.rglob('*') if p.is_file() and 'node_modules' not in str(p)]
+          print('=== source files',len(files),'===')
+          for p in files:
+            if p.suffix.lower() in ('.py','.rs','.tsx','.ts','.json') and len(str(p))<180:
+              print('FILE',str(p),'bytes',p.stat().st_size)
+          terms=('robloxplayer','roblox_running','roblox_online','detect_roblox','find_roblox','clientappsettings','is_roblox','preflight','apply_flags','apply_fflags')
+          print('=== Relevant code matches ===')
+          seen=0
+          for p in files:
+            if p.suffix.lower() not in ('.py','.rs','.tsx','.ts','.js'): continue
+            try:lines=p.read_text(encoding='utf-8').splitlines()
+            except (UnicodeError,OSError):continue
+            for i,line in enumerate(lines):
+              if any(t in line.lower() for t in terms):
+                print('MATCH',p,i+1, line[:180])
+                seen+=1
+                if seen>=175: break
+            if seen>=175:break
+          PYINNER
+      - name: Save original recovered source as short-lived build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zflag-recovered-source
+          path: recovered/
+          retention-days: 3
