@@ -1,8 +1,8 @@
-name: Build ZFLAG 2.0.24 compatibility update
+name: Build ZFLAG 2.0.25 compatibility update
 on:
   push:
     paths:
-      - ".github/workflows/build-zflag-2.0.24.yml"
+      - ".github/workflows/build-zflag-2.0.25.yml"
   workflow_dispatch:
 permissions:
   contents: write
@@ -56,6 +56,20 @@ jobs:
           subprocess.run([sys.executable,"apply_repair.py","zflag-source"],check=True)
           '@ | Set-Content -Encoding utf8 apply_repair_verified.py
           python apply_repair_verified.py
+      - name: Expand bounded JSON API payloads for 20K+ preset entries
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          server=Path("zflag-source/backend/server.py")
+          contents=server.read_text(encoding="utf-8")
+          original="if length > 2_000_000:"
+          if original not in contents:raise SystemExit("Expected JSON limit not found; update needs review")
+          contents=contents.replace(original,"if length < 0 or length > 32_000_000:",1)
+          server.write_text(contents,encoding="utf-8")
+          print("JSON payload limit: 32 MB; negative lengths rejected")
+          '@ | Set-Content -Encoding utf8 expand_json_limit.py
+          python expand_json_limit.py
       - name: Run backend regression tests
         shell: pwsh
         run: |
@@ -67,7 +81,7 @@ jobs:
           @'
           import pathlib,json
           root=pathlib.Path("zflag-source")
-          version="2.0.24"
+          version="2.0.25"
           for path in root.rglob("*"):
               if path.is_file() and path.suffix.lower() in (".json",".toml",".rs",".tsx",".ts",".js",".mjs",".html",".txt",".md"):
                   if "node_modules" in path.parts:continue
@@ -114,7 +128,7 @@ jobs:
           candidates=list(pathlib.Path("zflag-source/src-tauri/target/release/bundle/nsis").glob("*.exe"))
           if not candidates:raise SystemExit("Windows installer was not produced")
           chosen=max(candidates,key=lambda p:p.stat().st_mtime)
-          dest=pathlib.Path("ZFLAG-Setup-v2.0.24.exe")
+          dest=pathlib.Path("ZFLAG-Setup-v2.0.25.exe")
           shutil.copy2(chosen,dest)
           if dest.stat().st_size<5000000:raise SystemExit("Unexpectedly small installer")
           print("Verified installer",dest.stat().st_size,"bytes",hashlib.sha256(dest.read_bytes()).hexdigest())
@@ -122,10 +136,10 @@ jobs:
               path=pathlib.Path(filename)
               if not path.is_file():continue
               content=path.read_text(encoding="utf-8")
-              content=content.replace("ZFLAG-Setup-v2.0.23.exe","ZFLAG-Setup-v2.0.24.exe")
-              content=content.replace("2.0.23","2.0.24")
+              content=content.replace("ZFLAG-Setup-v2.0.23.exe","ZFLAG-Setup-v2.0.25.exe")
+              content=content.replace("2.0.23","2.0.25")
               if filename=="index.html" and "id=\"compatibility-note-2026\"" not in content:
-                  note='''<section id="compatibility-note-2026" class="section" style="padding:38px 0" aria-label="Roblox FastFlag compatibility"><div class="wrap" style="border:1px solid var(--line);padding:22px;border-radius:10px;background:var(--panel)"><div class="kicker">Roblox compatibility · October 2026</div><p style="font-size:14px;line-height:1.6;color:var(--muted)">ZFLAG 2.0.24 detects Roblox without requesting memory-writing access, checks large JSON presets, and saves <strong>Roblox-allowlisted local FastFlags</strong> to ClientAppSettings.json. Restart Roblox after applying. Roblox ignores non-allowlisted flags. This release does not bypass client protections or inject arbitrary memory flags.</p><a class="text-link" href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569/">Roblox official policy</a></div></section>'''
+                  note='''<section id="compatibility-note-2026" class="section" style="padding:38px 0" aria-label="Roblox FastFlag compatibility"><div class="wrap" style="border:1px solid var(--line);padding:22px;border-radius:10px;background:var(--panel)"><div class="kicker">Roblox compatibility · October 2026</div><p style="font-size:14px;line-height:1.6;color:var(--muted)">ZFLAG 2.0.25 detects Roblox without requesting memory-writing access, checks large JSON presets, and saves <strong>Roblox-allowlisted local FastFlags</strong> to ClientAppSettings.json. Restart Roblox after applying. Roblox ignores non-allowlisted flags. This release does not bypass client protections or inject arbitrary memory flags.</p><a class="text-link" href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569/">Roblox official policy</a></div></section>'''
                   content=content.replace("</main>",note+"\n</main>",1)
               path.write_text(content,encoding="utf-8")
           '@ | Set-Content -Encoding utf8 publish.py
@@ -133,14 +147,14 @@ jobs:
       - name: Upload verified Windows installer
         uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-2.0.24-Windows
-          path: ZFLAG-Setup-v2.0.24.exe
+          name: ZFLAG-2.0.25-Windows
+          path: ZFLAG-Setup-v2.0.25.exe
           if-no-files-found: error
       - name: Publish new installer and website references after successful tests
         shell: pwsh
         run: |
           git config user.name "ZFLAG Build Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add ZFLAG-Setup-v2.0.24.exe index.html README.md DEPLOY-TO-RENDER.txt render.yaml
-          git commit -m "Publish tested ZFLAG 2.0.24 supported-FFlag compatibility build"
+          git add ZFLAG-Setup-v2.0.25.exe index.html README.md DEPLOY-TO-RENDER.txt render.yaml
+          git commit -m "Publish tested ZFLAG 2.0.25 supported-FFlag compatibility build"
           git push
