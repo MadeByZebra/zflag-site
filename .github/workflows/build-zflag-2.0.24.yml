@@ -1,0 +1,146 @@
+name: Build ZFLAG 2.0.24 compatibility update
+on:
+  push:
+    paths:
+      - ".github/workflows/build-zflag-2.0.24.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Recover verified original ZFLAG Studio source
+        shell: pwsh
+        run: |
+          @'
+          import subprocess,io,zipfile,struct,pathlib
+          sha="5eac1d1773099ff5e86dcb89b9796eab674b35a2"
+          blob=subprocess.check_output(["git","show",f"{sha}:ZFLAG-Setup-v2.0.22.exe"])
+          eocd=blob.rfind(b"PK\x05\x06")
+          if eocd<0:raise SystemExit("Original source archive missing")
+          sig,disk,cd_disk,n_disk,n_total,cd_size,cd_offset,comment_len=struct.unpack_from("<4s4H2LH",blob,eocd)
+          start=eocd-cd_size-cd_offset;end=eocd+22+comment_len
+          root=pathlib.Path("zflag-source")
+          with zipfile.ZipFile(io.BytesIO(blob[start:end])) as archive:
+              for item in archive.infolist():
+                  if not (root/item.filename).resolve().is_relative_to(root.resolve()):
+                      raise SystemExit("Unsafe archive entry")
+              archive.extractall(root)
+          print("Recovered original source from signed-in owner's repository history.")
+          '@ | Set-Content -Encoding utf8 recover.py
+          python recover.py
+      - name: Verify and apply ZFLAG detection and local configuration repair
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,base64,zlib,hashlib,subprocess,sys
+          data=pathlib.Path("patches/zflag-local-2.0.24.py.zlib.b64").read_text().strip()
+          patch=zlib.decompress(base64.b64decode(data))
+          digest=hashlib.sha256(patch).hexdigest()
+          print("Repair patch SHA256:",digest)
+          if digest!="9019605c17a5c2f4b8d8ed996bfaf20e0683c1382c03bc4a4d519233fff8f02e":
+              raise SystemExit("ZFLAG repair patch integrity check failed")
+          pathlib.Path("apply_repair.py").write_bytes(patch)
+          subprocess.run([sys.executable,"apply_repair.py","zflag-source"],check=True)
+          '@ | Set-Content -Encoding utf8 apply_repair_verified.py
+          python apply_repair_verified.py
+      - name: Run backend regression tests
+        shell: pwsh
+        run: |
+          python -m unittest discover -s zflag-source/tests -v
+          python -m py_compile zflag-source/backend/server.py
+      - name: Prepare Windows application metadata
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,json
+          root=pathlib.Path("zflag-source")
+          version="2.0.24"
+          for path in root.rglob("*"):
+              if path.is_file() and path.suffix.lower() in (".json",".toml",".rs",".tsx",".ts",".js",".mjs",".html",".txt",".md"):
+                  if "node_modules" in path.parts:continue
+                  try:content=path.read_text(encoding="utf-8")
+                  except UnicodeError:continue
+                  updated=content.replace("2.0.9",version)
+                  if content!=updated:path.write_text(updated,encoding="utf-8")
+          pkg=root/"package.json"
+          obj=json.loads(pkg.read_text(encoding="utf-8"))
+          obj["version"]=version
+          pkg.write_text(json.dumps(obj,indent=2)+"\n",encoding="utf-8")
+          conf=root/"src-tauri"/"tauri.conf.json"
+          obj=json.loads(conf.read_text(encoding="utf-8"))
+          obj["version"]=version
+          obj.setdefault("bundle",{})["active"]=True
+          obj["bundle"]["targets"]=["nsis"]
+          conf.write_text(json.dumps(obj,indent=2)+"\n",encoding="utf-8")
+          print("Windows NSIS installer configured for",version)
+          '@ | Set-Content -Encoding utf8 prepare.py
+          python prepare.py
+      - name: Install JavaScript dependencies
+        working-directory: zflag-source
+        shell: pwsh
+        run: npm install --no-audit --no-fund
+      - name: Build ZFLAG frontend
+        working-directory: zflag-source
+        shell: pwsh
+        run: npm run build
+      - name: Build Python backend sidecar
+        working-directory: zflag-source
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check pyinstaller
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-sidecar.ps1
+      - name: Build ZFLAG Windows installer
+        working-directory: zflag-source
+        shell: pwsh
+        run: npm run desktop:build -- --bundles nsis
+      - name: Verify binaries and stage website update
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,shutil,hashlib
+          candidates=list(pathlib.Path("zflag-source/src-tauri/target/release/bundle/nsis").glob("*.exe"))
+          if not candidates:raise SystemExit("Windows installer was not produced")
+          chosen=max(candidates,key=lambda p:p.stat().st_mtime)
+          dest=pathlib.Path("ZFLAG-Setup-v2.0.24.exe")
+          shutil.copy2(chosen,dest)
+          if dest.stat().st_size<5000000:raise SystemExit("Unexpectedly small installer")
+          print("Verified installer",dest.stat().st_size,"bytes",hashlib.sha256(dest.read_bytes()).hexdigest())
+          for filename in ("index.html","README.md","DEPLOY-TO-RENDER.txt","render.yaml"):
+              path=pathlib.Path(filename)
+              if not path.is_file():continue
+              content=path.read_text(encoding="utf-8")
+              content=content.replace("ZFLAG-Setup-v2.0.23.exe","ZFLAG-Setup-v2.0.24.exe")
+              content=content.replace("2.0.23","2.0.24")
+              if filename=="index.html" and "id=\"compatibility-note-2026\"" not in content:
+                  note='''<section id="compatibility-note-2026" class="section" style="padding:38px 0" aria-label="Roblox FastFlag compatibility"><div class="wrap" style="border:1px solid var(--line);padding:22px;border-radius:10px;background:var(--panel)"><div class="kicker">Roblox compatibility · October 2026</div><p style="font-size:14px;line-height:1.6;color:var(--muted)">ZFLAG 2.0.24 detects Roblox without requesting memory-writing access, checks large JSON presets, and saves <strong>Roblox-allowlisted local FastFlags</strong> to ClientAppSettings.json. Restart Roblox after applying. Roblox ignores non-allowlisted flags. This release does not bypass client protections or inject arbitrary memory flags.</p><a class="text-link" href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569/">Roblox official policy</a></div></section>'''
+                  content=content.replace("</main>",note+"\n</main>",1)
+              path.write_text(content,encoding="utf-8")
+          '@ | Set-Content -Encoding utf8 publish.py
+          python publish.py
+      - name: Upload verified Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZFLAG-2.0.24-Windows
+          path: ZFLAG-Setup-v2.0.24.exe
+          if-no-files-found: error
+      - name: Publish new installer and website references after successful tests
+        shell: pwsh
+        run: |
+          git config user.name "ZFLAG Build Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add ZFLAG-Setup-v2.0.24.exe index.html README.md DEPLOY-TO-RENDER.txt render.yaml
+          git commit -m "Publish tested ZFLAG 2.0.24 supported-FFlag compatibility build"
+          git push
