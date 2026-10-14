@@ -286,9 +286,9 @@ function statusUiSignature(value: Status) {
 }
 
 const builtInPresets = [
-  { id: "fps", name: "FPS", description: "Minimal frame-rate preset.", value: FPS_PRESET },
-  { id: "performance", name: "Performance", description: "Balanced performance profile from the original app.", value: PERFORMANCE_PRESET },
-  { id: "texture", name: "Texture Skip Mips", description: "Sets FIntDebugTextureManagerSkipMips to 8.", value: TEXTURE_PRESET },
+  { id: "fps", name: "Fullscreen Alt+Enter", description: "Officially allowlisted manual fullscreen option. Does not unlock FPS.", value: FPS_PRESET },
+  { id: "performance", name: "CSG draw distance", description: "Officially allowlisted CSG distance options; choose values carefully.", value: PERFORMANCE_PRESET },
+  { id: "texture", name: "Texture override off", description: "Keep Roblox's normal texture quality behavior.", value: TEXTURE_PRESET },
 ]
 
 const accentOptions: Array<{ id: AccentPreset; label: string; color: string }> = [
@@ -2060,15 +2060,9 @@ export default function App() {
     const wasConnected = lastConnectedRef.current
     lastConnectedRef.current = status.connected
     if (!wasConnected && status.connected && settings.autoApplyEnabled && settings.autoApplyConfigId) {
-      const config = savedConfigs.find((item) => item.id === settings.autoApplyConfigId)
-      if (config) {
-        try {
-          const value = JSON.parse(config.content)
-          if (value && !Array.isArray(value) && typeof value === "object") {
-            void applyFlags("auto-apply", value as Record<string, unknown>, config.name)
-          }
-        } catch { showToast("Auto Apply skipped", `${config.name} contains invalid JSON.`, "warning") }
-      }
+      // Local ClientAppSettings only takes effect after a Roblox restart.
+      // Never alter a user's local game configuration automatically at process startup.
+      showToast("Auto Apply paused", "For stability, use Save Supported manually and restart Roblox.", "warning")
     }
   }, [status.connected, settings.autoApplyEnabled, settings.autoApplyConfigId, savedConfigs])
 
@@ -2687,7 +2681,7 @@ export default function App() {
 
         {settingsSection === "behavior" && (
           <><div className="settings-section"><div className="settings-title">AUTO APPLY</div>
-            <div className="setting-row"><div><strong>Apply profile when Roblox connects</strong><p>Runs only after you explicitly enable it and choose a saved profile.</p></div><Toggle checked={draftSettings.autoApplyEnabled} onChange={(value) => setDraftSettings((current) => ({ ...current, autoApplyEnabled: value }))} /></div>
+            <div className="setting-row"><div><strong>Automatic profile apply (paused)</strong><p>Disabled in this stability build. Local settings must be saved manually and loaded by restarting Roblox.</p></div><Toggle checked={false} onChange={() => showToast("Automatic apply paused", "Use Save Supported in the editor.", "info")} /></div>
             <div className="setting-field"><label>Auto Apply profile</label><select value={draftSettings.autoApplyConfigId} onChange={(e) => setDraftSettings((current) => ({ ...current, autoApplyConfigId: e.target.value }))}><option value="">None</option>{savedConfigs.map((config) => <option key={config.id} value={config.id}>{config.name}</option>)}</select></div>
           </div></>
         )}
