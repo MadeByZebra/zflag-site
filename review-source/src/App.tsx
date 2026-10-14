@@ -72,11 +72,11 @@ const DEFAULT_API = "http://127.0.0.1:18766"
 let desktopSidecarStarted = false
 
 const DEFAULT_JSON = `{
-  "DFIntTaskSchedulerTargetFps": "9999"
+  "DFIntTaskSchedulerTargetFps": "120"
 }`
 
 const PERFORMANCE_PRESET = {
-  DFIntTaskSchedulerTargetFps: "9999",
+  DFIntTaskSchedulerTargetFps: "120",
   DFIntCSGLevelOfDetailSwitchingDistance: "250",
   DFIntCSGLevelOfDetailSwitchingDistanceL12: "500",
   DFIntCSGLevelOfDetailSwitchingDistanceL23: "1250",
@@ -85,7 +85,7 @@ const PERFORMANCE_PRESET = {
   FFlagDebugGraphicsDisableDirect3D11: "false",
 }
 
-const FPS_PRESET = { DFIntTaskSchedulerTargetFps: "9999" }
+const FPS_PRESET = { DFIntTaskSchedulerTargetFps: "120" }
 const TEXTURE_PRESET = { FIntDebugTextureManagerSkipMips: "8" }
 
 type View = "home" | "editor" | "presets" | "activity" | "agent" | "settings"
