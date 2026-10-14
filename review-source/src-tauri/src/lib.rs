@@ -133,9 +133,9 @@ pub fn run() {
                 return;
             }
 
-            if let WindowEvent::CloseRequested { api, .. } = event {
-                api.prevent_close();
-                let _ = window.hide();
+            if let WindowEvent::CloseRequested { .. } = event {
+                // Respect the X button: close completely, do not silently hide to tray.
+                window.app_handle().exit(0);
             }
         })
         .run(tauri::generate_context!())
