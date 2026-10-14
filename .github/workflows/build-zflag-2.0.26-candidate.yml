@@ -1,4 +1,5 @@
 name: Build ZFLAG 2.0.28 experimental Windows installer
+# QA run: includes full skipped-flag export, repaired JSX feedback, native initialization and installer smoke test.
 on:
   push:
     paths:
