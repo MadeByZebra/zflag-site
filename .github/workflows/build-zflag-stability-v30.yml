@@ -299,7 +299,7 @@ jobs:
           Write-Output "Authenticode signature status: $sig"
           $process=Start-Process -FilePath $installer -ArgumentList "/S" -Wait -PassThru
           if ($process.ExitCode -ne 0) { throw "NSIS silent installer exited with $($process.ExitCode)" }
-          $destination=Join-Path $env:LOCALAPPDATA "ZFLAG Test"
+          $destination=Join-Path $env:LOCALAPPDATA "ZFLAG Stable Test"
           foreach($program in @("fflag-studio.exe","fflag-backend.exe","zflag-native.exe")) {
             $path=Join-Path $destination $program
             if (-not (Test-Path $path)) { throw "Installed app missing $path" }
@@ -307,7 +307,7 @@ jobs:
             if ($length -lt 10000) { throw "Installed binary unexpectedly small: $path" }
             Write-Output "Verified installed: $program ($length bytes)"
           }
-          if (-not (Test-Path (Join-Path $env:LOCALAPPDATA "ZFLAG/fflag-studio.exe"))) { throw "Fresh installation unexpectedly replaced the old ZFLAG" }
+          if (-not (Test-Path (Join-Path $env:LOCALAPPDATA "ZFLAG Test/fflag-studio.exe"))) { throw "Fresh installation unexpectedly replaced the old ZFLAG Test" }
           Write-Output "PASS: both versions installed side-by-side without an old uninstall"
           $main=Join-Path $destination "fflag-studio.exe"
           $app=Start-Process -FilePath $main -WorkingDirectory $destination -PassThru
