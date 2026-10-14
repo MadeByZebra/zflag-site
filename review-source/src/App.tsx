@@ -68,7 +68,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import logoMark from "./assets/zflag-logo.svg"
 
-const DEFAULT_API = "http://127.0.0.1:18766"
+const DEFAULT_API = "http://127.0.0.1:18767"
 let desktopSidecarStarted = false
 
 const DEFAULT_JSON = `{
@@ -323,7 +323,7 @@ function safeParse<T>(raw: string | null, fallback: T): T {
 function loadSettings(): SettingsState {
   const parsed = safeParse<Partial<SettingsState>>(localStorage.getItem("fflag-studio-settings"), {})
   const savedApi = typeof parsed.apiUrl === "string" ? parsed.apiUrl.trim().replace(/\/$/, "") : ""
-  const migratedApi = !savedApi || ["http://127.0.0.1:8765","http://localhost:8765","http://127.0.0.1:18765","http://localhost:18765"].includes(savedApi)
+  const migratedApi = !savedApi || ["http://127.0.0.1:8765","http://localhost:8765","http://127.0.0.1:18765","http://localhost:18765","http://127.0.0.1:18766","http://localhost:18766"].includes(savedApi)
     ? DEFAULT_API
     : savedApi
   const savedPoll = typeof parsed.pollMs === "number" ? parsed.pollMs : 12000
@@ -1015,7 +1015,7 @@ export default function App() {
           const health = await fetch(`${bridgeUrl}/health`, { cache: "no-store", signal: AbortSignal.timeout(1500) })
           if (health.ok) {
             const data = await health.json() as { backendVersion?: string }
-            if (data.backendVersion === "6.5-stable") {
+            if (data.backendVersion === "6.6-stable") {
               desktopSidecarStarted = true
               return true
             }
@@ -1037,7 +1037,7 @@ export default function App() {
           })
         } catch { /* already offline */ }
 
-        // Give the previous bridge time to actually release port 18765 before
+        // Give the previous bridge time to actually release port 18767 before
         // spawning the bundled sidecar. This avoids a stale process winning the race.
         for (let attempt = 0; attempt < 12; attempt += 1) {
           try {
@@ -1478,7 +1478,7 @@ export default function App() {
     if (browserModeBusy) return
     setBrowserModeBusy(true)
 
-    // The bundled desktop sidecar always owns 127.0.0.1:18766. Do not let a
+    // The bundled desktop sidecar always owns 127.0.0.1:18767. Do not let a
     // custom API URL in Settings accidentally break the Browser button.
     const baseUrl = (isDesktop ? DEFAULT_API : settings.apiUrl).replace(/\/$/, "") || DEFAULT_API
     const browserUrl = `${baseUrl}/app/`
@@ -1500,7 +1500,7 @@ export default function App() {
         throw new Error(
           health.backendVersion
             ? `Backend ${health.backendVersion} is running, but this copy does not contain the Browser UI. Restart ZFLAG using this build.`
-            : "A stale ZFLAG backend is occupying port 18765. Close old ZFLAG copies and try again.",
+            : "A stale ZFLAG backend is occupying port 18767. Close old ZFLAG copies and try again.",
         )
       }
 
@@ -2333,7 +2333,7 @@ export default function App() {
           {lastApplied ? <><div><strong>{lastApplied.name}</strong><small>{new Date(lastApplied.appliedAt).toLocaleString()} · {lastApplied.applied} applied · {lastApplied.errors} errors · {lastApplied.source ?? "manual"}</small></div><button type="button" onClick={() => restoreSnapshot(lastApplied)}>Restore snapshot</button></> : <div className="empty-center">No apply history yet.</div>}
         </div>
         <div className="section-label-row"><span>WHAT'S NEW</span></div>
-        <div className="update-log-card"><strong>v2.0.9 Browser CORS Fix</strong><p>Fixed the exact Browser button failure after backend restart: Browser verification now uses a CORS-safe JSON bundle check, static browser files include CORS headers, and Windows launch uses backend os.startfile first.</p></div><div className="update-log-card"><strong>v2.0.8 Browser + Performance Fix</strong><p>Moved the local bridge to port 18765 to bypass stale old backends, added root redirects, reduced status polling/render churn, and removed expensive always-on blur effects.</p></div><div className="update-log-card"><strong>v2.0.7 Preset + Browser Fix</strong><p>Centered preset/save dialogs through body portals, hardened Browser Mode recovery, fixed stale bridge handling, and added native + backend browser-launch fallbacks.</p></div><div className="update-log-card"><strong>v2.0.4 Friend Package</strong><p>Added a one-click release packager that creates a clean friend-ready installer ZIP.</p></div><div className="update-log-card"><strong>v2.0.3 UI Stability Pass</strong><p>Button reliability pass, safe titlebar clicks, repeated-file imports, browser-mode click locking, build preflight, and no silent invalid-JSON export.</p></div><div className="update-log-card"><strong>v2.0.2 Tauri Config Fix</strong><p>Removed the invalid useHttpsScheme window property so Tauri 2.0.0 can validate the native window configuration and continue the Windows build.</p></div><div className="update-log-card"><strong>v2.0.1 Browser Mode Fix</strong><p>One-click browser mode now verifies/restarts the local bridge, validates the bundled web UI, and opens it in the Windows default browser without relying on the old /open-browser route.</p></div><div className="update-log-card"><strong>v2.0.0 Reliability Suite</strong><p>CodeMirror 6, preflight, rollback, backend recovery, offset validation, IndexedDB workspace storage, inspector, compare tools, and diagnostics.</p></div>
+        <div className="update-log-card"><strong>v2.0.9 Browser CORS Fix</strong><p>Fixed the exact Browser button failure after backend restart: Browser verification now uses a CORS-safe JSON bundle check, static browser files include CORS headers, and Windows launch uses backend os.startfile first.</p></div><div className="update-log-card"><strong>v2.0.8 Browser + Performance Fix</strong><p>Moved the local bridge to port 18767 to bypass stale old backends, added root redirects, reduced status polling/render churn, and removed expensive always-on blur effects.</p></div><div className="update-log-card"><strong>v2.0.7 Preset + Browser Fix</strong><p>Centered preset/save dialogs through body portals, hardened Browser Mode recovery, fixed stale bridge handling, and added native + backend browser-launch fallbacks.</p></div><div className="update-log-card"><strong>v2.0.4 Friend Package</strong><p>Added a one-click release packager that creates a clean friend-ready installer ZIP.</p></div><div className="update-log-card"><strong>v2.0.3 UI Stability Pass</strong><p>Button reliability pass, safe titlebar clicks, repeated-file imports, browser-mode click locking, build preflight, and no silent invalid-JSON export.</p></div><div className="update-log-card"><strong>v2.0.2 Tauri Config Fix</strong><p>Removed the invalid useHttpsScheme window property so Tauri 2.0.0 can validate the native window configuration and continue the Windows build.</p></div><div className="update-log-card"><strong>v2.0.1 Browser Mode Fix</strong><p>One-click browser mode now verifies/restarts the local bridge, validates the bundled web UI, and opens it in the Windows default browser without relying on the old /open-browser route.</p></div><div className="update-log-card"><strong>v2.0.0 Reliability Suite</strong><p>CodeMirror 6, preflight, rollback, backend recovery, offset validation, IndexedDB workspace storage, inspector, compare tools, and diagnostics.</p></div>
       </div>
     )
   }
