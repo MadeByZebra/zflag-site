@@ -2561,3 +2561,20 @@ html.native-shell .app-shell::after { box-shadow: none !important; }
 }
 .theme-light .zflag-large-preset-notice {background:rgba(48,75,120,.07);color:#404853}
 .theme-light .zflag-large-preset-notice strong {color:#161b24}
+
+/* Explicit, reversible Roblox local flag recovery */
+.zflag-large-preset-notice button.zflag-reset-action {
+  background:transparent;color:#bfcee6;border:1px solid rgba(166,188,222,.36);
+}
+.zflag-large-preset-notice button.zflag-reset-action:hover {background:rgba(182,204,238,.13);color:#fff}
+.zflag-reset-confirm {
+  background:#1b222f;color:#e8effb;padding:12px 14px;display:flex;align-items:center;
+  gap:10px;flex-wrap:wrap;border-bottom:1px solid rgba(191,207,231,.28);
+}
+.zflag-reset-confirm > div {flex:1 1 300px}
+.zflag-reset-confirm strong {font-size:12px;color:#e9edf5}
+.zflag-reset-confirm p {font-size:10px;color:#abb9cf;margin:5px 0 0;line-height:1.5}
+.zflag-reset-confirm button {padding:8px 12px;border-radius:8px;cursor:pointer;
+  border:1px solid rgba(201,220,245,.2);background:#2a3341;color:#dce6f5;font-size:10px}
+.zflag-reset-confirm button.confirm {background:#e0e9f8;color:#121720;font-weight:700}
+.zflag-reset-confirm button:disabled {opacity:.55;cursor:wait}
