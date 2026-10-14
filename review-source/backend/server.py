@@ -35,7 +35,7 @@ from zflag_supported import ALLOWED, REFERENCE, preflight as local_preflight, sa
 
 TARGET = "RobloxPlayerBeta.exe"
 HOST = "127.0.0.1"
-PORT = 18766
+PORT = 18767
 
 PROCESS_VM_READ = 0x0010
 PROCESS_VM_WRITE = 0x0020
@@ -618,7 +618,7 @@ class Runtime:
                 "backendPid": os.getpid(),
                 "backendUptimeSec": max(0, int(time.time() - self.started_at)),
                 "rollbackDepth": len(self.rollback_stack),
-                "backendVersion": "6.5-stable",
+                "backendVersion": "6.6-stable",
                 "browserUiBundled": os.path.isfile(os.path.join(_app_dist_root(), "index.html")),
                 "browserUrl": f"http://{HOST}:{PORT}/app/",
                 "logs": list(self.logs[-100:]),
@@ -1043,7 +1043,7 @@ class Handler(BaseHTTPRequestHandler):
             bundle = _browser_bundle_check()
             self._json(200, {
                 "ok": True,
-                "backendVersion": "6.5-stable",
+                "backendVersion": "6.6-stable",
                 "browserUi": bool(bundle.get("browserUi")),
                 "browserUrl": f"http://{HOST}:{PORT}/app/",
             })
