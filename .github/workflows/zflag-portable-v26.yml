@@ -1,0 +1,72 @@
+name: Inspect and package ZFLAG v2.0.26 portable build
+on:
+  push:
+    paths:
+      - ".github/workflows/zflag-portable-v26.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  portable:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect NSIS installer archive and extract payload
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $seven="C:\Program Files\7-Zip\7z.exe"
+          if (-not (Test-Path $seven)) { $seven=(Get-Command 7z -ErrorAction Stop).Source }
+          & $seven l "ZFLAG-Setup-v2.0.26.exe" | Out-File -Encoding utf8 nsis-listing.txt
+          & $seven x "ZFLAG-Setup-v2.0.26.exe" -oextracted -y | Out-File -Encoding utf8 extract-log.txt
+          Get-ChildItem extracted -Recurse -File | ForEach-Object { $_.FullName.Substring((Get-Location).Path.Length + 1) + " (" + $_.Length + " bytes)" } | Out-File -Encoding utf8 extracted-files.txt
+          Get-Content extracted-files.txt | Select-Object -First 45
+      - name: Build standalone ZIP if extracted payload has all binaries
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          @'
+          from pathlib import Path
+          import shutil,zipfile,hashlib,json
+          base=Path("extracted")
+          files=[x for x in base.rglob("*") if x.is_file()]
+          print("Extracted:",len(files),"files")
+          for f in files:
+              if f.suffix.lower()==".exe": print(f,f.stat().st_size)
+          main=[x for x in files if x.name.lower()=="zflag.exe"]
+          python=[x for x in files if x.name.lower().startswith("fflag-backend") and x.suffix.lower()==".exe"]
+          native=[x for x in files if x.name.lower().startswith("zflag-native") and x.suffix.lower()==".exe"]
+          if not main or not python or not native:
+              print("NSIS extraction incomplete; portable package not created")
+              Path("PORTABLE-NOT-BUILT.txt").write_text("NSIS payload did not expose all required binaries.\n\n"+Path("extracted-files.txt").read_text(encoding="utf-8"),encoding="utf-8")
+          else:
+              folder=Path("ZFLAG-Portable-v2.0.26")
+              folder.mkdir(exist_ok=True)
+              for name,candidates in (("ZFLAG.exe",main),("fflag-backend.exe",python),("zflag-native.exe",native)):
+                  shutil.copy2(max(candidates,key=lambda f:f.stat().st_size),folder/name)
+              (folder/"README.txt").write_text("ZFLAG experimental portable v2.0.26\nUnzip the entire folder, then double-click ZFLAG.exe on Windows 10/11 x64.\nKeep both sidecar executables next to ZFLAG.exe.\nWindows WebView2 is required.\nThis is an experimental native-memory injection build; live Roblox functionality has not been verified.\nDon't disable antivirus or Windows security to run this build.\n",encoding="utf-8")
+              with zipfile.ZipFile("ZFLAG-Portable-v2.0.26.zip","w",compression=zipfile.ZIP_DEFLATED,compresslevel=7) as z:
+                  for f in folder.rglob("*"):
+                      if f.is_file():z.write(f,f.as_posix())
+              print("Portable zipped",Path("ZFLAG-Portable-v2.0.26.zip").stat().st_size)
+          '@ | Set-Content -Encoding utf8 package-portable.py
+          python package-portable.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ZFLAG-v26-NSIS-inspection
+          path: |
+            nsis-listing.txt
+            extract-log.txt
+            extracted-files.txt
+            PORTABLE-NOT-BUILT.txt
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: hashFiles('ZFLAG-Portable-v2.0.26.zip') != ''
+        with:
+          name: ZFLAG-v26-portable-Windows
+          path: ZFLAG-Portable-v2.0.26.zip
+          if-no-files-found: error
