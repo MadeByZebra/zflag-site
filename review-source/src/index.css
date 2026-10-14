@@ -2540,3 +2540,24 @@ html.native-shell .app-shell::after { box-shadow: none !important; }
 .editor-toolbar .toolbar-right .zflag-probe-button:hover:not(:disabled) {
   background:#18302c !important; color:#e6fff7 !important;
 }
+
+/* Stability 2.0.34: make capability limits unmistakable; never suggest a live write occurred. */
+.zflag-large-preset-notice {
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:10px 14px;
+  background:rgba(142,166,206,.08); border-bottom:1px solid rgba(162,184,217,.17);
+  color:#c5cfdf;
+}
+.zflag-large-preset-notice > svg {flex:0 0 auto;color:#a5b9dc}
+.zflag-large-preset-notice p {flex:1 1 320px;min-width:0;margin:0;font-size:11px;line-height:1.55}
+.zflag-large-preset-notice strong {color:#f0f3fa}
+.zflag-large-preset-notice button {background:#cbd9ef;color:#10151e;font-size:10px;
+  border:0;border-radius:9px;min-height:30px;padding:0 12px;font-weight:700;cursor:pointer}
+.zflag-large-preset-notice button:hover {background:#fff}
+.zflag-large-preset-notice button:disabled {opacity:.45;cursor:default}
+.editor-toolbar .toolbar-right button.zflag-action-secondary:disabled {
+  display:inline-flex !important;background:#161a21 !important;color:#98a0ad !important;
+  border:1px dashed rgba(173,190,218,.28) !important;opacity:1 !important;
+  cursor:not-allowed !important;
+}
+.theme-light .zflag-large-preset-notice {background:rgba(48,75,120,.07);color:#404853}
+.theme-light .zflag-large-preset-notice strong {color:#161b24}
