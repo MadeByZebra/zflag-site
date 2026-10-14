@@ -124,9 +124,20 @@ jobs:
           # This process lives in a different folder and must not block new setup.
           $legacyDir=Join-Path $env:RUNNER_TEMP "zflag-other-version"
           New-Item -ItemType Directory -Path $legacyDir -Force | Out-Null
+          # Build a tiny deterministic dummy process named fflag-studio.exe.
+          # Renaming modern Notepad.exe fails: Windows AppX-hosted Notepad
+          # immediately exits outside its packaged installation.
+          dotnet new console --framework net8.0 --name fflag-studio --output old-process-fixture --force
+          if ($LASTEXITCODE -ne 0) { throw "Could not generate legacy process fixture" }
+          'System.Threading.Thread.Sleep(System.TimeSpan.FromMinutes(4));' | Set-Content -Encoding utf8 old-process-fixture/Program.cs
+          dotnet publish old-process-fixture/fflag-studio.csproj -c Release -r win-x64 --self-contained false -p:UseAppHost=true -o old-process-build
+          if ($LASTEXITCODE -ne 0) { throw "Could not build legacy process fixture" }
           $otherExe=Join-Path $legacyDir "fflag-studio.exe"
-          Copy-Item (Join-Path $env:WINDIR "System32/notepad.exe") $otherExe
-          $other=Start-Process -FilePath $otherExe -PassThru
+          Copy-Item old-process-build/fflag-studio.exe $otherExe
+          Copy-Item old-process-build/fflag-studio.dll $legacyDir
+          Copy-Item old-process-build/fflag-studio.runtimeconfig.json $legacyDir
+          Copy-Item old-process-build/fflag-studio.deps.json $legacyDir -ErrorAction SilentlyContinue
+          $other=Start-Process -FilePath $otherExe -WorkingDirectory $legacyDir -PassThru
           Start-Sleep -Milliseconds 800
           $other.Refresh()
           if ($other.HasExited) { throw "Regression fixture process exited immediately" }
