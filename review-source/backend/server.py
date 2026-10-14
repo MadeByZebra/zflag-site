@@ -514,31 +514,31 @@ class Runtime:
             )
             self.logs = self.logs[-250:]
 
-def acquire_process(self) -> bool:
-    # Detect Roblox independently of memory/anti-cheat privileges.
-    pid=find_pid(TARGET)
-    with self.lock:
-        old=self.pid
-        self.pid=pid
-        self.handle=0
-        self.base=0
-    if pid and pid!=old:
-        self.log(f"Roblox running (PID {pid}); local settings require a restart", "success")
-    return pid is not None
+    def acquire_process(self) -> bool:
+        # Detect Roblox independently of memory/anti-cheat privileges.
+        pid=find_pid(TARGET)
+        with self.lock:
+            old=self.pid
+            self.pid=pid
+            self.handle=0
+            self.base=0
+        if pid and pid!=old:
+            self.log(f"Roblox running (PID {pid}); local settings require a restart", "success")
+        return pid is not None
 
-def refresh_offsets(self) -> bool:
-    # Local configuration does not use version-specific memory offsets.
-    with self.lock:
-        self.offsets=None
-        self.ready=True
-        self.fetching=False
-        self.offset_source=REFERENCE
-        self.offset_source_host="Roblox Developer Forum"
-        self.offset_fetched_at=time.time()
-        self.offset_bytes=0
-        self.offset_validation=f"{len(ALLOWED)} published locally configurable flags"
-    self.log(f"Loaded {len(ALLOWED)} officially allowed local settings", "success")
-    return True
+    def refresh_offsets(self) -> bool:
+        # Local configuration does not use version-specific memory offsets.
+        with self.lock:
+            self.offsets=None
+            self.ready=True
+            self.fetching=False
+            self.offset_source=REFERENCE
+            self.offset_source_host="Roblox Developer Forum"
+            self.offset_fetched_at=time.time()
+            self.offset_bytes=0
+            self.offset_validation=f"{len(ALLOWED)} published locally configurable flags"
+        self.log(f"Loaded {len(ALLOWED)} officially allowed local settings", "success")
+        return True
 
     def clear_logs(self) -> None:
         with self.lock:
@@ -570,37 +570,37 @@ def refresh_offsets(self) -> bool:
                 "logs": list(self.logs[-100:]),
             }
 
-def preflight(self, flags: dict[str, object]) -> dict[str, object]:
-    return local_preflight(flags)
+    def preflight(self, flags: dict[str, object]) -> dict[str, object]:
+        return local_preflight(flags)
 
-def apply(self, flags: dict[str, object], source: str = "manual") -> dict[str, object]:
-    # Save only Roblox-supported local overrides; never write game memory.
-    pid=find_pid(TARGET)
-    try: result=save_eligible(flags,pid)
-    except (OSError, ValueError, TypeError) as exc:
-        self.log(f"Local config save failed: {exc}", "error")
-        return {"ok":False,"error":f"Failed to save ClientAppSettings.json: {exc}"}
-    if result.get("ok"):
-        snapshot=result.pop("rollback")
-        rollback_id=str(int(time.time()*1000))
+    def apply(self, flags: dict[str, object], source: str = "manual") -> dict[str, object]:
+        # Save only Roblox-supported local overrides; never write game memory.
+        pid=find_pid(TARGET)
+        try: result=save_eligible(flags,pid)
+        except (OSError, ValueError, TypeError) as exc:
+            self.log(f"Local config save failed: {exc}", "error")
+            return {"ok":False,"error":f"Failed to save ClientAppSettings.json: {exc}"}
+        if result.get("ok"):
+            snapshot=result.pop("rollback")
+            rollback_id=str(int(time.time()*1000))
+            with self.lock:
+                self.rollback_stack.append({"id":rollback_id,"snapshot":snapshot})
+                self.rollback_stack=self.rollback_stack[-20:]
+            result["rollbackId"]=rollback_id
+            self.log(f"Saved {result['applied']} local settings; {result['errors']} unsupported/invalid; restart Roblox", "success")
+        else:self.log(str(result.get("error","No compatible flags")),"warning")
+        return result
+
+    def rollback_last(self) -> dict[str, object]:
         with self.lock:
-            self.rollback_stack.append({"id":rollback_id,"snapshot":snapshot})
-            self.rollback_stack=self.rollback_stack[-20:]
-        result["rollbackId"]=rollback_id
-        self.log(f"Saved {result['applied']} local settings; {result['errors']} unsupported/invalid; restart Roblox", "success")
-    else:self.log(str(result.get("error","No compatible flags")),"warning")
-    return result
-
-def rollback_last(self) -> dict[str, object]:
-    with self.lock:
-        if not self.rollback_stack:
-            return {"ok":False,"error":"No local configuration backup available"}
-        entry=self.rollback_stack[-1]
-    try:restore(entry["snapshot"])
-    except OSError as exc:return {"ok":False,"error":str(exc)}
-    with self.lock:self.rollback_stack.pop()
-    self.log("Restored previous local ClientAppSettings.json", "success")
-    return {"ok":True,"restored":True}
+            if not self.rollback_stack:
+                return {"ok":False,"error":"No local configuration backup available"}
+            entry=self.rollback_stack[-1]
+        try:restore(entry["snapshot"])
+        except OSError as exc:return {"ok":False,"error":str(exc)}
+        with self.lock:self.rollback_stack.pop()
+        self.log("Restored previous local ClientAppSettings.json", "success")
+        return {"ok":True,"restored":True}
 
 
 def _clean_agent_base_url(raw: object) -> str:
