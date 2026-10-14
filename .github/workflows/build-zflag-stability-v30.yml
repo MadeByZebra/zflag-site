@@ -1,5 +1,5 @@
 name: Build ZFLAG 2.0.30 Roblox-stability Windows installer TEST
-# QA run: v30 stability side-by-side install, read-only Roblox detection, isolated port 18766, and safe native guard.
+# QA run: v30.1 tested backend runtime startup, native fail-safe, read-only detection and isolated 18766 startup.
 on:
   push:
     paths:
@@ -143,6 +143,27 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (-not (Test-Path native/zflag-native.exe)) { throw "No native executable produced" }
           Get-FileHash native/zflag-native.exe -Algorithm SHA256
+      - name: Prove native stability CLI exits quickly without reading Roblox memory
+        shell: pwsh
+        run: |
+          @'
+          import subprocess,json, pathlib, time
+          root=pathlib.Path.cwd()
+          inp=root/"qa-sample-flags.json"
+          rep=root/"qa-sample-report.json"
+          inp.write_text(json.dumps({"FFlagHandleAltEnterFullscreenManually":True}),encoding="utf-8")
+          t=time.monotonic()
+          p=subprocess.run([str(root/"native/zflag-native.exe"),"--apply",str(inp),"--report",str(rep)],
+                           capture_output=True,text=True,timeout=4,check=False)
+          duration=time.monotonic()-t
+          if not rep.exists():raise SystemExit("Native CLI did not produce a report")
+          data=json.loads(rep.read_text(encoding="utf-8"))
+          assert p.returncode==5,(p.returncode,p.stdout,p.stderr)
+          assert data["succeeded"]==0 and data["total"]==1,data
+          assert "Stability build" in data["error"],data
+          print("PASS: native legacy memory scanner safely blocked in",round(duration,3),"seconds")
+          '@ | Set-Content -Encoding utf8 qa-native-safe.py
+          python qa-native-safe.py
       - name: Install native engine as a second Tauri sidecar
         shell: pwsh
         run: |
