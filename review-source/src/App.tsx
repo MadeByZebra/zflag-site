@@ -622,7 +622,7 @@ export default function App() {
     return { success, failed, total, rate }
   }, [lastApplied?.id, lastApplied?.applied, lastApplied?.errors])
   const failedResults = useMemo(() => (lastApplied?.results ?? []).filter((entry) => !entry.ok), [lastApplied?.id])
-  const visibleFailedResults = useMemo(() => showUnsupportedOnly ? failedResults.filter((entry) => entry.message.toLowerCase().includes("not in offset file")) : failedResults, [failedResults, showUnsupportedOnly])
+  const visibleFailedResults = useMemo(() => showUnsupportedOnly ? failedResults.filter((entry) => /not in offset file|not on roblox|not allowlist|unsupported/i.test(entry.message)) : failedResults, [failedResults, showUnsupportedOnly])
   const preflightMap = useMemo(() => new Map((preflight?.entries ?? []).map((entry) => [entry.name, entry])), [preflight])
   const filteredPreflightEntries = useMemo(() => {
     const entries = preflight?.entries ?? []
@@ -1130,7 +1130,7 @@ export default function App() {
         body: JSON.stringify({ flags, source }),
       })
       const raw = await response.text()
-      let result: { ok?: boolean; applied?: number; errors?: number; error?: string | null; rollbackId?: string | null; results?: Array<{ name?: string; ok?: boolean; message?: string; value?: unknown }> } = {}
+      let result: { ok?: boolean; applied?: number; errors?: number; error?: string | null; unsupported?: number; invalid?: number; message?: string; rollbackId?: string | null; results?: Array<{ name?: string; ok?: boolean; message?: string; value?: unknown }> } = {}
       try { result = raw ? JSON.parse(raw) : {} } catch { /* handled below */ }
       const successfulResults = Array.isArray(result.results) ? result.results.filter((entry) => entry?.ok === true).length : 0
       const applied = Math.max(Number(result.applied ?? 0) || 0, successfulResults)
@@ -1149,7 +1149,16 @@ export default function App() {
       setApplyHistory((current) => [snapshot, ...current].slice(0, Object.keys(flags).length > 3000 ? 8 : 50))
       if (applied > 0) {
         if (source === "native") setNativeFeedback(`${applied.toLocaleString()} written to Roblox memory · ${errors.toLocaleString()} failed. ${errors ? "See injection results for individual failures." : "Verify the changed behavior in Roblox."}`)
-        showToast(source === "native" ? (errors ? "Live injection partially succeeded" : "Live injection completed") : (errors ? "Saved with skips" : "Allowed settings saved"), source === "native" ? `${applied} written · ${errors} failed` : (errors ? `${applied} saved · ${errors} ignored/invalid` : `${applied} allowed flag${applied === 1 ? "" : "s"} saved; restart Roblox`), errors ? "warning" : "success")
+        if (source !== "native" && errors) {
+          setEditorBottomTab("failures")
+          setBottomPanelOpen(true)
+        }
+        showToast(
+          source === "native" ? (errors ? "Injection partially succeeded" : "Injection completed") : (errors ? "Only allowed flags saved" : "Allowed settings saved"),
+          source === "native" ? `${applied.toLocaleString()} reported written · ${errors.toLocaleString()} failed` :
+            (errors ? `${applied.toLocaleString()} saved · ${Number(result.unsupported ?? errors).toLocaleString()} not allowlisted · ${Number(result.invalid ?? 0).toLocaleString()} invalid. Open Skipped flags below; restart Roblox.` : `${applied.toLocaleString()} allowed flags saved; restart Roblox`),
+          errors ? "warning" : "success",
+        )
         await refreshStatus(settings.apiUrl, true)
         return true
       }
@@ -2303,7 +2312,7 @@ export default function App() {
         </div>
         {lastApplyStats.total > 0 && <div className="apply-progress-row">
           <div className="apply-progress-track"><span style={{ width: `${lastApplyStats.rate}%` }} /></div>
-          <div className="apply-progress-labels"><b>{lastApplyStats.rate}% saved</b><span>{lastApplyStats.success} saved</span><span>{lastApplyStats.failed} failed</span></div>
+          <div className="apply-progress-labels"><b>{lastApplyStats.rate}% {lastApplied?.source === "native" ? "reported written" : "saved"}</b><span>{lastApplyStats.success} {lastApplied?.source === "native" ? "reported written" : "saved"}</span><span>{lastApplyStats.failed} failed</span></div>
         </div>}
         <div className="editor-surface" key={activeTab?.id} style={{ ['--editor-font-size' as string]: `${settings.editorFontSize}px` }}>
           <div className="editor-meta">
@@ -2342,13 +2351,13 @@ export default function App() {
             <div className="editor-bottom-tabs">
               <div className="editor-bottom-tab-buttons">
                 <button type="button" className={cn(editorBottomTab === "activity" && "active")} onClick={() => setEditorBottomTab("activity")}>Activity</button>
-                <button type="button" className={cn(editorBottomTab === "failures" && "active")} onClick={() => setEditorBottomTab("failures")}>Failures <span className="tab-count">{failedResults.length}</span></button>
+                <button type="button" className={cn(editorBottomTab === "failures" && "active")} onClick={() => setEditorBottomTab("failures")}>{lastApplied?.source === "native" ? "Failed writes" : "Skipped flags"} <span className="tab-count">{lastApplied?.errors ?? 0}</span></button>
                 <button type="button" className={cn(editorBottomTab === "validation" && "active")} onClick={() => setEditorBottomTab("validation")}>Validation</button>
                 <button type="button" className={cn(editorBottomTab === "diagnostics" && "active")} onClick={() => setEditorBottomTab("diagnostics")}>Diagnostics</button>
               </div>
               <div className="apply-stat-strip">
                 <span className="stat-success"><b>{lastApplyStats.success}</b> success</span>
-                <span className="stat-error"><b>{lastApplyStats.failed}</b> errors</span>
+                <span className="stat-error"><b>{lastApplyStats.failed}</b> {lastApplied?.source === "native" ? "failed" : "skipped"}</span>
                 <span><b>{lastApplyStats.total}</b> total</span>
                 <span className="stat-rate"><b>{lastApplyStats.rate}%</b> rate</span>
                 <button className="panel-max-button" type="button" onClick={() => setBottomPanelMaximized((value) => !value)} title={bottomPanelMaximized ? "Restore panel" : "Maximize panel"}>{bottomPanelMaximized ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}</button>
