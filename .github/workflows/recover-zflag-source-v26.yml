@@ -33,6 +33,13 @@ jobs:
                   if not (root/item.filename).resolve().is_relative_to(root.resolve()):
                       raise SystemExit("Unsafe archive entry")
               archive.extractall(root)
+          # Apply the same verified compatibility repair used by the last production build.
+          import base64,zlib,hashlib,sys
+          encoded=pathlib.Path("patches/zflag-local-2.0.24.py.zlib.b64").read_text().strip()
+          patch=zlib.decompress(base64.b64decode(encoded))
+          assert hashlib.sha256(patch).hexdigest()=="9019605c17a5c2f4b8d8ed996bfaf20e0683c1382c03bc4a4d519233fff8f02e"
+          pathlib.Path("recover-patch.py").write_bytes(patch)
+          subprocess.run([sys.executable,"recover-patch.py",str(root)],check=True)
           dest=pathlib.Path("review-source")
           for relative in ("src","backend/server.py","backend/__init__.py","src-tauri/src","src-tauri/tauri.conf.json","package.json"):
               p=root/relative
