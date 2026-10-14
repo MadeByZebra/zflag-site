@@ -2516,3 +2516,16 @@ html.native-shell .app-shell { border-radius: 18px !important; }
 .native-inject-feedback p { flex: 1; margin: 0; font-size: 10px; line-height: 1.5; color: #ccd0d6; overflow-wrap: anywhere; }
 .native-inject-feedback button { background: transparent; border: 0; color: #888; cursor: pointer; font-size: 18px; padding: 0 4px; }
 @media (max-width: 980px) { .toolbar-right button.zflag-action { display: inline-flex !important; } }
+
+/* ZFLAG: finish the unified borderless Windows window and save-result readout */
+html.native-shell body, html.native-shell #root { overflow: hidden; background: transparent !important; }
+html.native-shell .app-shell { outline: none !important; filter: none !important; box-shadow: none !important; }
+html.native-shell .app-shell::after { box-shadow: none !important; }
+.zflag-save-feedback { background: rgba(255,255,255,.025); }
+.zflag-save-feedback > button:not(:last-child) { font-size: 10px; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); border-radius: 8px; padding: 6px 10px; color: #e4e4e4; }
+.zflag-save-feedback > button:not(:last-child):hover { background: rgba(255,255,255,.07); }
+.editor-toolbar button.zflag-action-primary, .editor-toolbar button.zflag-action-secondary { box-shadow: none !important; font-family: inherit !important; }
+.editor-toolbar .toolbar-right button.zflag-action:focus-visible { outline: 2px solid rgba(255,255,255,.55); outline-offset: 2px; }
+.theme-light .zflag-save-feedback { background: rgba(0,0,0,.035); }
+.theme-light .native-inject-feedback p { color: #35383e; }
+.theme-light .native-inject-feedback span { color: #555c63; }
