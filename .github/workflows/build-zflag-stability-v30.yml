@@ -1,5 +1,5 @@
 name: Build ZFLAG 2.0.30 Roblox-stability Windows installer TEST
-# QA run: includes full skipped-flag export, repaired JSX feedback, native initialization and installer smoke test.
+# QA run: v30 stability side-by-side install, read-only Roblox detection, isolated port 18766, and safe native guard.
 on:
   push:
     paths:
