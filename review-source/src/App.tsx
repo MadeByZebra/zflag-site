@@ -521,6 +521,7 @@ export default function App() {
   const [status, setStatus] = useState<Status>(emptyStatus)
   const [busy, setBusy] = useState(false)
   const [nativeFeedback, setNativeFeedback] = useState<string | null>(null)
+  const [saveFeedback, setSaveFeedback] = useState<string | null>(null)
   const [backendReachable, setBackendReachable] = useState(false)
   const [settings, setSettings] = useState<SettingsState>(loadSettings)
   const [draftSettings, setDraftSettings] = useState<SettingsState>(settings)
@@ -1121,6 +1122,7 @@ export default function App() {
       return false
     }
     if (source === "native") setNativeFeedback("Checking Roblox process and applying flags…")
+    else setSaveFeedback(null)
     setBusy(true)
     try {
       const endpoint = source === "native" ? "/native-apply" : "/apply"
@@ -1149,6 +1151,7 @@ export default function App() {
       setApplyHistory((current) => [snapshot, ...current].slice(0, Object.keys(flags).length > 3000 ? 8 : 50))
       if (applied > 0) {
         if (source === "native") setNativeFeedback(`${applied.toLocaleString()} written to Roblox memory · ${errors.toLocaleString()} failed. ${errors ? "See injection results for individual failures." : "Verify the changed behavior in Roblox."}`)
+        if (source !== "native") setSaveFeedback(`${applied.toLocaleString()} saved to local settings · ${Number(result.unsupported ?? 0).toLocaleString()} unsupported · ${Number(result.invalid ?? 0).toLocaleString()} invalid. Only allowlisted flags are saved, and Roblox must restart. This is not a live injection.`)
         if (source !== "native" && errors) {
           setEditorBottomTab("failures")
           setBottomPanelOpen(true)
@@ -1165,6 +1168,7 @@ export default function App() {
       throw new Error(result.error || (response.ok ? (source === "native" ? "Native engine did not write any flags" : "No allowed flags could be saved") : `Apply request failed (HTTP ${response.status})`))
     } catch (error) {
       if (source === "native") setNativeFeedback(error instanceof Error ? error.message : "Could not reach local backend")
+      else setSaveFeedback(error instanceof Error ? error.message : "Failed to write local settings")
       showToast(source === "native" ? "Inject failed" : "Save failed", error instanceof Error ? error.message : "Could not reach local backend", "error")
       return false
     } finally {
@@ -2302,6 +2306,7 @@ export default function App() {
           </div>
         </div>
         {nativeFeedback && <div role="status" className="native-inject-feedback"><span>LIVE INJECT</span><p>{nativeFeedback}</p><button type="button" title="Dismiss inject result" onClick={() => setNativeFeedback(null)}>×</button></div>}
+        {saveFeedback && <div role="status" className="native-inject-feedback zflag-save-feedback"><span>LOCAL SAVE</span><p>{saveFeedback}</p><button type="button" onClick={() => { setEditorBottomTab("failures"); setBottomPanelOpen(true) }}>Skipped details</button><button type="button" aria-label="Dismiss save result" onClick={() => setSaveFeedback(null)}>×</button></div>
         <div className="diff-strip">
           <div className="diff-left"><span>Changes vs last apply</span><b className="diff-add">+{diffSummary.added}</b><b className="diff-change">~{diffSummary.changed}</b><b className="diff-remove">-{diffSummary.removed}</b></div>
           <div className="apply-result-summary">
@@ -2312,7 +2317,7 @@ export default function App() {
         </div>
         {lastApplyStats.total > 0 && <div className="apply-progress-row">
           <div className="apply-progress-track"><span style={{ width: `${lastApplyStats.rate}%` }} /></div>
-          <div className="apply-progress-labels"><b>{lastApplyStats.rate}% {lastApplied?.source === "native" ? "reported written" : "saved"}</b><span>{lastApplyStats.success} {lastApplied?.source === "native" ? "reported written" : "saved"}</span><span>{lastApplyStats.failed} failed</span></div>
+          <div className="apply-progress-labels"><b>{lastApplyStats.rate}% {lastApplied?.source === "native" ? "reported written" : "saved"}</b><span>{lastApplyStats.success} {lastApplied?.source === "native" ? "reported written" : "saved"}</span><span>{lastApplyStats.failed} {lastApplied?.source === "native" ? "failed" : "skipped"}</span></div>
         </div>}
         <div className="editor-surface" key={activeTab?.id} style={{ ['--editor-font-size' as string]: `${settings.editorFontSize}px` }}>
           <div className="editor-meta">
@@ -2542,12 +2547,12 @@ export default function App() {
         <div className="page-title-row"><div className="page-title-block"><h1>Activity</h1><p>Local backend events, grouped errors, apply history, and restore points.</p></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={copyLogs}><Clipboard className="size-3.5" /> Copy</Button><Button variant="outline" size="sm" onClick={() => void clearLogs()}><Trash2 className="size-3.5" /> Clear</Button></div></div>
         <div className="apply-overview-grid">
           <div><span>Success</span><strong className="success">{lastApplyStats.success}</strong><small>Last apply</small></div>
-          <div><span>Errors</span><strong className="error">{lastApplyStats.failed}</strong><small>Last apply</small></div>
+          <div><span>{lastApplied?.source === "native" ? "Failed writes" : "Skipped"}</span><strong className="error">{lastApplyStats.failed}</strong><small>{lastApplied?.source === "native" ? "Native results" : "Unsupported or invalid"}</small></div>
           <div><span>Success rate</span><strong>{lastApplyStats.rate}%</strong><small>{lastApplyStats.total} attempted</small></div>
           <div><span>Session change</span><strong>+{sessionComparison.newlySuccessful} / -{sessionComparison.newlyFailing}</strong><small>{sessionComparison.recovered} recovered</small></div>
         </div>
         <div className="section-label-row"><span>APPLY HISTORY</span><button type="button" onClick={() => { setApplyHistory([]); showToast("Apply history cleared", undefined, "info") }}>Clear history</button></div>
-        <div className="apply-history-list">{applyHistory.length === 0 ? <div className="empty-card">No saved apply snapshots yet.</div> : applyHistory.slice(0, 12).map((item) => <div className="apply-history-row" key={item.id}><div><strong>{item.name}</strong><small>{new Date(item.appliedAt).toLocaleString()} · {item.applied} applied · {item.errors} errors · {item.source ?? "manual"}{item.rollbackId ? " · rollback captured" : ""}</small></div><div className="history-row-actions"><button type="button" onClick={() => restoreSnapshot(item)}>Restore JSON</button>{item === applyHistory[0] && item.rollbackId && <button onClick={() => void rollbackLastApply()}>Rollback memory</button>}{item.results?.some((entry) => !entry.ok) && <button onClick={() => { const source = safeParse<Record<string, unknown>>(item.content, {}); const failed = Object.fromEntries((item.results ?? []).filter((entry) => !entry.ok).map((entry) => [entry.name, source[entry.name] ?? entry.value ?? ""])); exportText(JSON.stringify(failed, null, 2), `${item.name.replace(/\.json$/i, "")}-failed.json`) }}>Export failed</button>}</div></div>)}</div>
+        <div className="apply-history-list">{applyHistory.length === 0 ? <div className="empty-card">No saved apply snapshots yet.</div> : applyHistory.slice(0, 12).map((item) => <div className="apply-history-row" key={item.id}><div><strong>{item.name}</strong><small>{new Date(item.appliedAt).toLocaleString()} · {item.applied} {item.source === "native" ? "reported written" : "saved"} · {item.errors} {item.source === "native" ? "failed" : "skipped"} · {item.source ?? "manual"}{item.rollbackId ? " · rollback captured" : ""}</small></div><div className="history-row-actions"><button type="button" onClick={() => restoreSnapshot(item)}>Restore JSON</button>{item === applyHistory[0] && item.rollbackId && <button onClick={() => void rollbackLastApply()}>Rollback local file</button>}{item.results?.some((entry) => !entry.ok) && <button onClick={() => { const source = safeParse<Record<string, unknown>>(item.content, {}); const failed = Object.fromEntries((item.results ?? []).filter((entry) => !entry.ok).map((entry) => [entry.name, source[entry.name] ?? entry.value ?? ""])); exportText(JSON.stringify(failed, null, 2), `${item.name.replace(/\.json$/i, "")}-failed.json`) }}>Export failed</button>}</div></div>)}</div>
         <div className="section-label-row"><span>BACKEND LOG</span></div>
         <div className="activity-tools">
           <div className="activity-search"><Search className="size-3.5" /><input value={activitySearch} onChange={(event) => setActivitySearch(event.target.value)} placeholder="Search activity…" /></div>
