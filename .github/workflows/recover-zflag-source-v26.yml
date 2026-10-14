@@ -23,7 +23,7 @@ jobs:
           import subprocess,io,zipfile,struct,pathlib,shutil
           sha="5eac1d1773099ff5e86dcb89b9796eab674b35a2"
           blob=subprocess.check_output(["git","show",f"{sha}:ZFLAG-Setup-v2.0.22.exe"])
-          eocd=blob.rfind(b"PK\\x05\\x06")
+          eocd=blob.rfind(bytes([80,75,5,6]))
           if eocd<0:raise SystemExit("Original source archive missing")
           sig,disk,cd_disk,n_disk,n_total,cd_size,cd_offset,comment_len=struct.unpack_from("<4s4H2LH",blob,eocd)
           start=eocd-cd_size-cd_offset
