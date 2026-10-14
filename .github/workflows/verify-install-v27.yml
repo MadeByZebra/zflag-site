@@ -9,7 +9,7 @@ permissions:
   actions: read
 jobs:
   install:
-    if: github.ref_name == 'zflag-native-engine-2.0.27'
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
