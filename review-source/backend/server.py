@@ -494,6 +494,9 @@ class Runtime:
         self.ready = False
         self.fetching = False
         self.started_at = time.time()
+        self._last_probe_at = 0.0
+        self._cached_pid = None
+        self.native_lock = threading.Lock()
         self.offset_source: Optional[str] = None
         self.offset_source_host: Optional[str] = None
         self.offset_fetched_at: Optional[float] = None
@@ -516,16 +519,36 @@ class Runtime:
             self.logs = self.logs[-250:]
 
     def acquire_process(self) -> bool:
-        # Detect Roblox independently of memory/anti-cheat privileges.
-        pid=find_pid(TARGET)
+        # A read-only, rate-limited Windows process-list lookup. Never open or
+        # scan Roblox memory from the status/health polling path.
+        now = time.monotonic()
         with self.lock:
-            old=self.pid
-            self.pid=pid
-            self.handle=0
-            self.base=0
-        if pid and pid!=old:
-            self.log(f"Roblox running (PID {pid}); local settings require a restart", "success")
+            if now - self._last_probe_at < 8.0:
+                return self._cached_pid is not None
+            self._last_probe_at = now
+        pid = find_pid(TARGET)
+        with self.lock:
+            old = self.pid
+            self._cached_pid = pid
+            self.pid = pid
+            self.handle = 0
+            self.base = 0
+        if pid and pid != old:
+            self.log(f"Roblox Player detected (PID {pid}); no game memory was accessed", "success")
         return pid is not None
+
+    def native_probe(self) -> dict[str, object]:
+        # Instant non-invasive process check, independent of the cached UI status.
+        pid = find_pid(TARGET)
+        with self.lock:
+            self.pid = pid
+            self._cached_pid = pid
+            self._last_probe_at = time.monotonic()
+        if pid is None:
+            return {"ok": False, "found": False, "pid": None,
+                    "error": "RobloxPlayerBeta.exe not found in the Windows process list. Start Roblox Player, not Roblox Studio; open an actual game before retrying. No process was opened or modified."}
+        return {"ok": True, "found": True, "pid": pid,
+                "message": f"Found Roblox Player PID {pid} using Windows process enumeration only. Game memory was not accessed."}
 
     def refresh_offsets(self) -> bool:
         # Local configuration does not use version-specific memory offsets.
@@ -565,7 +588,7 @@ class Runtime:
                 "backendPid": os.getpid(),
                 "backendUptimeSec": max(0, int(time.time() - self.started_at)),
                 "rollbackDepth": len(self.rollback_stack),
-                "backendVersion": "6.4-local",
+                "backendVersion": "6.5-stable",
                 "browserUiBundled": os.path.isfile(os.path.join(_app_dist_root(), "index.html")),
                 "browserUrl": f"http://{HOST}:{PORT}/app/",
                 "logs": list(self.logs[-100:]),
@@ -606,64 +629,27 @@ class Runtime:
 
 
     def native_apply(self, flags: object, source: str = "native") -> dict[str, object]:
-        # Deliberately separate from normal /apply (which saves allowlisted local settings).
-        # This path runs only when the user presses the explicit Live Inject button.
+        # Stability mode: never launch the historical cross-process memory scanner.
+        # That scanner can read enormous memory regions and change undocumented
+        # values, triggering Roblox hangs or crashes on newer client builds.
         if not isinstance(flags, dict) or not flags:
             return {"ok": False, "error": "A nonempty JSON object of flags is required"}
         if len(flags) > 100000:
-            return {"ok": False, "error": "Too many flags (100,000 limit)"}
-        candidates = [
-            Path(sys.executable).with_name("zflag-native.exe"),
-            Path(getattr(sys, "_MEIPASS", "") or ".") / "zflag-native.exe",
-            Path(__file__).resolve().parent.parent / "native" / "zflag-native.exe",
-        ]
-        binary = next((p for p in candidates if p.is_file()), None)
-        if binary is None:
-            self.log("Native engine executable not installed", "error")
-            return {"ok": False, "error": "ZFLAG native engine missing from installation"}
+            return {"ok": False, "error": "Preset exceeds the 100,000 entry limit"}
+        if not self.native_lock.acquire(blocking=False):
+            return {"ok": False, "error": "An injection check is already running; try again after it completes"}
         try:
-            data = json.dumps(flags, separators=(",", ":"), ensure_ascii=False)
-            if len(data.encode("utf-8")) > 32_000_000:
-                return {"ok": False, "error": "Preset exceeds 32MB"}
-            with tempfile.TemporaryDirectory(prefix="zflag-live-") as temp:
-                preset_path = Path(temp) / "input.json"
-                report_path = Path(temp) / "report.json"
-                preset_path.write_text(data, encoding="utf-8")
-                cmd = [str(binary), "--apply", str(preset_path), "--report", str(report_path)]
-                finished = subprocess.run(cmd, capture_output=True, text=True, timeout=300,
-                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), check=False)
-                if not report_path.is_file():
-                    return {"ok": False, "error": "Native engine exited without reporting results; " +
-                        (finished.stderr or "")[-300:]}
-                report = json.loads(report_path.read_text(encoding="utf-8"))
-            if report.get("error"):
-                self.log("Native engine: " + str(report["error"])[:180], "error")
-                return {"ok": False, "error": str(report["error"])}
-            total = int(report.get("total", -1))
-            good = int(report.get("succeeded", -1))
-            bad = int(report.get("failed", -1))
-            if total != len(flags) or good < 0 or bad < 0 or good + bad != total:
-                return {"ok": False, "error": "Native report counts are inconsistent"}
-            if finished.returncode not in (0, 1):
-                return {"ok": False, "error": "Native engine failed with exit code " + str(finished.returncode)}
-            failures = report.get("failures") if isinstance(report.get("failures"), list) else []
-            failures_by_name = {str(v.get("name")): str(v.get("reason", "failed"))
-                for v in failures if isinstance(v, dict)}
-            results = [{"name": name, "ok": name not in failures_by_name,
-                        "message": failures_by_name.get(name, "written"),
-                        "value": value}
-                       for name, value in list(flags.items())[:1200]]
-            self.log(f"Live engine completed: {good} written, {bad} failed, {total} total", "success" if good else "warning")
-            return {"ok": good > 0, "complete": bad == 0 and good > 0,
-                    "partial": bad > 0 and good > 0, "applied": good, "errors": bad,
-                    "results": results, "resultsTruncated": total > len(results),
-                    "rollbackId": None, "error": None if good else "No flags could be written",
-                    "mode": "native-memory", "source": source}
-        except subprocess.TimeoutExpired:
-            return {"ok": False, "error": "Live inject timed out (no result confirmed)"}
-        except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
-            self.log(f"Native engine failed: {exc}", "error")
-            return {"ok": False, "error": "Native engine failed: " + str(exc)[:200]}
+            probe = self.native_probe()
+            if not probe["ok"]:
+                self.log("Inject stopped safely: Roblox Player not detected", "warning")
+                return {"ok": False, "error": probe["error"], "mode": "safe-detection",
+                        "robloxDetected": False}
+            self.log("Live injection blocked in stability build: unsupported memory scanner disabled", "warning")
+            return {"ok": False, "mode": "safe-detection", "robloxDetected": True,
+                    "pid": probe["pid"],
+                    "error": "Roblox Player was detected, but live memory injection is paused in this stability build. The older native scanner can hang or crash Roblox. No Roblox memory was read or written. Use Save Allowed for supported local settings, then restart Roblox."}
+        finally:
+            self.native_lock.release()
 
 
 def _clean_agent_base_url(raw: object) -> str:
@@ -1038,6 +1024,9 @@ class Handler(BaseHTTPRequestHandler):
             flags = payload.get("flags") if isinstance(payload, dict) else None
             result = runtime.preflight(flags)
             self._json(200 if result.get("ok") else 400, result)
+            return
+        if self.path == "/native-probe":
+            self._json(200, runtime.native_probe())
             return
         if self.path == "/native-apply":
             flags = payload.get("flags") if isinstance(payload, dict) else None
