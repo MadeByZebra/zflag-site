@@ -1,0 +1,69 @@
+name: ZFLAG 2.0.26 native engine compiler check
+on:
+  push:
+    paths:
+      - ".github/workflows/compile-native-v26.yml"
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore reviewed native engine source and check hash
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,base64,zlib,hashlib
+          root=pathlib.Path("native")
+          data="".join((root/f"zflag_native_chunk{i}.txt").read_text(encoding="utf-8").strip() for i in range(4))
+          source=zlib.decompress(base64.b64decode(data))
+          expected="71413702b1d613dbf77711f039eec546b67155aa231c94d96590a5c032a9f152"
+          assert hashlib.sha256(source).hexdigest()==expected, "Native source integrity mismatch"
+          (root/"zflag_native.cpp").write_bytes(source)
+          print("Native C++ source recovered and verified:", len(source), "bytes")
+          '@ | Set-Content -Encoding utf8 restore-native.py
+          python restore-native.py
+      - name: Download C++ header dependency
+        shell: pwsh
+        run: git clone --depth 1 --branch master https://github.com/Tencent/rapidjson.git native/rapidjson-vendor
+      - name: Compile native executable with Microsoft Visual C++
+        shell: pwsh
+        run: |
+          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products "*" -property installationPath
+          if (-not $vs) { throw "Visual Studio not installed" }
+          $vcvars=Join-Path $vs "VC\Auxiliary\Build\vcvars64.bat"
+          @'
+          @echo off
+          call "%~1" || exit /b 1
+          cl /nologo /std:c++17 /EHsc /O2 /MD /DWIN32_LEAN_AND_MEAN /I native\rapidjson-vendor\include native\zflag_native.cpp /Fe:native\zflag-native.exe /link comctl32.lib shell32.lib psapi.lib user32.lib gdi32.lib comdlg32.lib winhttp.lib advapi32.lib msimg32.lib gdiplus.lib
+          exit /b %errorlevel%
+          '@ | Set-Content -Encoding ascii compile-native.cmd
+          cmd /c compile-native.cmd "$vcvars"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path native/zflag-native.exe)) { throw "No native executable produced" }
+          Get-FileHash native/zflag-native.exe -Algorithm SHA256
+      - name: Native engine input validation smoke test
+        shell: pwsh
+        run: |
+          @'
+          import json
+          from pathlib import Path
+          obj={f"FFlagZflagTest{i:05d}":False for i in range(25000)}
+          Path("native/smoke.json").write_text(json.dumps(obj),encoding="utf-8")
+          '@ | Set-Content -Encoding utf8 generate-native-smoke.py
+          python generate-native-smoke.py
+          & native/zflag-native.exe --apply native/smoke.json --report native/smoke-report.json
+          Write-Host "Native engine exit code: $LASTEXITCODE"
+          if (-not (Test-Path native/smoke-report.json)) { throw "Expected report missing" }
+          Get-Content native/smoke-report.json | Select-Object -First 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ZFLAG-2.0.26-native-engine-Windows-experimental
+          path: native/zflag-native.exe
+          if-no-files-found: error
