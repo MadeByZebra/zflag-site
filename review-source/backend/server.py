@@ -35,7 +35,7 @@ from zflag_supported import ALLOWED, REFERENCE, preflight as local_preflight, sa
 
 TARGET = "RobloxPlayerBeta.exe"
 HOST = "127.0.0.1"
-PORT = 18765
+PORT = 18766
 
 PROCESS_VM_READ = 0x0010
 PROCESS_VM_WRITE = 0x0020
@@ -131,6 +131,27 @@ _ntdll.NtWriteVirtualMemory.argtypes = [
     ctypes.POINTER(ctypes.c_size_t),
 ]
 _ntdll.NtWriteVirtualMemory.restype = ctypes.c_long
+
+
+def list_roblox_processes() -> list[dict[str, object]]:
+    """Enumerate only process names/PIDs. Never request handles to game memory."""
+    snap = _k32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+    if snap == INVALID_HANDLE_VALUE:
+        return []
+    found: list[dict[str, object]] = []
+    entry = PROCESSENTRY32W()
+    entry.dwSize = ctypes.sizeof(PROCESSENTRY32W)
+    try:
+        if _k32.Process32FirstW(snap, ctypes.byref(entry)):
+            while True:
+                name = str(entry.szExeFile)
+                if "roblox" in name.lower():
+                    found.append({"name": name, "pid": int(entry.th32ProcessID)})
+                if not _k32.Process32NextW(snap, ctypes.byref(entry)):
+                    break
+    finally:
+        _k32.CloseHandle(snap)
+    return found[:24]
 
 
 def find_pid(exe: str) -> Optional[int]:
@@ -539,15 +560,19 @@ class Runtime:
 
     def native_probe(self) -> dict[str, object]:
         # Instant non-invasive process check, independent of the cached UI status.
-        pid = find_pid(TARGET)
+        names = list_roblox_processes()
+        player = next((p for p in names if str(p["name"]).lower() == TARGET.lower()), None)
+        pid = int(player["pid"]) if player else None
         with self.lock:
             self.pid = pid
             self._cached_pid = pid
             self._last_probe_at = time.monotonic()
         if pid is None:
-            return {"ok": False, "found": False, "pid": None,
-                    "error": "RobloxPlayerBeta.exe not found in the Windows process list. Start Roblox Player, not Roblox Studio; open an actual game before retrying. No process was opened or modified."}
-        return {"ok": True, "found": True, "pid": pid,
+            alternatives = ", ".join(f"{x['name']} (PID {x['pid']})" for x in names)
+            detail = f"Detected these Roblox-related processes instead: {alternatives}. " if names else "No Roblox-related processes were visible. "
+            return {"ok": False, "found": False, "pid": None, "processes": names,
+                    "error": detail + "ZFLAG currently supports the RobloxPlayerBeta.exe Windows Player process only. Start a game in Roblox Player and retry. No game memory was opened, scanned or modified."}
+        return {"ok": True, "found": True, "pid": pid, "processes": names,
                 "message": f"Found Roblox Player PID {pid} using Windows process enumeration only. Game memory was not accessed."}
 
     def refresh_offsets(self) -> bool:
