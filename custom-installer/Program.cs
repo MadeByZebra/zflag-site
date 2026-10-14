@@ -138,7 +138,7 @@ internal sealed class InstallerWindow : Window
         shell.Child = frame;
 
         // Custom brand bar: the installer never opens a PowerShell or console window.
-        var top = new Grid();
+        var top = new Grid { Background = Brushes.Transparent, Cursor = Cursors.Hand };
         top.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         top.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         Grid.SetRow(top, 0); frame.Children.Add(top);
@@ -152,10 +152,26 @@ internal sealed class InstallerWindow : Window
             Margin = new Thickness(14, 0, 12, 0) });
         brand.Children.Add(Text(uninstall ? "UNINSTALLER" : "INSTALLER", 10, Muted, FontWeights.SemiBold));
         top.Children.Add(brand);
-        top.MouseLeftButtonDown += (_, e) => { if (e.LeftButton == MouseButtonState.Pressed) DragMove(); };
+        // Capture title-bar mouse-down before nested text and panels handle it.
+        // Buttons remain clickable; all blank and branded header space is draggable.
+        top.PreviewMouseLeftButtonDown += (_, e) =>
+        {
+            if (e.ChangedButton != MouseButton.Left || e.ClickCount != 1) return;
+            DependencyObject? hit = e.OriginalSource as DependencyObject;
+            while (hit != null && hit != top)
+            {
+                if (hit is Button) return;
+                hit = hit is Visual ? VisualTreeHelper.GetParent(hit) : null;
+            }
+            try { DragMove(); e.Handled = true; }
+            catch (InvalidOperationException) { /* mouse released before dragging */ }
+        };
+        KeyDown += (_, e) => {
+            if (e.Key == Key.Escape) { Close(); e.Handled = true; }
+        };
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         Grid.SetColumn(buttons, 1); top.Children.Add(buttons);
-        buttons.Children.Add(Text("v2.0.31  /  PREVIEW", 10, Dim, FontWeights.SemiBold));
+        buttons.Children.Add(Text("2.0.32   •   TEST BUILD", 10, Dim, FontWeights.SemiBold));
         var minimize = ActionButton("—", false, 32);
         minimize.Height = 29; minimize.Margin = new Thickness(18, 0, 7, 0);
         minimize.Click += (_, _) => WindowState = WindowState.Minimized;
@@ -168,14 +184,14 @@ internal sealed class InstallerWindow : Window
         var chip = Rounded(Brush("#253248"), 10);
         chip.HorizontalAlignment = HorizontalAlignment.Left;
         chip.Padding = new Thickness(12, 6, 12, 6);
-        chip.Child = Text(uninstall ? "SAFE CLEANUP • YOUR SETTINGS ARE KEPT" : "BUILT FOR WINDOWS • READY IN A FEW CLICKS", 10, Brush(SubtleBlue), FontWeights.SemiBold);
+        chip.Child = Text(uninstall ? "SAFE CLEANUP • YOUR SETTINGS ARE KEPT" : "WINDOWS 10/11   •   X64", 10, Brush(SubtleBlue), FontWeights.SemiBold);
         body.Children.Add(chip);
 
-        _headline = Text(uninstall ? "Remove the preview." : "Your setup, reimagined.", 31, Ink, FontWeights.Bold);
+        _headline = Text(uninstall ? "Remove the preview." : "Install ZFLAG", 31, Ink, FontWeights.Bold);
         _headline.Margin = new Thickness(0, 17, 0, 6);
         body.Children.Add(_headline);
         _subline = Text(uninstall ? "Remove this ZFLAG preview without touching your Roblox or other ZFLAG installations."
-                                  : "A proper ZFLAG install. No terminals, no scripts, no complicated setup.",
+                                  : "Everything you need, in one installer. No terminal or developer tools.",
                         12.5, Muted);
         _subline.TextWrapping = TextWrapping.Wrap;
         body.Children.Add(_subline);
@@ -193,16 +209,16 @@ internal sealed class InstallerWindow : Window
         productGrid.Children.Add(productLogo);
         var productName = new StackPanel { Margin = new Thickness(14, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
         productName.Children.Add(Text("ZFLAG Desktop", 15, Ink, FontWeights.SemiBold));
-        var desc = Text("Stable local bridge • editor • presets", 11, Muted);
+        var desc = Text("FastFlag Studio   /   Editor + presets", 11, Muted);
         desc.Margin = new Thickness(0, 4, 0, 0); productName.Children.Add(desc);
         Grid.SetColumn(productName, 1); productGrid.Children.Add(productName);
-        var productTag = Text("2.0.30  STABILITY CORE", 10, Brush(SubtleBlue), FontWeights.SemiBold);
+        var productTag = Text("STABILITY BUILD 2.0.30", 10, Brush(SubtleBlue), FontWeights.SemiBold);
         Grid.SetColumn(productTag, 2); productGrid.Children.Add(productTag);
 
         var progressHeading = new Grid();
         progressHeading.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         progressHeading.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        _stage = Text("Ready to begin", 12, Ink, FontWeights.SemiBold);
+        _stage = Text("Ready to install", 12, Ink, FontWeights.SemiBold);
         _percent = Text("0%", 12, Muted, FontWeights.SemiBold);
         progressHeading.Children.Add(_stage); Grid.SetColumn(_percent, 1); progressHeading.Children.Add(_percent);
         body.Children.Add(progressHeading);
@@ -224,7 +240,7 @@ internal sealed class InstallerWindow : Window
         progressTemplate.VisualTree = progressGrid;
         _progress.Template = progressTemplate;
         body.Children.Add(_progress);
-        _details = Text("INSTALL LOCATION   " + _installPath, 10, Dim);
+        _details = Text("DESTINATION   " + _installPath, 10, Dim);
         _details.TextTrimming = TextTrimming.CharacterEllipsis;
         body.Children.Add(_details);
 
@@ -238,7 +254,7 @@ internal sealed class InstallerWindow : Window
             FontFamily = new FontFamily("Segoe UI"), FontSize = 12, Foreground = Muted,
             Margin = new Thickness(0, 0, 0, 9) };
         options.Children.Add(_desktopShortcut);
-        options.Children.Add(Text("Local install • No administrator access required", 10, Dim));
+        options.Children.Add(Text("Per-user setup   /   No administrator access", 10, Dim));
         footer.Children.Add(options);
         if (uninstall) _desktopShortcut.Visibility = Visibility.Collapsed;
         var actions = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
@@ -274,6 +290,10 @@ internal sealed class InstallerWindow : Window
     private async Task BeginAsync()
     {
         if (_busy) return;
+        // Read UI-owned state before starting a worker. Reading the checkbox
+        // in Task.Run caused the reported 0% cross-thread WPF exception.
+        var createDesktopShortcut = _desktopShortcut.IsChecked == true;
+        _stage.Foreground = Ink;
         _busy = true;
         _cancel = new CancellationTokenSource();
         _primary.IsEnabled = false;
@@ -292,15 +312,15 @@ internal sealed class InstallerWindow : Window
             if (_uninstall)
                 await Task.Run(() => InstallEngine.Uninstall(progress, _cancel.Token));
             else
-                await Task.Run(() => InstallEngine.Install(_installPath, true, _desktopShortcut.IsChecked == true, progress, _cancel.Token));
+                await Task.Run(() => InstallEngine.Install(_installPath, true, createDesktopShortcut, progress, _cancel.Token));
             _pulse.Stop();
             _busy = false;
             _finished = true;
             _progress.Value = 100; _percent.Text = "100%";
             _stage.Text = _uninstall ? "Uninstallation completed" : "Installation completed";
-            _headline.Text = _uninstall ? "ZFLAG preview removed." : "You're all set.";
+            _headline.Text = _uninstall ? "ZFLAG preview removed." : "Installation complete";
             _subline.Text = _uninstall ? "Your Roblox and other ZFLAG files were not changed."
-                                        : "ZFLAG is installed and ready. Launch it when you're ready.";
+                                        : "ZFLAG is ready. Open it now or launch it later from Start.";
             _details.Text = _uninstall ? "A locked uninstall helper may finish cleanup after restart."
                                        : "Installed to " + _installPath;
             _secondary.Visibility = Visibility.Collapsed;
@@ -327,7 +347,7 @@ internal sealed class InstallerWindow : Window
             _stage.Foreground = Brush("#FF9EA9");
             _details.Text = ex.Message;
             _details.ToolTip = ex.ToString();
-            _subline.Text = "Nothing is hidden: move your mouse over the error below for details. You can retry safely.";
+            _subline.Text = "Installation stopped. Check the error below, then try again.";
             _primary.IsEnabled = true;
             _primary.Content = "Retry";
             _secondary.IsEnabled = true; _secondary.Content = "Close";
