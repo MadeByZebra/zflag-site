@@ -1,0 +1,69 @@
+name: Verify ZFLAG v2.0.32 installer can be dragged
+on:
+  push:
+    paths:
+      - ".github/workflows/test-zflag-custom-drag-v32.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  drag:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ZFLAG-Custom-Branded-Installer-v2.0.32-TEST
+          run-id: 38651441448
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: dist
+      - name: Actually move the installer window using title-bar mouse drag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $exe=(Get-ChildItem dist -File -Filter "*.exe" | Select-Object -First 1).FullName
+          $p=Start-Process -FilePath $exe -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            $p.Refresh()
+            if ($p.HasExited -or $p.MainWindowHandle -eq [IntPtr]::Zero) { throw "Custom installer did not show GUI" }
+            Add-Type -TypeDefinition @'
+          using System;
+          using System.Runtime.InteropServices;
+          public static class MouseTools {
+            [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left,Top,Right,Bottom; }
+            [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr window, out RECT rect);
+            [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
+            [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
+            [DllImport("user32.dll")] public static extern void mouse_event(uint flags,uint dx,uint dy,uint data,UIntPtr extra);
+          }
+          '@
+            $before=New-Object MouseTools+RECT
+            [MouseTools]::GetWindowRect($p.MainWindowHandle,[ref]$before) | Out-Null
+            [MouseTools]::SetForegroundWindow($p.MainWindowHandle) | Out-Null
+            Start-Sleep -Milliseconds 400
+            # Hit-test title bar at y+43, x+225: no buttons overlap this point.
+            $x=$before.Left+220; $y=$before.Top+44
+            [MouseTools]::SetCursorPos($x,$y) | Out-Null
+            Start-Sleep -Milliseconds 200
+            [MouseTools]::mouse_event(0x0002,0,0,0,[UIntPtr]::Zero)
+            for($i=1;$i -le 12;$i++){
+              Start-Sleep -Milliseconds 55
+              [MouseTools]::SetCursorPos(($x+($i*13)),($y+($i*6))) | Out-Null
+            }
+            [MouseTools]::mouse_event(0x0004,0,0,0,[UIntPtr]::Zero)
+            Start-Sleep -Milliseconds 700
+            $after=New-Object MouseTools+RECT
+            [MouseTools]::GetWindowRect($p.MainWindowHandle,[ref]$after) | Out-Null
+            Write-Output "Titlebar drag position: ($($before.Left),$($before.Top)) -> ($($after.Left),$($after.Top))"
+            if ([Math]::Abs($after.Left-$before.Left) -lt 45 -and [Math]::Abs($after.Top-$before.Top) -lt 35) {
+              throw "Installer did not move after Windows mouse drag (top-left unchanged)"
+            }
+            Write-Output "PASS: real title-bar mouse drag moved WPF installer"
+          } finally {
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+          }
