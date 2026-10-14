@@ -136,7 +136,7 @@ jobs:
           obj=json.loads(conf.read_text(encoding="utf-8"))
           bundle=obj.setdefault("bundle",{})
           bundle["externalBin"]=list(dict.fromkeys(bundle.get("externalBin",[])+["binaries/zflag-native"]))
-          conf.write_text(json.dumps(obj,indent=2)+"\\n",encoding="utf-8")
+          conf.write_text(json.dumps(obj,indent=2)+chr(10),encoding="utf-8")
           print("Native compiled binary staged as Tauri externalBin")
           '@ | Set-Content -Encoding utf8 add-native-sidecar.py
           python add-native-sidecar.py
