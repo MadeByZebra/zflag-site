@@ -117,11 +117,7 @@ jobs:
           # The original offset scanner reads many megabytes of Roblox process
           # memory; older undocumented writes can hang or crash updated clients.
           # Fail safely until a version-validated injection engine is available.
-          inserted=marker+'''
-    const int count=(int)doc.MemberCount();
-    WriteReport(report,count,0,count,"","Stability build: legacy Roblox memory injection is disabled to prevent game hangs. Use ZFLAG Check Roblox for read-only detection and Save Allowed for Roblox-supported local settings.");
-    return 5;
-'''
+          inserted=marker+chr(10)+'    const int count=(int)doc.MemberCount();'+chr(10)+'    WriteReport(report,count,0,count,"","Stability build: legacy Roblox memory injection is disabled to prevent game hangs. Use Check Roblox for read-only detection and Save Allowed for local settings.");'+chr(10)+'    return 5;'+chr(10)
           content=content.replace(marker,inserted,1)
           src.write_text(content,encoding="utf-8")
           print("Verified native CLI fail-safe: no process handles, scans or memory writes")
@@ -340,5 +336,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ZFLAG-v2.0.30-Stability-Windows-TEST
-          path: ZFLAG-Simple-Install-v2.0.30-TEST.exe
+          path: ZFLAG-Stability-Install-v2.0.30-TEST.exe
           if-no-files-found: error
