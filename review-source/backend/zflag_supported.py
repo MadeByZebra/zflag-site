@@ -129,6 +129,31 @@ def save_eligible(flags,pid=None):
             "rollback":{"target":str(target),"backup":str(backup) if old is not None else None},
             "message":f"Saved {len(eligible):,} allowed flags; skipped {checked['unsupported']:,} not allowlisted and {checked['invalid']:,} invalid. Restart Roblox."}
 
+
+def reset_local_settings(pid=None):
+    """Back up and remove local overrides. Never access or modify Roblox process memory.
+
+    The original configuration is saved before deletion; it can be restored manually.
+    Roblox must be closed and relaunched for this to take effect.
+    """
+    target = target_json(pid)
+    if target is None:
+        return {"ok": False, "error": "Roblox Player installation was not found"}
+    if target.is_symlink() or target.parent.is_symlink():
+        return {"ok": False, "error": "Refusing to follow a linked Roblox configuration path"}
+    if not target.exists():
+        return {"ok": True, "removed": False, "message": "No local overrides found. Roblox settings are already at defaults."}
+    if not target.is_file():
+        return {"ok": False, "error": "Roblox config path is not a regular file"}
+    raw = target.read_bytes()
+    backup_dir = Path(os.environ.get("LOCALAPPDATA", str(target.parent)))/"ZFLAG"/"Backups"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    backup = backup_dir/(f"Reset-ClientAppSettings-{time.time_ns()}.json.bak")
+    atomic_save(backup, raw)
+    target.unlink()
+    return {"ok": True, "removed": True, "backup": str(backup),
+            "message": "Custom Roblox local overrides were backed up and reset. Restart Roblox to load defaults."}
+
 def restore(entry):
     path=Path(entry["target"])
     backup=entry.get("backup")
