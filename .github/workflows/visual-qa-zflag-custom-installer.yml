@@ -1,0 +1,65 @@
+name: Capture actual ZFLAG custom installer UI for visual QA
+on:
+  push:
+    paths:
+      - ".github/workflows/visual-qa-zflag-custom-installer.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  screenshot:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ZFLAG-Custom-Branded-Installer-v2.0.31-TEST
+          run-id: 38650566901
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: dist
+      - name: Launch window and capture actual WPF installer appearance
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $exe=(Get-ChildItem dist -File -Filter "*.exe" | Select-Object -First 1).FullName
+          $proc=Start-Process -FilePath $exe -PassThru
+          for ($i=0;$i -lt 22;$i++) {
+            Start-Sleep -Milliseconds 400
+            $proc.Refresh()
+            if ($proc.HasExited) { throw "Branded setup window exited with code $($proc.ExitCode)" }
+            if ($proc.MainWindowHandle -ne [IntPtr]::Zero) { break }
+          }
+          if ($proc.MainWindowHandle -eq [IntPtr]::Zero) { throw "Installer didn't create a visible top-level window" }
+          Add-Type -AssemblyName System.Drawing
+          Add-Type -TypeDefinition @'
+          using System;
+          using System.Runtime.InteropServices;
+          public static class ScreenshotRect {
+            [StructLayout(LayoutKind.Sequential)]
+            public struct RECT { public int Left,Top,Right,Bottom; }
+            [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd,out RECT r);
+          }
+          '@
+          $rect=New-Object ScreenshotRect+RECT
+          if (-not [ScreenshotRect]::GetWindowRect($proc.MainWindowHandle,[ref]$rect)) { throw "Could not obtain installer window bounds" }
+          $w=$rect.Right-$rect.Left
+          $h=$rect.Bottom-$rect.Top
+          if ($w -lt 200 -or $h -lt 200) { throw "Unreasonable WPF window dimensions $w x $h" }
+          $bmp=New-Object System.Drawing.Bitmap($w,$h)
+          $graphics=[System.Drawing.Graphics]::FromImage($bmp)
+          $graphics.CopyFromScreen($rect.Left,$rect.Top,0,0,(New-Object System.Drawing.Size($w,$h)))
+          $graphics.Dispose()
+          $bmp.Save((Join-Path (Get-Location).Path "zflag-branded-installer-visual-QA.png"),[System.Drawing.Imaging.ImageFormat]::Png)
+          $bmp.Dispose()
+          Write-Output "Visual preview saved: $w x $h"
+          Stop-Process -Id $proc.Id -Force
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ZFLAG-custom-installer-visual-QA
+          path: zflag-branded-installer-visual-QA.png
+          if-no-files-found: warn

@@ -1,0 +1,61 @@
+name: QA ZFLAG old-to-new NSIS upgrade and uninstall
+on:
+  push:
+    paths:
+      - ".github/workflows/verify-upgrade-v28.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  upgrade:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ZFLAG-v2.0.28-Windows-TEST
+          run-id: 38590789769
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: incoming
+      - name: Test uninstalling the previously installed version during upgrade
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $log = Join-Path (Get-Location).Path "upgrade-report.txt"
+          function Note([string] $Message) { $Message | Tee-Object -FilePath $log -Append }
+          function RunInstaller([string] $file, [string] $label) {
+            Note "Starting $label"
+            $p = Start-Process -FilePath $file -ArgumentList "/S" -PassThru
+            if (-not $p.WaitForExit(90000)) { $p.Kill(); throw "$label timed out after 90 seconds" }
+            Note "$label exited with code $($p.ExitCode)"
+            if ($p.ExitCode -ne 0) { throw "$label returned a failure status: $($p.ExitCode)" }
+          }
+          $old = (Resolve-Path "ZFLAG-Setup-v2.0.26.exe").Path
+          $new = (Get-ChildItem incoming -Filter "*.exe" -File | Select-Object -First 1).FullName
+          if (-not $new) { throw "New installer missing" }
+          $target = Join-Path $env:LOCALAPPDATA "ZFLAG"
+          RunInstaller $old "Install ZFLAG 2.0.26"
+          foreach ($f in @("fflag-studio.exe", "uninstall.exe")) {
+            if (-not (Test-Path (Join-Path $target $f))) { throw "Old install missing $f" }
+          }
+          Get-ChildItem "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall" -ErrorAction SilentlyContinue | ForEach-Object {
+            $item = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
+            if ($item.DisplayName -match "ZFLAG|FFlag") { Note "Found prior uninstall registration: $($item.DisplayName); $($item.DisplayVersion); $($item.UninstallString)" }
+          }
+          RunInstaller $new "Upgrade to ZFLAG 2.0.28"
+          foreach ($f in @("fflag-studio.exe","fflag-backend.exe","zflag-native.exe")) {
+            $p = Join-Path $target $f
+            if (-not (Test-Path $p)) { throw "Upgrade missing $f" }
+            Note "Upgrade installed: $f $((Get-Item $p).Length) bytes"
+          }
+          Note "PASS: v2.0.26 to v2.0.28 upgraded automatically"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ZFLAG-v28-NSIS-upgrade-report
+          path: upgrade-report.txt
+          if-no-files-found: warn

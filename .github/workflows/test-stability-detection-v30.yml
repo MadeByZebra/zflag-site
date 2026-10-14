@@ -1,0 +1,55 @@
+name: Test ZFLAG v30 backend runtime initialization and safe Roblox detection
+on:
+  push:
+    paths:
+      - ".github/workflows/test-stability-detection-v30.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Import real ZFLAG backend and exercise read-only Roblox process enumeration
+        shell: pwsh
+        run: |
+          @'
+          import sys
+          import threading
+          import urllib.request
+          import json
+          from pathlib import Path
+          sys.path.insert(0,str(Path("review-source/backend").resolve()))
+          import server
+          print("Bridge version and port",server.PORT,server.TARGET)
+          assert server.PORT == 18766
+          probe=server.runtime.native_probe()
+          print("Direct detection result:",probe)
+          assert "found" in probe and "ok" in probe
+          assert probe["found"] is False, "CI runner unexpectedly has Roblox running"
+          server_thread=server.ThreadingHTTPServer(("127.0.0.1",0),server.Handler)
+          port=server_thread.server_address[1]
+          t=threading.Thread(target=server_thread.serve_forever,daemon=True)
+          t.start()
+          def post(path,body):
+              req=urllib.request.Request(
+                  f"http://127.0.0.1:{port}{path}",
+                  json.dumps(body).encode(),headers={"Content-Type":"application/json"},method="POST")
+              with urllib.request.urlopen(req,timeout=5) as response:
+                  return json.load(response)
+          for n in range(6):
+              result=post("/native-probe",{})
+              assert result["found"] is False, result
+              result=post("/native-apply",{"flags":{"FFlagHandleAltEnterFullscreenManually":True}})
+              assert result["ok"] is False and result.get("robloxDetected") is False, result
+          server_thread.shutdown()
+          server_thread.server_close()
+          print("PASS: Safe detection responds to repeated requests; no game memory operations")
+          '@ | Set-Content -Encoding utf8 verify-detection.py
+          python verify-detection.py

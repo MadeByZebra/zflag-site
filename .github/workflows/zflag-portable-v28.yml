@@ -1,0 +1,81 @@
+name: Package ZFLAG 2.0.28 portable for uninstall-error recovery
+on:
+  push:
+    paths:
+      - ".github/workflows/zflag-portable-v28.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  portable:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download successful 2.0.28 Windows QA installer
+        uses: actions/download-artifact@v4
+        with:
+          name: ZFLAG-v2.0.28-Windows-TEST
+          run-id: 38590789769
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: incoming
+      - name: Extract full installer payload using 7-Zip
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $exe=Get-ChildItem incoming -File -Filter "*.exe" | Select-Object -First 1
+          if (-not $exe) { throw "Missing 2.0.28 installer artifact" }
+          $seven="C:\Program Files\7-Zip\7z.exe"
+          if (-not (Test-Path $seven)) { $seven=(Get-Command 7z -ErrorAction Stop).Source }
+          & $seven x $exe.FullName "-oextracted" -y | Out-File -Encoding utf8 extraction.log
+          if ($LASTEXITCODE -ne 0) { throw "NSIS payload extraction failed" }
+          Get-ChildItem extracted -Recurse -File | ForEach-Object { $_.FullName + " (" + $_.Length + " bytes)" } | Out-File -Encoding utf8 files.txt
+      - name: Package verified stand-alone executable and both sidecars
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          import shutil,zipfile,hashlib
+          all_files=[p for p in Path("extracted").rglob("*") if p.is_file()]
+          required={"fflag-studio.exe": None, "fflag-backend.exe": None, "zflag-native.exe": None}
+          for name in required:
+              candidates=[p for p in all_files if p.name.lower()==name]
+              if not candidates:raise SystemExit("Missing required executable: "+name)
+              winner=max(candidates,key=lambda p:p.stat().st_size)
+              if winner.stat().st_size<10000:raise SystemExit("Executable unexpectedly small: "+str(winner))
+              required[name]=winner
+          destination=Path("ZFLAG-Portable-v2.0.28")
+          destination.mkdir()
+          for name,source in required.items():
+              shutil.copy2(source,destination/name)
+              if (destination/name).read_bytes()[:2]!=b"MZ":raise SystemExit("Invalid Windows executable: "+name)
+              print("Packed",name,source.stat().st_size)
+          (destination/"README.txt").write_text(
+              "ZFLAG Portable v2.0.28 - UNINSTALL ERROR WORKAROUND\n"
+              "1. Close any installed ZFLAG and its background processes.\n"
+              "2. Extract the ENTIRE zip to a new directory such as your Desktop.\n"
+              "3. Launch fflag-studio.exe directly. Do not run any old Setup Builder.\n"
+              "4. Keep fflag-backend.exe and zflag-native.exe together with the main exe.\n"
+              "5. The existing installation is unchanged; this build requires WebView2.\n"
+              "6. Live Roblox memory injection is experimental and NOT verified on your PC.\n"
+              "7. Do not disable antivirus or Windows security to run the application.\n",
+              encoding="utf-8")
+          archive=Path("ZFLAG-Portable-v2.0.28.zip")
+          with zipfile.ZipFile(archive,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=7) as z:
+              for p in destination.iterdir(): z.write(p,p.as_posix())
+          with zipfile.ZipFile(archive) as z:
+              if z.testzip():raise SystemExit("Portable archive failed integrity check")
+              actual={p.name for p in destination.iterdir()}
+              if not set(required).issubset(actual):raise SystemExit("Archive missing executable")
+          print("PASS: ZFLAG portable archive",archive.stat().st_size,"SHA256",hashlib.sha256(archive.read_bytes()).hexdigest())
+          '@ | Set-Content -Encoding utf8 make-portable.py
+          python make-portable.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ZFLAG-v28-portable-Windows-TEST
+          path: ZFLAG-Portable-v2.0.28.zip
+          if-no-files-found: error

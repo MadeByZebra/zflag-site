@@ -1,0 +1,48 @@
+name: Validate branded ZFLAG installer window startup v2.0.31
+on:
+  push:
+    paths:
+      - ".github/workflows/test-zflag-custom-installer-ui.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ZFLAG-Custom-Branded-Installer-v2.0.31-TEST
+          run-id: 38650566901
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: dist
+      - name: Test branded WPF installer window (not only command-line verification)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $exe=Get-ChildItem dist -Filter "*.exe" -File | Select-Object -First 1
+          if (-not $exe) { throw "GUI setup binary missing" }
+          $p=Start-Process -FilePath $exe.FullName -WorkingDirectory $exe.DirectoryName -PassThru
+          Start-Sleep -Seconds 7
+          $p.Refresh()
+          if ($p.HasExited) { throw "Branded installer GUI crashed during initialization, exit code $($p.ExitCode)" }
+          Write-Output "PASS: Branded ZFLAG WPF installer stays open and responsive long enough for test"
+          $p.CloseMainWindow() | Out-Null
+          Start-Sleep -Seconds 2
+          $p.Refresh()
+          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force; Write-Output "Closed using fallback process cleanup" }
+      - name: Check custom uninstaller UI window starts
+        shell: pwsh
+        run: |
+          $exe=(Get-ChildItem dist -Filter "*.exe" -File | Select-Object -First 1).FullName
+          $p=Start-Process -FilePath $exe -ArgumentList "--uninstall" -PassThru
+          Start-Sleep -Seconds 4
+          $p.Refresh()
+          if ($p.HasExited) { throw "Custom ZFLAG uninstaller UI crashed on startup" }
+          Stop-Process -Id $p.Id -Force
+          Write-Output "PASS: custom uninstaller UI starts"

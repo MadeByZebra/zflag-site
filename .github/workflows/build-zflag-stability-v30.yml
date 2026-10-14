@@ -1,0 +1,363 @@
+name: Build ZFLAG 2.0.30 Roblox-stability Windows installer TEST
+# QA run: v30.1 tested backend runtime startup, native fail-safe, read-only detection and isolated 18766 startup.
+on:
+  push:
+    paths:
+      - ".github/workflows/build-zflag-stability-v30.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Recover verified original ZFLAG Studio source
+        shell: pwsh
+        run: |
+          @'
+          import subprocess,io,zipfile,struct,pathlib
+          sha="5eac1d1773099ff5e86dcb89b9796eab674b35a2"
+          blob=subprocess.check_output(["git","show",f"{sha}:ZFLAG-Setup-v2.0.22.exe"])
+          eocd=blob.rfind(b"PK\x05\x06")
+          if eocd<0:raise SystemExit("Original source archive missing")
+          sig,disk,cd_disk,n_disk,n_total,cd_size,cd_offset,comment_len=struct.unpack_from("<4s4H2LH",blob,eocd)
+          start=eocd-cd_size-cd_offset;end=eocd+22+comment_len
+          root=pathlib.Path("zflag-source")
+          with zipfile.ZipFile(io.BytesIO(blob[start:end])) as archive:
+              for item in archive.infolist():
+                  if not (root/item.filename).resolve().is_relative_to(root.resolve()):
+                      raise SystemExit("Unsafe archive entry")
+              archive.extractall(root)
+          print("Recovered original source from signed-in owner's repository history.")
+          '@ | Set-Content -Encoding utf8 recover.py
+          python recover.py
+      - name: Verify and apply ZFLAG detection and local configuration repair
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,base64,zlib,hashlib,subprocess,sys
+          data=pathlib.Path("patches/zflag-local-2.0.24.py.zlib.b64").read_text().strip()
+          patch=zlib.decompress(base64.b64decode(data))
+          digest=hashlib.sha256(patch).hexdigest()
+          print("Repair patch SHA256:",digest)
+          if digest!="9019605c17a5c2f4b8d8ed996bfaf20e0683c1382c03bc4a4d519233fff8f02e":
+              raise SystemExit("ZFLAG repair patch integrity check failed")
+          pathlib.Path("apply_repair.py").write_bytes(patch)
+          subprocess.run([sys.executable,"apply_repair.py","zflag-source"],check=True)
+          '@ | Set-Content -Encoding utf8 apply_repair_verified.py
+          python apply_repair_verified.py
+      - name: Expand bounded JSON API payloads for 20K+ preset entries
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          server=Path("zflag-source/backend/server.py")
+          contents=server.read_text(encoding="utf-8")
+          original="if length > 2_000_000:"
+          if original not in contents:raise SystemExit("Expected JSON limit not found; update needs review")
+          contents=contents.replace(original,"if length < 0 or length > 32_000_000:",1)
+          server.write_text(contents,encoding="utf-8")
+          print("JSON payload limit: 32 MB; negative lengths rejected")
+          '@ | Set-Content -Encoding utf8 expand_json_limit.py
+          python expand_json_limit.py
+      - name: Overlay repaired ZFLAG interface and Python bridge endpoint
+        shell: pwsh
+        run: |
+          @'
+          import shutil,pathlib
+          src=pathlib.Path("review-source")
+          dst=pathlib.Path("zflag-source")
+          files=0
+          for path in src.rglob("*"):
+              if not path.is_file():continue
+              target=dst/path.relative_to(src)
+              target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copy2(path,target)
+              files+=1
+          print("Reused original ZFLAG interface and patched local backend:",files,"files")
+          '@ | Set-Content -Encoding utf8 overlay-source.py
+          python overlay-source.py
+          python -m py_compile zflag-source/backend/server.py zflag-source/backend/zflag_supported.py
+      - name: Restore reviewed native engine source and check hash
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,base64,zlib,hashlib
+          root=pathlib.Path("native")
+          data="".join((root/f"zflag_native_chunk{i}.txt").read_text(encoding="utf-8").strip() for i in range(4))
+          source=zlib.decompress(base64.b64decode(data))
+          expected="71413702b1d613dbf77711f039eec546b67155aa231c94d96590a5c032a9f152"
+          assert hashlib.sha256(source).hexdigest()==expected, "Native source integrity mismatch"
+          (root/"zflag_native.cpp").write_bytes(source)
+          print("Native C++ source recovered and verified:", len(source), "bytes")
+          '@ | Set-Content -Encoding utf8 restore-native.py
+          python restore-native.py
+      - name: Disable unsafe legacy memory scanning for Roblox stability
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          src=Path("native/zflag_native.cpp")
+          content=src.read_text(encoding="utf-8")
+          marker='if (!ReadPreset(input.c_str(),doc,error)) {WriteReport(report,0,0,0,"",error);return 2;}'
+          assert content.count(marker)==1, "Original C++ CLI marker mismatch"
+          # The original offset scanner reads many megabytes of Roblox process
+          # memory; older undocumented writes can hang or crash updated clients.
+          # Fail safely until a version-validated injection engine is available.
+          inserted=marker+chr(10)+'    const int count=(int)doc.MemberCount();'+chr(10)+'    WriteReport(report,count,0,count,"","Stability build: legacy Roblox memory injection is disabled to prevent game hangs. Use Check Roblox for read-only detection and Save Allowed for local settings.");'+chr(10)+'    return 5;'+chr(10)
+          content=content.replace(marker,inserted,1)
+          src.write_text(content,encoding="utf-8")
+          print("Verified native CLI fail-safe: no process handles, scans or memory writes")
+          '@ | Set-Content -Encoding utf8 guard-native.py
+          python guard-native.py
+      - name: Download C++ header dependency
+        shell: pwsh
+        run: git clone --depth 1 --branch master https://github.com/Tencent/rapidjson.git native/rapidjson-vendor
+      - name: Compile native executable with Microsoft Visual C++
+        shell: pwsh
+        run: |
+          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products "*" -property installationPath
+          if (-not $vs) { throw "Visual Studio not installed" }
+          $vcvars=Join-Path $vs "VC\Auxiliary\Build\vcvars64.bat"
+          @'
+          @echo off
+          call "%~1" || exit /b 1
+          cl /nologo /std:c++17 /EHsc /O2 /MD /DWIN32_LEAN_AND_MEAN /I native\rapidjson-vendor\include native\zflag_native.cpp /Fe:native\zflag-native.exe /link comctl32.lib shell32.lib psapi.lib user32.lib gdi32.lib comdlg32.lib winhttp.lib advapi32.lib msimg32.lib gdiplus.lib
+          exit /b %errorlevel%
+          '@ | Set-Content -Encoding ascii compile-native.cmd
+          cmd /c compile-native.cmd "$vcvars"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path native/zflag-native.exe)) { throw "No native executable produced" }
+          Get-FileHash native/zflag-native.exe -Algorithm SHA256
+      - name: Prove native stability CLI exits quickly without reading Roblox memory
+        shell: pwsh
+        run: |
+          @'
+          import subprocess,json, pathlib, time
+          root=pathlib.Path.cwd()
+          inp=root/"qa-sample-flags.json"
+          rep=root/"qa-sample-report.json"
+          inp.write_text(json.dumps({"FFlagHandleAltEnterFullscreenManually":True}),encoding="utf-8")
+          t=time.monotonic()
+          p=subprocess.run([str(root/"native/zflag-native.exe"),"--apply",str(inp),"--report",str(rep)],
+                           capture_output=True,text=True,timeout=4,check=False)
+          duration=time.monotonic()-t
+          if not rep.exists():raise SystemExit("Native CLI did not produce a report")
+          data=json.loads(rep.read_text(encoding="utf-8"))
+          assert p.returncode==5,(p.returncode,p.stdout,p.stderr)
+          assert data["succeeded"]==0 and data["total"]==1,data
+          assert "Stability build" in data["error"],data
+          print("PASS: native legacy memory scanner safely blocked in",round(duration,3),"seconds")
+          '@ | Set-Content -Encoding utf8 qa-native-safe.py
+          python qa-native-safe.py
+      - name: Install native engine as a second Tauri sidecar
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,shutil,json
+          root=pathlib.Path("zflag-source")
+          target=root/"src-tauri/binaries/zflag-native-x86_64-pc-windows-msvc.exe"
+          target.parent.mkdir(parents=True,exist_ok=True)
+          shutil.copy2("native/zflag-native.exe",target)
+          conf=root/"src-tauri/tauri.conf.json"
+          obj=json.loads(conf.read_text(encoding="utf-8"))
+          bundle=obj.setdefault("bundle",{})
+          bundle["externalBin"]=list(dict.fromkeys(bundle.get("externalBin",[])+["binaries/zflag-native"]))
+          conf.write_text(json.dumps(obj,indent=2)+chr(10),encoding="utf-8")
+          print("Native compiled binary staged as Tauri externalBin")
+          '@ | Set-Content -Encoding utf8 add-native-sidecar.py
+          python add-native-sidecar.py
+      - name: Run backend regression tests
+        shell: pwsh
+        run: |
+          python -m unittest discover -s zflag-source/tests -v
+          python -m py_compile zflag-source/backend/server.py
+      - name: Prepare Windows application metadata
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,json
+          root=pathlib.Path("zflag-source")
+          version="2.0.30"
+          for path in root.rglob("*"):
+              if path.is_file() and path.suffix.lower() in (".json",".toml",".rs",".tsx",".ts",".js",".mjs",".html",".txt",".md"):
+                  if "node_modules" in path.parts:continue
+                  try:content=path.read_text(encoding="utf-8")
+                  except UnicodeError:continue
+                  updated=content.replace("2.0.9",version)
+                  if content!=updated:path.write_text(updated,encoding="utf-8")
+          pkg=root/"package.json"
+          obj=json.loads(pkg.read_text(encoding="utf-8"))
+          obj["version"]=version
+          pkg.write_text(json.dumps(obj,indent=2)+"\n",encoding="utf-8")
+          conf=root/"src-tauri"/"tauri.conf.json"
+          obj=json.loads(conf.read_text(encoding="utf-8"))
+          obj["version"]=version
+          obj.setdefault("bundle",{})["active"]=True
+          obj["bundle"]["targets"]=["nsis"]
+          conf.write_text(json.dumps(obj,indent=2)+"\n",encoding="utf-8")
+          print("Windows NSIS installer configured for",version)
+          '@ | Set-Content -Encoding utf8 prepare.py
+          python prepare.py
+      - name: Configure separate NSIS installation to bypass a broken old uninstaller
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          import json
+          conf=Path("zflag-source/src-tauri/tauri.conf.json")
+          obj=json.loads(conf.read_text(encoding="utf-8"))
+          obj["productName"]="ZFLAG Stable Test"
+          obj["identifier"]="com.zebra.zflag.stabilitytest"
+          obj["app"]["windows"][0]["title"]="ZFLAG"
+          bundle=obj.setdefault("bundle",{})
+          bundle["publisher"]="Zebra"
+          bundle.setdefault("windows",{}).setdefault("nsis",{})["startMenuFolder"]="ZFLAG Test"
+          bundle["windows"]["nsis"]["installMode"]="currentUser"
+          conf.write_text(json.dumps(obj,indent=2)+"\n",encoding="utf-8")
+          print("Separate installation identity:",obj["productName"],obj["identifier"])
+          '@ | Set-Content -Encoding utf8 isolate-installer.py
+          python isolate-installer.py
+      - name: Generate matching ZFLAG desktop, shortcut, installer and taskbar icons
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check Pillow
+          @'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          out=Path("zflag-source/src-tauri/icons")
+          out.mkdir(parents=True, exist_ok=True)
+          # Matches review-source/src/assets/zflag-logo.svg rather than a generic Tauri icon.
+          n=1024
+          image=Image.new("RGBA",(n,n),(0,0,0,0))
+          draw=ImageDraw.Draw(image)
+          scale=n/128
+          rc=lambda x: int(round(x*scale))
+          draw.rounded_rectangle((rc(10),rc(10),rc(118),rc(118)),radius=rc(28),fill="#0a0d12",outline="#222835",width=rc(4))
+          zpath=[(34,34),(94,34),(94,44),(52,84),(94,84),(94,94),(34,94),(34,84),(76,44),(34,44)]
+          draw.polygon([(rc(x),rc(y)) for x,y in zpath],fill="#e9edf4")
+          draw.line((rc(34),rc(100),rc(94),rc(100)),fill="#2f3a4f",width=rc(4))
+          for size,name in [(32,"32x32.png"),(128,"128x128.png"),(256,"128x128@2x.png")]:
+              image.resize((size,size),Image.Resampling.LANCZOS).save(out/name)
+          image.save(out/"icon.ico",format="ICO",sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
+          print("Generated consistent ZFLAG icon from the existing brand mark")
+          '@ | Set-Content -Encoding utf8 generate-icons.py
+          python generate-icons.py
+      - name: Install JavaScript dependencies
+        working-directory: zflag-source
+        shell: pwsh
+        run: npm install --no-audit --no-fund
+      - name: Build ZFLAG frontend
+        working-directory: zflag-source
+        shell: pwsh
+        run: npm run build
+      - name: Build Python backend sidecar
+        working-directory: zflag-source
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check pyinstaller
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-sidecar.ps1
+      - name: Build ZFLAG Windows installer
+        working-directory: zflag-source
+        shell: pwsh
+        run: npm run desktop:build -- --bundles nsis
+      - name: Stage Windows test installer (do not publish website)
+        shell: pwsh
+        run: |
+          @'
+          import pathlib,shutil,hashlib
+          candidates=list(pathlib.Path("zflag-source/src-tauri/target/release/bundle/nsis").glob("*.exe"))
+          if not candidates:raise SystemExit("NSIS installer was not produced")
+          source=max(candidates,key=lambda path:path.stat().st_mtime)
+          target=pathlib.Path("ZFLAG-Stability-Install-v2.0.30-TEST.exe")
+          shutil.copy2(source,target)
+          if target.stat().st_size<5_000_000: raise SystemExit("Installer unexpectedly small")
+          print("TEST ONLY",target,target.stat().st_size,"bytes",hashlib.sha256(target.read_bytes()).hexdigest())
+          '@ | Set-Content -Encoding utf8 verify-installer.py
+          python verify-installer.py
+      - name: Download existing ZFLAG installer for side-by-side regression test
+        uses: actions/download-artifact@v4
+        with:
+          name: ZFLAG-v2.0.29-Simple-Windows-TEST
+          run-id: 38595323559
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: old-version
+      - name: Install ZFLAG 2.0.29 before checking the new stability installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $old=(Get-ChildItem old-version -Filter "*.exe" -File | Select-Object -First 1)
+          if (-not $old) { throw "Previous installer artifact missing" }
+          $proc=Start-Process -FilePath $old.FullName -ArgumentList "/S" -Wait -PassThru
+          if ($proc.ExitCode -ne 0) { throw "Previous installer failed: $($proc.ExitCode)" }
+          if (-not (Test-Path (Join-Path $env:LOCALAPPDATA "ZFLAG Test/fflag-studio.exe"))) { throw "Previous ZFLAG not installed" }
+          Write-Output "Legacy ZFLAG installed; testing new independent install"
+      - name: Verify the installer can install all three executables on clean Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $installer=(Resolve-Path "ZFLAG-Stability-Install-v2.0.30-TEST.exe").Path
+          $sig=(Get-AuthenticodeSignature $installer).Status
+          Write-Output "Authenticode signature status: $sig"
+          $process=Start-Process -FilePath $installer -ArgumentList "/S" -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "NSIS silent installer exited with $($process.ExitCode)" }
+          $destination=Join-Path $env:LOCALAPPDATA "ZFLAG Stable Test"
+          foreach($program in @("fflag-studio.exe","fflag-backend.exe","zflag-native.exe")) {
+            $path=Join-Path $destination $program
+            if (-not (Test-Path $path)) { throw "Installed app missing $path" }
+            $length=(Get-Item $path).Length
+            if ($length -lt 10000) { throw "Installed binary unexpectedly small: $path" }
+            Write-Output "Verified installed: $program ($length bytes)"
+          }
+          if (-not (Test-Path (Join-Path $env:LOCALAPPDATA "ZFLAG Test/fflag-studio.exe"))) { throw "Fresh installation unexpectedly replaced the old ZFLAG Test" }
+          Write-Output "PASS: both versions installed side-by-side without an old uninstall"
+          $main=Join-Path $destination "fflag-studio.exe"
+          $app=Start-Process -FilePath $main -WorkingDirectory $destination -PassThru
+          Start-Sleep -Seconds 5
+          $app.Refresh()
+          if ($app.HasExited) { throw "New app exited immediately after first launch: $($app.ExitCode)" }
+          Write-Output "PASS: new ZFLAG app started successfully (PID $($app.Id))"
+          Write-Output "App left open for backend health/probe QA"
+      - name: Smoke-test safe process detection and isolated backend startup
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $base="http://127.0.0.1:18766"
+          $health=$null
+          foreach($attempt in 1..20) {
+            try { $health=Invoke-RestMethod "$base/health" -TimeoutSec 2; break }
+            catch { Start-Sleep -Milliseconds 400 }
+          }
+          if (-not $health) { throw "Stability backend not listening on isolated port 18766" }
+          if ($health.backendVersion -ne "6.5-stable") { throw "Wrong bridge backend version: $($health.backendVersion)" }
+          $probe=Invoke-WebRequest "$base/native-probe" -Method POST -ContentType "application/json" -Body "{}" -TimeoutSec 4 -SkipHttpErrorCheck
+          if ($probe.StatusCode -notin @(200,400)) { throw "Unexpected Roblox probe status $($probe.StatusCode)" }
+          $result=$probe.Content | ConvertFrom-Json
+          if ($result.found -eq $true) { throw "Unexpected Roblox process in clean Windows runner" }
+          if ($result.error -notmatch "memory" -and $result.error -notmatch "process") { throw "Missing safe process-detection status" }
+          Write-Output "PASS: isolated 18766 backend is healthy and safe process check returned immediately"
+          $native=Invoke-RestMethod "$base/native-apply" -Method POST -ContentType "application/json" -Body '{"flags":{"FFlagHandleAltEnterFullscreenManually":true}}' -TimeoutSec 4
+          if ($native.ok -eq $true) { throw "Unsafe write unexpectedly claimed success" }
+          if ($native.error -notmatch "Roblox") { throw "Native stability error did not identify missing Roblox" }
+          Write-Output "PASS: no Roblox present, injection safely refused without scanning memory"
+      - name: Upload unverified Windows test installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZFLAG-v2.0.30-Stability-Windows-TEST
+          path: ZFLAG-Stability-Install-v2.0.30-TEST.exe
+          if-no-files-found: error

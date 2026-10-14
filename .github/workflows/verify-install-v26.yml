@@ -1,0 +1,48 @@
+name: Validate ZFLAG v2.0.26 installer on clean Windows
+on:
+  push:
+    paths:
+      - ".github/workflows/verify-install-v26.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  install:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check installer header, signature and SHA256
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $file=Get-Item "ZFLAG-Setup-v2.0.26.exe"
+          if ($file.Length -lt 10000000) { throw "Installer unexpectedly small" }
+          $signature=Get-AuthenticodeSignature $file.FullName
+          "Signature status: $($signature.Status)" | Tee-Object install-test.txt
+          (Get-FileHash $file.FullName -Algorithm SHA256 | Out-String) | Add-Content install-test.txt
+      - name: Silent-install test under current user
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $installer=(Resolve-Path "ZFLAG-Setup-v2.0.26.exe").Path
+          $p=Start-Process -FilePath $installer -ArgumentList "/S" -Wait -PassThru
+          "Installer exit code: $($p.ExitCode)" | Tee-Object -Append install-test.txt
+          $base=Join-Path $env:LOCALAPPDATA "ZFLAG"
+          "Expected destination: $base" | Tee-Object -Append install-test.txt
+          Get-ChildItem $env:LOCALAPPDATA -Directory | Where-Object { $_.Name -match "ZFLAG|fflag" } | Select-Object -ExpandProperty FullName | Tee-Object -Append install-test.txt
+          if ($p.ExitCode -ne 0) { throw "Installer exit code: $($p.ExitCode)" }
+          if (-not (Test-Path $base)) { throw "Installer returned success but ZFLAG folder was not created" }
+          $names=@("fflag-studio.exe","fflag-backend.exe","zflag-native.exe")
+          foreach($name in $names) {
+             $fp=Join-Path $base $name
+             if (-not (Test-Path $fp)) { throw "Missing installed file $fp" }
+             "$fp $((Get-Item $fp).Length)" | Tee-Object -Append install-test.txt
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ZFLAG-v26-install-smoke-report
+          path: install-test.txt
+          if-no-files-found: warn
