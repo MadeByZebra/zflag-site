@@ -68,7 +68,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import logoMark from "./assets/zflag-logo.svg"
 
-const DEFAULT_API = "http://127.0.0.1:18765"
+const DEFAULT_API = "http://127.0.0.1:18766"
 let desktopSidecarStarted = false
 
 const DEFAULT_JSON = `{
@@ -326,16 +326,18 @@ function safeParse<T>(raw: string | null, fallback: T): T {
 function loadSettings(): SettingsState {
   const parsed = safeParse<Partial<SettingsState>>(localStorage.getItem("fflag-studio-settings"), {})
   const savedApi = typeof parsed.apiUrl === "string" ? parsed.apiUrl.trim().replace(/\/$/, "") : ""
-  const migratedApi = !savedApi || savedApi === "http://127.0.0.1:8765" || savedApi === "http://localhost:8765"
+  const migratedApi = !savedApi || ["http://127.0.0.1:8765","http://localhost:8765","http://127.0.0.1:18765","http://localhost:18765"].includes(savedApi)
     ? DEFAULT_API
     : savedApi
-  const savedPoll = typeof parsed.pollMs === "number" ? parsed.pollMs : 3000
+  const savedPoll = typeof parsed.pollMs === "number" ? parsed.pollMs : 12000
+  const migrationDone = localStorage.getItem("zflag-stability-autoapply-reset-v30") === "1"
+  if (!migrationDone) localStorage.setItem("zflag-stability-autoapply-reset-v30", "1")
   return {
     apiUrl: migratedApi,
     autoRefresh: typeof parsed.autoRefresh === "boolean" ? parsed.autoRefresh : true,
     // 1–1.8 second full-status polling caused unnecessary whole-app React
     // renders on large 1,000+ flag configs. Keep the minimum at 3 seconds.
-    pollMs: Math.max(3000, savedPoll),
+    pollMs: Math.max(10000, savedPoll),
     animations: typeof parsed.animations === "boolean" ? parsed.animations : true,
     themeMode: parsed.themeMode === "light" ? "light" : "dark",
     accentPreset: ["default", "emerald", "violet", "rose", "cyan", "amber"].includes(String(parsed.accentPreset)) ? parsed.accentPreset as AccentPreset : "default",
@@ -347,7 +349,7 @@ function loadSettings(): SettingsState {
     compactNotifications: typeof parsed.compactNotifications === "boolean" ? parsed.compactNotifications : true,
     editorFontSize: typeof parsed.editorFontSize === "number" ? parsed.editorFontSize : 12.5,
     editorWordWrap: typeof parsed.editorWordWrap === "boolean" ? parsed.editorWordWrap : false,
-    autoApplyEnabled: typeof parsed.autoApplyEnabled === "boolean" ? parsed.autoApplyEnabled : false,
+    autoApplyEnabled: migrationDone && parsed.autoApplyEnabled === true,
     autoApplyConfigId: typeof parsed.autoApplyConfigId === "string" ? parsed.autoApplyConfigId : "",
   }
 }
@@ -593,6 +595,7 @@ export default function App() {
   const codeMirrorRef = useRef<EditorView | null>(null)
   const backendChildRef = useRef<{ kill?: () => Promise<void> } | null>(null)
   const backendStartingRef = useRef(false)
+  const applyInProgressRef = useRef(false)
   const backendMissesRef = useRef(0)
   const statusRefreshingRef = useRef(false)
   const trayActionRef = useRef<(action: string) => void>(() => {})
@@ -1005,9 +1008,28 @@ export default function App() {
   async function startOrRestartDesktopBackend(reason = "startup") {
     if (!isDesktop || backendStartingRef.current) return false
     backendStartingRef.current = true
-    const bridgeUrl = reason.startsWith("browser-mode") ? DEFAULT_API : settings.apiUrl.replace(/\/$/, "")
+    // All desktop instances use the isolated stability backend port.
+    const bridgeUrl = DEFAULT_API
     try {
+      if (reason === "startup") {
+        try {
+          const health = await fetch(`${bridgeUrl}/health`, { cache: "no-store", signal: AbortSignal.timeout(1500) })
+          if (health.ok) {
+            const data = await health.json() as { backendVersion?: string }
+            if (data.backendVersion === "6.5-stable") {
+              desktopSidecarStarted = true
+              return true
+            }
+            showToast("ZFLAG port occupied", "Another application is using the stability backend port. Close the other copy of ZFLAG Stable Test first.", "warning")
+            return false
+          }
+        } catch { /* port is free; start our backend below */ }
+      }
       if (reason !== "startup") {
+        if (!backendChildRef.current) {
+          showToast("Restart skipped", "This window does not own the backend process. Close other ZFLAG Stable Test windows instead.", "warning")
+          return false
+        }
         try {
           await fetch(`${bridgeUrl}/shutdown`, {
             method: "POST",
@@ -1072,10 +1094,8 @@ export default function App() {
       setStatus((current) => current.connected || current.logs.length ? emptyStatus : current)
       setBackendReachable((current) => current ? false : current)
       backendMissesRef.current += 1
-      if (isDesktop && backendMissesRef.current >= 3 && !backendStartingRef.current) {
-        backendMissesRef.current = 0
-        void startOrRestartDesktopBackend("watchdog")
-      }
+      // Do not auto-kill/restart another ZFLAG instance during a brief CPU spike.
+      // The user can restart the backend from Settings when needed.
       if (!quiet) showToast("Local backend unavailable", isDesktop ? "ZFLAG will try to restart the local bridge automatically." : "Start the desktop app or browser bridge.", "warning")
       return false
     } finally {
@@ -1121,7 +1141,12 @@ export default function App() {
       showToast("Nothing to apply", "The configuration is empty.", "info")
       return false
     }
-    if (source === "native") setNativeFeedback("Checking Roblox process and applying flags…")
+    if (applyInProgressRef.current) {
+      showToast("Operation already running", "Wait for the previous request to finish.", "warning")
+      return false
+    }
+    applyInProgressRef.current = true
+    if (source === "native") setNativeFeedback("Checking Roblox without touching its memory…")
     else setSaveFeedback(null)
     setBusy(true)
     try {
@@ -1130,6 +1155,7 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ flags, source }),
+        signal: AbortSignal.timeout(source === "native" ? 8000 : 20000),
       })
       const raw = await response.text()
       let result: { ok?: boolean; applied?: number; errors?: number; error?: string | null; unsupported?: number; invalid?: number; message?: string; rollbackId?: string | null; results?: Array<{ name?: string; ok?: boolean; message?: string; value?: unknown }> } = {}
@@ -1172,7 +1198,25 @@ export default function App() {
       showToast(source === "native" ? "Inject failed" : "Save failed", error instanceof Error ? error.message : "Could not reach local backend", "error")
       return false
     } finally {
+      applyInProgressRef.current = false
       setBusy(false)
+    }
+  }
+
+  async function probeRobloxSafely() {
+    try {
+      const response = await fetch(`${settings.apiUrl}/native-probe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+        signal: AbortSignal.timeout(5000),
+      })
+      const result = await response.json() as { ok?: boolean; found?: boolean; pid?: number; message?: string; error?: string }
+      const message = result.message || result.error || "Unknown detection result"
+      setNativeFeedback(message)
+      showToast(result.found ? "Roblox Player detected" : "Roblox Player not detected", message, result.found ? "success" : "warning")
+    } catch (error) {
+      showToast("Roblox check unavailable", error instanceof Error ? error.message : "Backend did not respond", "warning")
     }
   }
 
@@ -1409,7 +1453,7 @@ export default function App() {
     if (browserModeBusy) return
     setBrowserModeBusy(true)
 
-    // The bundled desktop sidecar always owns 127.0.0.1:18765. Do not let a
+    // The bundled desktop sidecar always owns 127.0.0.1:18766. Do not let a
     // custom API URL in Settings accidentally break the Browser button.
     const baseUrl = (isDesktop ? DEFAULT_API : settings.apiUrl).replace(/\/$/, "") || DEFAULT_API
     const browserUrl = `${baseUrl}/app/`
@@ -2007,10 +2051,9 @@ export default function App() {
         backendMissesRef.current = 0
       } catch {
         backendMissesRef.current += 1
-        if (backendMissesRef.current >= 3) {
-          backendMissesRef.current = 0
-          void startOrRestartDesktopBackend("watchdog")
-        }
+        // Report offline via status polling. Do not kill and respawn the bridge
+        // while Roblox is busy or multiple ZFLAG windows are open.
+        if (backendMissesRef.current > 3) backendMissesRef.current = 3
       }
     }, 9000)
     return () => { stopped = true; window.clearInterval(timer) }
@@ -2314,7 +2357,8 @@ export default function App() {
             <button type="button" disabled={preflightBusy || !parsed.ok || !status.ready} title={!parsed.ok ? "Fix invalid JSON first" : !status.ready ? "Local allowlist is not ready yet" : "Check Roblox local allowlist before saving"} onClick={() => void runPreflight()}><ScanSearch className="size-3.5" /> {preflightBusy ? "Checking…" : "Preflight"}</button>
             <button type="button" disabled={!status.rollbackDepth} onClick={() => void rollbackLastApply()} title={status.rollbackDepth ? "Restore values captured before the last successful Apply" : "No config backup is available yet"}><RotateCcw className="size-3.5" /> Rollback</button>
             <button type="button" onClick={() => setSaveDialog({ mode: "preset", value: activeTab?.name.replace(/\.json$/i, "") ?? "My preset" })}><WandSparkles className="size-3.5" /> Preset</button>
-            <Button className="zflag-action zflag-action-primary" size="sm" disabled={busy || !parsed.ok} variant="outline" title="INJECT • Attempts to apply FastFlags to the running Roblox process using the original C++ native engine. Experimental; no memory rollback." onClick={() => void applyFlags("native")}>
+            <button type="button" className="zflag-probe-button" title="Check for Roblox Player without opening or scanning game memory" onClick={() => void probeRobloxSafely()}><ScanSearch className="size-3.5" /> Check Roblox</button>
+            <Button className="zflag-action zflag-action-primary" size="sm" disabled={busy || !parsed.ok} variant="outline" title="Stability build: checks Roblox process safely. Raw memory injection is temporarily paused because the legacy scanner can freeze Roblox." onClick={() => void applyFlags("native")}>
               {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} {busy ? "Injecting…" : "Inject"}
             </Button>
             <Button className="zflag-action zflag-action-secondary" size="sm" disabled={busy || !parsed.ok || !status.ready} variant="outline" title="SAVE ALLOWED • Writes only Roblox-allowlisted flags to the local settings file. Restart Roblox to load them." onClick={() => void applyFlags("manual")}>
