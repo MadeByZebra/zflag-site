@@ -81,7 +81,7 @@ pub fn run() {
             let show_item = MenuItemBuilder::with_id("show", "Show ZFLAG").build(app)?;
             let editor_item = MenuItemBuilder::with_id("editor", "Open Editor").build(app)?;
             let agent_item = MenuItemBuilder::with_id("agent", "Open AI Agent").build(app)?;
-            let apply_item = MenuItemBuilder::with_id("apply", "Apply Current Config").build(app)?;
+            let apply_item = MenuItemBuilder::with_id("apply", "Save Allowed Config").build(app)?;
             let refresh_item = MenuItemBuilder::with_id("refresh", "Refresh Status").build(app)?;
             let quit_item = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
             let menu = MenuBuilder::new(app)

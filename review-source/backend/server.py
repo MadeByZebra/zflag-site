@@ -30,6 +30,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Optional
 
+from zflag_supported import ALLOWED, REFERENCE, preflight as local_preflight, save_eligible, restore, target_install
+
 TARGET = "RobloxPlayerBeta.exe"
 HOST = "127.0.0.1"
 PORT = 18765
@@ -512,80 +514,31 @@ class Runtime:
             )
             self.logs = self.logs[-250:]
 
-    def acquire_process(self) -> bool:
-        with self.lock:
-            pid = find_pid(TARGET)
-            if not pid:
-                self.pid = None
-                self.base = 0
-                if self.handle:
-                    try:
-                        _k32.CloseHandle(self.handle)
-                    except Exception:
-                        pass
-                self.handle = 0
-                return False
-            if self.pid == pid and self.handle and self.base:
-                return True
-            base = get_module_base(pid, TARGET)
-            access = PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION
-            handle = _k32.OpenProcess(access, False, pid) if base else 0
-            if not base or not handle:
-                return False
-            if self.handle:
-                try:
-                    _k32.CloseHandle(self.handle)
-                except Exception:
-                    pass
-            self.pid = pid
-            self.base = int(base)
-            self.handle = int(handle)
-            self.log(f"Roblox process acquired (PID {pid})", "success")
-            return True
+def acquire_process(self) -> bool:
+    # Detect Roblox independently of memory/anti-cheat privileges.
+    pid=find_pid(TARGET)
+    with self.lock:
+        old=self.pid
+        self.pid=pid
+        self.handle=0
+        self.base=0
+    if pid and pid!=old:
+        self.log(f"Roblox running (PID {pid}); local settings require a restart", "success")
+    return pid is not None
 
-    def refresh_offsets(self) -> bool:
-        with self.lock:
-            if self.fetching:
-                return False
-            self.fetching = True
-        try:
-            self.log("Refreshing offset sources…", "info")
-            for url in _URLS:
-                host = url.split("/")[2]
-                body = _fetch_one(url)
-                if not body or len(body) <= 2048:
-                    self.log(f"Offset source failed: {host}", "warning")
-                    continue
-
-                parsed = parse_hpp(body)
-                count = len(parsed.flags)
-                # Do not mark a malformed HTML/error page as a valid offset table.
-                if count < 50:
-                    self.log(f"Rejected {host}: only {count} usable flags parsed", "warning")
-                    continue
-                if not any(name for name in parsed.flags):
-                    self.log(f"Rejected {host}: parsed flag table was empty", "warning")
-                    continue
-
-                with self.lock:
-                    self.offsets = parsed
-                    self.ready = True
-                    self.offset_source = url
-                    self.offset_source_host = host
-                    self.offset_fetched_at = time.time()
-                    self.offset_bytes = len(body)
-                    self.offset_validation = f"validated {count:,} flags"
-                self.log(f"Loaded {count:,} validated flags from {host}", "success")
-                return True
-
-            with self.lock:
-                self.ready = False
-                self.offset_validation = "all sources failed validation"
-            self.log("All offset sources failed validation", "error")
-            return False
-        finally:
-            with self.lock:
-                self.fetching = False
+def refresh_offsets(self) -> bool:
+    # Local configuration does not use version-specific memory offsets.
+    with self.lock:
+        self.offsets=None
+        self.ready=True
+        self.fetching=False
+        self.offset_source=REFERENCE
+        self.offset_source_host="Roblox Developer Forum"
+        self.offset_fetched_at=time.time()
+        self.offset_bytes=0
+        self.offset_validation=f"{len(ALLOWED)} published locally configurable flags"
+    self.log(f"Loaded {len(ALLOWED)} officially allowed local settings", "success")
+    return True
 
     def clear_logs(self) -> None:
         with self.lock:
@@ -601,8 +554,8 @@ class Runtime:
                 "base": f"0x{self.base:X}" if self.base else None,
                 "ready": self.ready,
                 "fetching": self.fetching,
-                "flagsLoaded": len(self.offsets.flags) if self.offsets else 0,
-                "clientVersion": self.offsets.version if self.offsets else None,
+                "flagsLoaded": len(ALLOWED),
+                "clientVersion": target_install(self.pid).name if target_install(self.pid) else None,
                 "offsetSource": self.offset_source,
                 "offsetSourceHost": self.offset_source_host,
                 "offsetFetchedAt": self.offset_fetched_at,
@@ -611,185 +564,43 @@ class Runtime:
                 "backendPid": os.getpid(),
                 "backendUptimeSec": max(0, int(time.time() - self.started_at)),
                 "rollbackDepth": len(self.rollback_stack),
-                "backendVersion": "6.3",
+                "backendVersion": "6.4-local",
                 "browserUiBundled": os.path.isfile(os.path.join(_app_dist_root(), "index.html")),
                 "browserUrl": f"http://{HOST}:{PORT}/app/",
                 "logs": list(self.logs[-100:]),
             }
 
-    def preflight(self, flags: dict[str, object]) -> dict[str, object]:
+def preflight(self, flags: dict[str, object]) -> dict[str, object]:
+    return local_preflight(flags)
+
+def apply(self, flags: dict[str, object], source: str = "manual") -> dict[str, object]:
+    # Save only Roblox-supported local overrides; never write game memory.
+    pid=find_pid(TARGET)
+    try: result=save_eligible(flags,pid)
+    except (OSError, ValueError, TypeError) as exc:
+        self.log(f"Local config save failed: {exc}", "error")
+        return {"ok":False,"error":f"Failed to save ClientAppSettings.json: {exc}"}
+    if result.get("ok"):
+        snapshot=result.pop("rollback")
+        rollback_id=str(int(time.time()*1000))
         with self.lock:
-            offsets = self.offsets
-            ready = self.ready
-        if not ready or not offsets:
-            return {"ok": False, "error": "Offsets are not loaded yet."}
-        if not isinstance(flags, dict) or not flags:
-            return {"ok": False, "error": "No flags supplied."}
+            self.rollback_stack.append({"id":rollback_id,"snapshot":snapshot})
+            self.rollback_stack=self.rollback_stack[-20:]
+        result["rollbackId"]=rollback_id
+        self.log(f"Saved {result['applied']} local settings; {result['errors']} unsupported/invalid; restart Roblox", "success")
+    else:self.log(str(result.get("error","No compatible flags")),"warning")
+    return result
 
-        supported = unsupported = invalid = 0
-        entries: list[dict[str, object]] = []
-        for full_name, raw_value in flags.items():
-            name = str(full_name)
-            bare = strip_prefix(name)
-            rva = offsets.flags.get(bare)
-            ftype = type_from_name(name)
-            valid, message, normalized = validate_flag_value(ftype, raw_value)
-            if rva is None:
-                unsupported += 1
-                entries.append({
-                    "name": name, "value": raw_value, "type": ftype,
-                    "supported": False, "valid": valid, "status": "unsupported",
-                    "message": "not in offset file", "offset": None,
-                })
-                continue
-            if not valid:
-                invalid += 1
-                entries.append({
-                    "name": name, "value": raw_value, "type": ftype,
-                    "supported": True, "valid": False, "status": "invalid",
-                    "message": message, "offset": f"0x{rva:X}",
-                })
-                continue
-            supported += 1
-            entries.append({
-                "name": name, "value": raw_value, "normalized": normalized,
-                "type": ftype, "supported": True, "valid": True,
-                "status": "supported", "message": message, "offset": f"0x{rva:X}",
-            })
-
-        return {
-            "ok": True,
-            "total": len(entries),
-            "supported": supported,
-            "unsupported": unsupported,
-            "invalid": invalid,
-            "entries": entries,
-            "source": self.offset_source,
-            "clientVersion": offsets.version,
-        }
-
-    def apply(self, flags: dict[str, object], source: str = "manual") -> dict[str, object]:
-        if not self.acquire_process():
-            self.log("Roblox is not running or could not be opened", "error")
-            return {"ok": False, "error": "Roblox is not running or could not be opened."}
-        with self.lock:
-            offsets = self.offsets
-            ready = self.ready
-            handle = self.handle
-            base = self.base
-            pid = self.pid
-        if not ready or not offsets:
-            return {"ok": False, "error": "Offsets are not loaded yet."}
-        if not isinstance(flags, dict) or not flags:
-            return {"ok": False, "error": "No flags supplied."}
-
-        good = 0
-        errors = 0
-        results: list[dict[str, object]] = []
-        rollback_entries: list[dict[str, object]] = []
-        self.log(f"Applying {len(flags)} flag(s) · {source}", "info")
-        for full_name, raw_value in flags.items():
-            name = str(full_name)
-            bare = strip_prefix(name)
-            rva = offsets.flags.get(bare)
-            if rva is None:
-                errors += 1
-                results.append({"name": name, "ok": False, "message": "not in offset file", "value": raw_value, "status": "unsupported"})
-                self.log(f"{name}: not in offset file", "error")
-                continue
-
-            ftype = type_from_name(name)
-            valid, validation_message, desired = validate_flag_value(ftype, raw_value)
-            if not valid:
-                errors += 1
-                results.append({"name": name, "ok": False, "message": validation_message, "value": raw_value, "status": "invalid"})
-                self.log(f"{name}: {validation_message}", "error")
-                continue
-
-            abs_addr = base + rva
-            previous = read_flag_raw(handle, abs_addr, ftype)
-            ok, message = write_flag(handle, abs_addr, ftype, desired)
-            results.append({"name": name, "ok": ok, "message": message, "value": raw_value, "type": ftype, "offset": f"0x{rva:X}"})
-            if ok:
-                good += 1
-                if previous is not None:
-                    rollback_entries.append({
-                        "name": name, "addr": abs_addr, "type": ftype, "data": previous.hex(),
-                    })
-                self.log(f"{name} = {desired}", "success")
-            else:
-                errors += 1
-                self.log(f"{name}: {message}", "error")
-
-        rollback_id = None
-        if rollback_entries and pid:
-            rollback_id = f"rb-{int(time.time()*1000)}"
-            with self.lock:
-                self.rollback_stack.insert(0, {
-                    "id": rollback_id, "pid": pid, "createdAt": time.time(),
-                    "source": source, "entries": rollback_entries,
-                })
-                self.rollback_stack = self.rollback_stack[:20]
-
-        if good and errors:
-            self.log(f"Finished: {good} applied, {errors} skipped/failed", "warning")
-        elif good:
-            self.log(f"Finished: {good} applied, 0 errors", "success")
-        else:
-            self.log(f"Finished: 0 applied, {errors} errors", "error")
-
-        return {
-            "ok": good > 0,
-            "complete": good > 0 and errors == 0,
-            "partial": good > 0 and errors > 0,
-            "applied": good,
-            "errors": errors,
-            "results": results,
-            "rollbackId": rollback_id,
-            "rollbackCaptured": len(rollback_entries),
-            "error": None if good > 0 else "No flags were applied.",
-        }
-
-    def rollback_last(self) -> dict[str, object]:
-        if not self.acquire_process():
-            return {"ok": False, "error": "Roblox is not running or could not be opened."}
-        with self.lock:
-            if not self.rollback_stack:
-                return {"ok": False, "error": "There is no captured Apply to roll back."}
-            snapshot = self.rollback_stack[0]
-            current_pid = self.pid
-            handle = self.handle
-        if snapshot.get("pid") != current_pid:
-            return {"ok": False, "error": "Roblox restarted; the previous memory snapshot is no longer safe to restore."}
-
-        restored = failed = 0
-        results: list[dict[str, object]] = []
-        for entry in snapshot.get("entries", []):
-            try:
-                raw = bytes.fromhex(str(entry.get("data") or ""))
-                addr = int(entry.get("addr") or 0)
-                ok = bool(raw) and addr > 0 and _write_raw(handle, addr, raw)
-            except Exception:
-                ok = False
-            results.append({"name": entry.get("name"), "ok": ok})
-            if ok:
-                restored += 1
-            else:
-                failed += 1
-
-        if restored:
-            with self.lock:
-                if self.rollback_stack and self.rollback_stack[0].get("id") == snapshot.get("id"):
-                    self.rollback_stack.pop(0)
-            self.log(f"Rollback restored {restored} flag(s), {failed} failed", "success" if not failed else "warning")
-        return {
-            "ok": restored > 0, "restored": restored, "errors": failed,
-            "results": results, "rollbackId": snapshot.get("id"),
-            "error": None if restored > 0 else "Rollback did not restore any values.",
-        }
-
-
-runtime = Runtime()
+def rollback_last(self) -> dict[str, object]:
+    with self.lock:
+        if not self.rollback_stack:
+            return {"ok":False,"error":"No local configuration backup available"}
+        entry=self.rollback_stack[-1]
+    try:restore(entry["snapshot"])
+    except OSError as exc:return {"ok":False,"error":str(exc)}
+    with self.lock:self.rollback_stack.pop()
+    self.log("Restored previous local ClientAppSettings.json", "success")
+    return {"ok":True,"restored":True}
 
 
 def _clean_agent_base_url(raw: object) -> str:
@@ -1043,7 +854,7 @@ threading.Thread(target=init_worker, daemon=True).start()
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "FFlagStudio/6.3"
+    server_version = "FFlagStudio/6.4"
 
     def _cors(self) -> None:
         origin = self.headers.get("Origin", "")
@@ -1131,7 +942,7 @@ class Handler(BaseHTTPRequestHandler):
             bundle = _browser_bundle_check()
             self._json(200, {
                 "ok": True,
-                "backendVersion": "6.3",
+                "backendVersion": "6.4-local",
                 "browserUi": bool(bundle.get("browserUi")),
                 "browserUrl": f"http://{HOST}:{PORT}/app/",
             })
@@ -1178,7 +989,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if self.path == "/refresh-offsets":
             threading.Thread(target=runtime.refresh_offsets, daemon=True).start()
-            self._json(202, {"ok": True, "message": "Offset refresh started"})
+            self._json(202, {"ok": True, "message": "Local allowlist refreshed"})
             return
         if self.path == "/clear-logs":
             runtime.clear_logs()
@@ -1190,7 +1001,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200 if ok else 500, {"ok": ok, "url": url, "error": None if ok else "Could not open the default browser"})
             return
         if self.path == "/diagnostics":
-            self._json(200, {"ok": True, "status": runtime.status(), "offsetUrls": list(_URLS)})
+            self._json(200, {"ok": True, "status": runtime.status(), "allowlistReference": REFERENCE})
             return
         if self.path == "/shutdown":
             self._json(200, {"ok": True, "message": "Backend shutting down"})

@@ -721,7 +721,7 @@ export default function App() {
       { id: "settings", label: "Open Settings", hint: "Navigate", run: () => changeView("settings") },
       { id: "new", label: "New configuration", hint: "Create", run: () => newTab() },
       { id: "import", label: "Import JSON file", hint: "File", run: () => fileInput.current?.click() },
-      { id: "refresh", label: "Refresh offsets", hint: "Runtime", run: () => void refreshOffsets() },
+      { id: "refresh", label: "Refresh allowlist", hint: "Runtime", run: () => void refreshOffsets() },
       { id: "preflight", label: "Run Preflight", hint: "Validate current config", run: () => { changeView("editor"); void runPreflight() } },
       { id: "compare", label: "Compare configurations", hint: "Diff", run: () => { setCompareLeftId("current"); setCompareRightId(savedConfigs[0]?.id ?? "current"); setCompareOpen(true) } },
       { id: "rollback", label: "Rollback last Apply", hint: "Restore captured values", run: () => void rollbackLastApply() },
@@ -1145,13 +1145,13 @@ export default function App() {
       }
       setApplyHistory((current) => [snapshot, ...current].slice(0, 50))
       if (applied > 0) {
-        showToast(errors ? "Applied with skips" : "Configuration applied", errors ? `${applied} applied · ${errors} skipped/failed` : `${applied} flag${applied === 1 ? "" : "s"} applied`, errors ? "warning" : "success")
+        showToast(errors ? "Saved with skips" : "Allowed settings saved", errors ? `${applied} saved · ${errors} ignored/invalid` : `${applied} allowed flag${applied === 1 ? "" : "s"} saved; restart Roblox`, errors ? "warning" : "success")
         await refreshStatus(settings.apiUrl, true)
         return true
       }
-      throw new Error(result.error || (response.ok ? "No flags were applied" : `Apply request failed (HTTP ${response.status})`))
+      throw new Error(result.error || (response.ok ? "No allowed flags could be saved" : `Apply request failed (HTTP ${response.status})`))
     } catch (error) {
-      showToast("Apply failed", error instanceof Error ? error.message : "Could not reach local backend", "error")
+      showToast("Save failed", error instanceof Error ? error.message : "Could not reach local backend", "error")
       return false
     } finally {
       setBusy(false)
@@ -2145,7 +2145,7 @@ export default function App() {
         <div className="topbar-right no-drag">
           <Badge className={cn("runtime-pill", status.connected && "connected")}>
             <span className={cn("status-dot", status.connected && "online")} />
-            {status.connected ? `PID ${status.pid}` : "Roblox offline"}
+            {status.connected ? `PID ${status.pid}` : "Roblox not running"}
           </Badge>
           {isDesktop && (
             <div className="window-controls">
@@ -2276,11 +2276,11 @@ export default function App() {
           </div>
           <div className="toolbar-right">
             <button type="button" onClick={() => { setCompareLeftId("current"); setCompareRightId(savedConfigs[0]?.id ?? "current"); setCompareOpen(true) }}><GitCompareArrows className="size-3.5" /> Compare</button>
-            <button type="button" disabled={preflightBusy || !parsed.ok || !status.ready} title={!parsed.ok ? "Fix invalid JSON first" : !status.ready ? "Offsets are not ready yet" : "Validate flags before Apply"} onClick={() => void runPreflight()}><ScanSearch className="size-3.5" /> {preflightBusy ? "Checking…" : "Preflight"}</button>
-            <button type="button" disabled={!status.rollbackDepth} onClick={() => void rollbackLastApply()} title={status.rollbackDepth ? "Restore values captured before the last successful Apply" : "No rollback snapshot is available yet"}><RotateCcw className="size-3.5" /> Rollback</button>
+            <button type="button" disabled={preflightBusy || !parsed.ok || !status.ready} title={!parsed.ok ? "Fix invalid JSON first" : !status.ready ? "Local allowlist is not ready yet" : "Check Roblox local allowlist before saving"} onClick={() => void runPreflight()}><ScanSearch className="size-3.5" /> {preflightBusy ? "Checking…" : "Preflight"}</button>
+            <button type="button" disabled={!status.rollbackDepth} onClick={() => void rollbackLastApply()} title={status.rollbackDepth ? "Restore values captured before the last successful Apply" : "No config backup is available yet"}><RotateCcw className="size-3.5" /> Rollback</button>
             <button type="button" onClick={() => setSaveDialog({ mode: "preset", value: activeTab?.name.replace(/\.json$/i, "") ?? "My preset" })}><WandSparkles className="size-3.5" /> Preset</button>
-            <Button size="sm" disabled={busy || !parsed.ok || !status.connected || !status.ready} onClick={() => void applyFlags("manual")}>
-              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} {busy ? "Applying…" : "Apply"}
+            <Button size="sm" disabled={busy || !parsed.ok || !status.ready} onClick={() => void applyFlags("manual")}>
+              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} {busy ? "Saving…" : "Save Allowed"}
             </Button>
           </div>
         </div>
@@ -2294,7 +2294,7 @@ export default function App() {
         </div>
         {lastApplyStats.total > 0 && <div className="apply-progress-row">
           <div className="apply-progress-track"><span style={{ width: `${lastApplyStats.rate}%` }} /></div>
-          <div className="apply-progress-labels"><b>{lastApplyStats.rate}% success</b><span>{lastApplyStats.success} applied</span><span>{lastApplyStats.failed} failed</span></div>
+          <div className="apply-progress-labels"><b>{lastApplyStats.rate}% saved</b><span>{lastApplyStats.success} saved</span><span>{lastApplyStats.failed} failed</span></div>
         </div>}
         <div className="editor-surface" key={activeTab?.id} style={{ ['--editor-font-size' as string]: `${settings.editorFontSize}px` }}>
           <div className="editor-meta">
@@ -2622,7 +2622,7 @@ export default function App() {
 
         {settingsSection === "keybinds" && (
           <><div className="settings-section"><div className="settings-title">KEYBINDS</div><div className="keybind-list">
-            {[ ["Command palette","Ctrl + K"], ["Save configuration","Ctrl + S"], ["Apply current profile","Ctrl + Enter"], ["New configuration","Ctrl + N"], ["Format JSON","Ctrl + Shift + F"], ["Open AI Agent","Ctrl + L"] ].map(([label, shortcut]) => <div className="keybind-row" key={label}><span>{label}</span><kbd>{shortcut}</kbd></div>)}
+            {[ ["Command palette","Ctrl + K"], ["Save configuration","Ctrl + S"], ["Save allowed flags from current profile","Ctrl + Enter"], ["New configuration","Ctrl + N"], ["Format JSON","Ctrl + Shift + F"], ["Open AI Agent","Ctrl + L"] ].map(([label, shortcut]) => <div className="keybind-row" key={label}><span>{label}</span><kbd>{shortcut}</kbd></div>)}
           </div></div></>
         )}
 
