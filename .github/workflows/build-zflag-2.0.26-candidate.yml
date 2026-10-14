@@ -1,14 +1,14 @@
-name: Build ZFLAG 2.0.26 experimental Windows installer
+name: Build ZFLAG 2.0.27 experimental Windows installer
 on:
   push:
     paths:
-      - ".github/workflows/build-zflag-2.0.26-candidate.yml"
+      - ".github/workflows/build-zflag-2.0.27-candidate.yml"
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   build:
-    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    if: github.ref_name == 'zflag-native-engine-2.0.27'
     runs-on: windows-latest
     timeout-minutes: 50
     steps:
@@ -151,7 +151,7 @@ jobs:
           @'
           import pathlib,json
           root=pathlib.Path("zflag-source")
-          version="2.0.26"
+          version="2.0.27"
           for path in root.rglob("*"):
               if path.is_file() and path.suffix.lower() in (".json",".toml",".rs",".tsx",".ts",".js",".mjs",".html",".txt",".md"):
                   if "node_modules" in path.parts:continue
@@ -172,6 +172,31 @@ jobs:
           print("Windows NSIS installer configured for",version)
           '@ | Set-Content -Encoding utf8 prepare.py
           python prepare.py
+      - name: Generate matching ZFLAG desktop, shortcut, installer and taskbar icons
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check Pillow
+          @'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          out=Path("zflag-source/src-tauri/icons")
+          out.mkdir(parents=True, exist_ok=True)
+          # Matches review-source/src/assets/zflag-logo.svg rather than a generic Tauri icon.
+          n=1024
+          image=Image.new("RGBA",(n,n),(0,0,0,0))
+          draw=ImageDraw.Draw(image)
+          scale=n/128
+          rc=lambda x: int(round(x*scale))
+          draw.rounded_rectangle((rc(10),rc(10),rc(118),rc(118)),radius=rc(28),fill="#0a0d12",outline="#222835",width=rc(4))
+          zpath=[(34,34),(94,34),(94,44),(52,84),(94,84),(94,94),(34,94),(34,84),(76,44),(34,44)]
+          draw.polygon([(rc(x),rc(y)) for x,y in zpath],fill="#e9edf4")
+          draw.line((rc(34),rc(100),rc(94),rc(100)),fill="#2f3a4f",width=rc(4))
+          for size,name in [(32,"32x32.png"),(128,"128x128.png"),(256,"128x128@2x.png")]:
+              image.resize((size,size),Image.Resampling.LANCZOS).save(out/name)
+          image.save(out/"icon.ico",format="ICO",sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
+          print("Generated consistent ZFLAG icon from the existing brand mark")
+          '@ | Set-Content -Encoding utf8 generate-icons.py
+          python generate-icons.py
       - name: Install JavaScript dependencies
         working-directory: zflag-source
         shell: pwsh
@@ -190,43 +215,23 @@ jobs:
         working-directory: zflag-source
         shell: pwsh
         run: npm run desktop:build -- --bundles nsis
-      - name: Verify binaries and stage website update
+      - name: Stage Windows test installer (do not publish website)
         shell: pwsh
         run: |
           @'
           import pathlib,shutil,hashlib
           candidates=list(pathlib.Path("zflag-source/src-tauri/target/release/bundle/nsis").glob("*.exe"))
-          if not candidates:raise SystemExit("Windows installer was not produced")
-          chosen=max(candidates,key=lambda p:p.stat().st_mtime)
-          dest=pathlib.Path("ZFLAG-Setup-v2.0.26.exe")
-          shutil.copy2(chosen,dest)
-          if dest.stat().st_size<5000000:raise SystemExit("Unexpectedly small installer")
-          print("Verified installer",dest.stat().st_size,"bytes",hashlib.sha256(dest.read_bytes()).hexdigest())
-          for filename in ("index.html","README.md","DEPLOY-TO-RENDER.txt","render.yaml"):
-              path=pathlib.Path(filename)
-              if not path.is_file():continue
-              content=path.read_text(encoding="utf-8")
-              content=content.replace("ZFLAG-Setup-v2.0.23.exe","ZFLAG-Setup-v2.0.26.exe")
-              content=content.replace("2.0.23","2.0.26")
-              content=content.replace("2.0.25","2.0.26")
-              content=content.replace("2.0.24","2.0.26")
-              if filename=="index.html" and "id=\"compatibility-note-2026\"" not in content:
-                  note='''<section id="compatibility-note-2026" class="section" style="padding:38px 0" aria-label="Roblox FastFlag compatibility"><div class="wrap" style="border:1px solid var(--line);padding:22px;border-radius:10px;background:var(--panel)"><div class="kicker">Roblox compatibility · October 2026</div><p style="font-size:14px;line-height:1.6;color:var(--muted)">ZFLAG 2.0.26 detects Roblox without requesting memory-writing access, checks large JSON presets, and saves <strong>Roblox-allowlisted local FastFlags</strong> to ClientAppSettings.json. Restart Roblox after applying. Roblox ignores non-allowlisted flags. The optional Live Inject button is experimental and writes Roblox memory. Current-game compatibility is not verified.</p><a class="text-link" href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569/">Roblox official policy</a></div></section>'''
-                  content=content.replace("</main>",note+"\n</main>",1)
-              path.write_text(content,encoding="utf-8")
-          '@ | Set-Content -Encoding utf8 publish.py
-          python publish.py
-      - name: Upload verified Windows installer
+          if not candidates:raise SystemExit("NSIS installer was not produced")
+          source=max(candidates,key=lambda path:path.stat().st_mtime)
+          target=pathlib.Path("ZFLAG-Setup-v2.0.27-TEST.exe")
+          shutil.copy2(source,target)
+          if target.stat().st_size<5_000_000: raise SystemExit("Installer unexpectedly small")
+          print("TEST ONLY",target,target.stat().st_size,"bytes",hashlib.sha256(target.read_bytes()).hexdigest())
+          '@ | Set-Content -Encoding utf8 verify-installer.py
+          python verify-installer.py
+      - name: Upload unverified Windows test installer
         uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-2.0.26-Windows
-          path: ZFLAG-Setup-v2.0.26.exe
+          name: ZFLAG-v2.0.27-Windows-TEST
+          path: ZFLAG-Setup-v2.0.27-TEST.exe
           if-no-files-found: error
-      - name: Publish new installer and website references after successful tests
-        shell: pwsh
-        run: |
-          git config user.name "ZFLAG Build Bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add ZFLAG-Setup-v2.0.26.exe index.html README.md DEPLOY-TO-RENDER.txt render.yaml
-          git commit -m "Publish tested ZFLAG 2.0.26 supported-FFlag compatibility build"
-          git push origin HEAD:zflag-native-engine-2.0.26
