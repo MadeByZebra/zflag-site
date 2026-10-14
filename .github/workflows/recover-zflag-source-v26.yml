@@ -1,0 +1,53 @@
+name: ZFLAG 2.0.26 source recovery (review branch only)
+on:
+  push:
+    paths:
+      - ".github/workflows/recover-zflag-source-v26.yml"
+permissions:
+  contents: write
+jobs:
+  recover:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Recover historic ZFLAG source and stage only application source
+        shell: pwsh
+        run: |
+          @'
+          import subprocess,io,zipfile,struct,pathlib,shutil
+          sha="5eac1d1773099ff5e86dcb89b9796eab674b35a2"
+          blob=subprocess.check_output(["git","show",f"{sha}:ZFLAG-Setup-v2.0.22.exe"])
+          eocd=blob.rfind(b"PK\\x05\\x06")
+          if eocd<0:raise SystemExit("Original source archive missing")
+          sig,disk,cd_disk,n_disk,n_total,cd_size,cd_offset,comment_len=struct.unpack_from("<4s4H2LH",blob,eocd)
+          start=eocd-cd_size-cd_offset
+          root=pathlib.Path("zflag-temp")
+          with zipfile.ZipFile(io.BytesIO(blob[start:eocd+22+comment_len])) as archive:
+              for item in archive.infolist():
+                  if not (root/item.filename).resolve().is_relative_to(root.resolve()):
+                      raise SystemExit("Unsafe archive entry")
+              archive.extractall(root)
+          dest=pathlib.Path("review-source")
+          for relative in ("src","backend/server.py","backend/__init__.py","src-tauri/src","src-tauri/tauri.conf.json","package.json"):
+              p=root/relative
+              if not p.exists():continue
+              d=dest/relative
+              d.parent.mkdir(parents=True,exist_ok=True)
+              if p.is_dir():shutil.copytree(p,d,dirs_exist_ok=True,ignore=shutil.ignore_patterns("node_modules","target","*.exe","*.dll"))
+              else:shutil.copy2(p,d)
+          print("Extracted files:",len(list(dest.rglob("*"))))
+          '@ | Set-Content -Encoding utf8 zflag-recover.py
+          python zflag-recover.py
+      - name: Commit recovered source only to review branch
+        shell: pwsh
+        run: |
+          git config user.name "ZFLAG Build Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add review-source
+          git diff --cached --quiet || (git commit -m "Recover inspectable ZFLAG application source for native integration"; git push origin HEAD:zflag-native-engine-2.0.26)
