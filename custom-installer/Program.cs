@@ -33,9 +33,10 @@ internal static class Program
             catch (Exception e) { Debug.WriteLine(e); return 4; }
         }
 
+        var guiTest = args.Length > 0 && args[0] == "--qa-gui-install";
         var app = new Application { ShutdownMode = ShutdownMode.OnMainWindowClose };
-        app.Run(new InstallerWindow(args.Length > 0 && args[0] == "--uninstall"));
-        return 0;
+        app.Run(new InstallerWindow(args.Length > 0 && args[0] == "--uninstall", guiTest));
+        return Environment.ExitCode;
     }
 }
 
@@ -49,6 +50,7 @@ internal sealed class InstallerWindow : Window
     private static readonly SolidColorBrush PaneBorder = Brush("#313A4C");
     private const string SubtleBlue = "#94B3EA";
     private readonly bool _uninstall;
+    private readonly bool _guiTest;
     private readonly string _installPath;
     private readonly TextBlock _headline;
     private readonly TextBlock _subline;
@@ -102,9 +104,10 @@ internal sealed class InstallerWindow : Window
         return b;
     }
 
-    internal InstallerWindow(bool uninstall)
+    internal InstallerWindow(bool uninstall, bool guiTest = false)
     {
         _uninstall = uninstall;
+        _guiTest = guiTest;
         _installPath = InstallEngine.InstallDirectory;
         Title = uninstall ? "ZFLAG Uninstaller" : "ZFLAG Installer";
         Width = 735; Height = 545; MinWidth = 735; MinHeight = 545;
@@ -277,6 +280,7 @@ internal sealed class InstallerWindow : Window
         _launch.Click += (_, _) => Launch();
         actions.Children.Add(_launch);
         _primary = ActionButton(uninstall ? "Uninstall" : "Install ZFLAG", true, 146);
+        System.Windows.Automation.AutomationProperties.SetAutomationId(_primary, "InstallZFLAG");
         _primary.Click += async (_, _) => {
             if (_finished) Close();
             else await BeginAsync();
@@ -285,6 +289,21 @@ internal sealed class InstallerWindow : Window
 
         _pulse = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(390) };
         _pulse.Tick += (_, _) => { if (_busy) { _dots = (_dots + 1) % 4; _stage.Text = _baseStage + new string('.', _dots); } };
+        if (_guiTest) Loaded += async (_, _) =>
+        {
+            // Exercise the same real WPF button click as an end-user.
+            _primary.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            var until = DateTime.UtcNow.AddMinutes(3);
+            while (_busy && DateTime.UtcNow < until) await Task.Delay(160);
+            var exists = InstallEngine.VerifyInstalledFiles(_installPath);
+            var shortcut = File.Exists(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "Microsoft", "Windows", "Start Menu", "Programs", "ZFLAG Studio Preview", "ZFLAG.lnk"));
+            var success = _finished && exists && shortcut;
+            Environment.ExitCode = success ? 0 : 51;
+            if (!success) Console.Error.WriteLine("Real WPF Install click failed: " + _details.Text);
+            Close();
+        };
     }
 
     private async Task BeginAsync()
