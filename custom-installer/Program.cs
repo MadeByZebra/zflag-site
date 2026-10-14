@@ -174,7 +174,7 @@ internal sealed class InstallerWindow : Window
         };
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         Grid.SetColumn(buttons, 1); top.Children.Add(buttons);
-        buttons.Children.Add(Text("2.0.32   •   TEST BUILD", 10, Dim, FontWeights.SemiBold));
+        buttons.Children.Add(Text("2.0.33   •   TEST BUILD", 10, Dim, FontWeights.SemiBold));
         var minimize = ActionButton("—", false, 32);
         minimize.Height = 29; minimize.Margin = new Thickness(18, 0, 7, 0);
         minimize.Click += (_, _) => WindowState = WindowState.Minimized;
