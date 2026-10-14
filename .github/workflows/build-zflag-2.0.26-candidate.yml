@@ -1,4 +1,4 @@
-name: Build ZFLAG 2.0.27 experimental Windows installer
+name: Build ZFLAG 2.0.28 experimental Windows installer
 on:
   push:
     paths:
@@ -103,6 +103,20 @@ jobs:
           print("Native C++ source recovered and verified:", len(source), "bytes")
           '@ | Set-Content -Encoding utf8 restore-native.py
           python restore-native.py
+      - name: Preserve the original injector first-run offsets discovery
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          src=Path("native/zflag_native.cpp")
+          data=src.read_text(encoding="utf-8")
+          old="g_OffsetsMap.clear(); g_offsets_parsed=true; cached_fvar_container_rva=0;"
+          new="g_OffsetsMap.clear(); g_offsets_parsed=false; cached_fvar_container_rva=0;"
+          if data.count(old)!=1: raise SystemExit("Unexpected native CLI initialization; refusing ambiguous patch")
+          src.write_text(data.replace(old,new,1),encoding="utf-8")
+          print("Restored original one-time offset discovery used by the supplied GUI source")
+          '@ | Set-Content -Encoding utf8 repair-native-init.py
+          python repair-native-init.py
       - name: Download C++ header dependency
         shell: pwsh
         run: git clone --depth 1 --branch master https://github.com/Tencent/rapidjson.git native/rapidjson-vendor
@@ -151,7 +165,7 @@ jobs:
           @'
           import pathlib,json
           root=pathlib.Path("zflag-source")
-          version="2.0.27"
+          version="2.0.28"
           for path in root.rglob("*"):
               if path.is_file() and path.suffix.lower() in (".json",".toml",".rs",".tsx",".ts",".js",".mjs",".html",".txt",".md"):
                   if "node_modules" in path.parts:continue
@@ -223,7 +237,7 @@ jobs:
           candidates=list(pathlib.Path("zflag-source/src-tauri/target/release/bundle/nsis").glob("*.exe"))
           if not candidates:raise SystemExit("NSIS installer was not produced")
           source=max(candidates,key=lambda path:path.stat().st_mtime)
-          target=pathlib.Path("ZFLAG-Setup-v2.0.27-TEST.exe")
+          target=pathlib.Path("ZFLAG-Setup-v2.0.28-TEST.exe")
           shutil.copy2(source,target)
           if target.stat().st_size<5_000_000: raise SystemExit("Installer unexpectedly small")
           print("TEST ONLY",target,target.stat().st_size,"bytes",hashlib.sha256(target.read_bytes()).hexdigest())
@@ -232,6 +246,6 @@ jobs:
       - name: Upload unverified Windows test installer
         uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.27-Windows-TEST
-          path: ZFLAG-Setup-v2.0.27-TEST.exe
+          name: ZFLAG-v2.0.28-Windows-TEST
+          path: ZFLAG-Setup-v2.0.28-TEST.exe
           if-no-files-found: error
