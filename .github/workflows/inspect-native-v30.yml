@@ -21,7 +21,7 @@ jobs:
           src=zlib.decompress(base64.b64decode(data)).decode("utf-8",errors="replace")
           lines=src.splitlines()
           print("TOTAL LINES",len(lines))
-          patterns=[r'--apply',r'FindProcess',r'FindWindow',r'CreateToolhelp32Snapshot',r'OpenProcess',r'GetProcess',r'RobloxPlayer',r'PROCESS_',r'cached_fvar_container_rva',r'g_offsets_parsed',r'while\\s*\\(',r'Sleep\\s*\\(',r'VirtualQueryEx']
+          patterns=[r'--apply',r'FindProcess',r'FindWindow',r'CreateToolhelp32Snapshot',r'OpenProcess',r'GetProcess',r'RobloxPlayer',r'PROCESS_',r'cached_fvar_container_rva',r'g_offsets_parsed',r'while',r'Sleep',r'VirtualQueryEx']
           positions=set()
           for pattern in patterns:
               matches=[n for n,line in enumerate(lines) if re.search(pattern,line,re.I)]
