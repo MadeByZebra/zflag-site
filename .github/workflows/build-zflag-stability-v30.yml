@@ -290,7 +290,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference="Stop"
-          $installer=(Resolve-Path "ZFLAG-Simple-Install-v2.0.30-TEST.exe").Path
+          $installer=(Resolve-Path "ZFLAG-Stability-Install-v2.0.30-TEST.exe").Path
           $sig=(Get-AuthenticodeSignature $installer).Status
           Write-Output "Authenticode signature status: $sig"
           $process=Start-Process -FilePath $installer -ArgumentList "/S" -Wait -PassThru
