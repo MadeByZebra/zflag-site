@@ -72,21 +72,18 @@ const DEFAULT_API = "http://127.0.0.1:18766"
 let desktopSidecarStarted = false
 
 const DEFAULT_JSON = `{
-  "DFIntTaskSchedulerTargetFps": "120"
+  "FFlagHandleAltEnterFullscreenManually": "False"
 }`
 
 const PERFORMANCE_PRESET = {
-  DFIntTaskSchedulerTargetFps: "120",
   DFIntCSGLevelOfDetailSwitchingDistance: "250",
   DFIntCSGLevelOfDetailSwitchingDistanceL12: "500",
   DFIntCSGLevelOfDetailSwitchingDistanceL23: "1250",
   DFIntCSGLevelOfDetailSwitchingDistanceL34: "3000",
-  DFIntTextureCompositorActiveJobs: "2",
-  FFlagDebugGraphicsDisableDirect3D11: "false",
 }
 
-const FPS_PRESET = { DFIntTaskSchedulerTargetFps: "120" }
-const TEXTURE_PRESET = { FIntDebugTextureManagerSkipMips: "8" }
+const FPS_PRESET = { FFlagHandleAltEnterFullscreenManually: "False" }
+const TEXTURE_PRESET = { DFFlagTextureQualityOverrideEnabled: "False" }
 
 type View = "home" | "editor" | "presets" | "activity" | "agent" | "settings"
 type ToastTone = "success" | "warning" | "error" | "info"
@@ -2358,16 +2355,15 @@ export default function App() {
             <button type="button" disabled={!status.rollbackDepth} onClick={() => void rollbackLastApply()} title={status.rollbackDepth ? "Restore values captured before the last successful Apply" : "No config backup is available yet"}><RotateCcw className="size-3.5" /> Rollback</button>
             <button type="button" onClick={() => setSaveDialog({ mode: "preset", value: activeTab?.name.replace(/\.json$/i, "") ?? "My preset" })}><WandSparkles className="size-3.5" /> Preset</button>
             <button type="button" className="zflag-probe-button" title="Check for Roblox Player without opening or scanning game memory" onClick={() => void probeRobloxSafely()}><ScanSearch className="size-3.5" /> Check Roblox</button>
-            <Button className="zflag-action zflag-action-primary" size="sm" disabled={busy || !parsed.ok} variant="outline" title="Stability build: checks Roblox process safely. Raw memory injection is temporarily paused because the legacy scanner can freeze Roblox." onClick={() => void applyFlags("native")}>
-              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} {busy ? "Injecting…" : "Inject"}
-            </Button>
-            <Button className="zflag-action zflag-action-secondary" size="sm" disabled={busy || !parsed.ok || !status.ready} variant="outline" title="SAVE ALLOWED • Writes only Roblox-allowlisted flags to the local settings file. Restart Roblox to load them." onClick={() => void applyFlags("manual")}>
-              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Save className="size-3.5" />} {busy ? "Saving…" : "Save Allowed"}
+            <Button className="zflag-action zflag-action-secondary" size="sm" disabled={true} variant="outline" title="Disabled for stability: the previous process-memory scanner froze Roblox. No live writes will be attempted in this version."><Shield className="size-3.5" /> Live Inject Paused</Button>
+            <Button className="zflag-action zflag-action-primary" size="sm" disabled={busy || !parsed.ok || !status.ready} variant="outline" title="SAVE SUPPORTED • Writes only allowlisted local Roblox settings with an on-disk backup. Roblox must be restarted to load them; unsupported flags will be skipped." onClick={() => void applyFlags("manual")}>
+              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Save className="size-3.5" />} {busy ? "Saving…" : "Save Supported"}
             </Button>
           </div>
         </div>
-        {nativeFeedback && <div role="status" className="native-inject-feedback"><span>LIVE INJECT</span><p>{nativeFeedback}</p><button type="button" title="Dismiss inject result" onClick={() => setNativeFeedback(null)}>×</button></div>}
+        {nativeFeedback && <div role="status" className="native-inject-feedback"><span>ROBLOX DETECTION</span><p>{nativeFeedback}</p><button type="button" title="Dismiss inject result" onClick={() => setNativeFeedback(null)}>×</button></div>}
         {saveFeedback && <div role="status" className="native-inject-feedback zflag-save-feedback"><span>LOCAL SAVE</span><p>{saveFeedback}</p><button type="button" onClick={() => { setEditorBottomTab("failures"); setBottomPanelOpen(true) }}>Skipped details</button><button type="button" aria-label="Dismiss save result" onClick={() => setSaveFeedback(null)}>×</button></div>}
+        {parsed.ok && Object.keys(parsed.value).length >= 50 && <div role="status" className="zflag-large-preset-notice"><Shield className="size-3.5" /><p><strong>{Object.keys(parsed.value).length.toLocaleString()}-flag preset:</strong> Roblox's local allowlist is limited. Run Preflight to see which entries can actually be saved. Unknown network, physics and scheduler flags are skipped, not injected.</p><button type="button" disabled={preflightBusy || !status.ready} onClick={() => void runPreflight()}>{preflightBusy ? "Checking…" : "Check compatibility"}</button></div>}
         <div className="diff-strip">
           <div className="diff-left"><span>Changes vs last apply</span><b className="diff-add">+{diffSummary.added}</b><b className="diff-change">~{diffSummary.changed}</b><b className="diff-remove">-{diffSummary.removed}</b></div>
           <div className="apply-result-summary">
@@ -2378,7 +2374,7 @@ export default function App() {
         </div>
         {lastApplyStats.total > 0 && <div className="apply-progress-row">
           <div className="apply-progress-track"><span style={{ width: `${lastApplyStats.rate}%` }} /></div>
-          <div className="apply-progress-labels"><b>{lastApplyStats.rate}% {lastApplied?.source === "native" ? "reported written" : "saved"}</b><span>{lastApplyStats.success} {lastApplied?.source === "native" ? "reported written" : "saved"}</span><span>{lastApplyStats.failed} {lastApplied?.source === "native" ? "failed" : "skipped"}</span></div>
+          <div className="apply-progress-labels"><b>{lastApplyStats.rate}% {lastApplied?.source === "native" ? "reported written" : "saved locally"}</b><span>{lastApplyStats.success} {lastApplied?.source === "native" ? "reported written" : "saved"}</span><span>{lastApplyStats.failed} {lastApplied?.source === "native" ? "failed" : "skipped"}</span></div>
         </div>}
         <div className="editor-surface" key={activeTab?.id} style={{ ['--editor-font-size' as string]: `${settings.editorFontSize}px` }}>
           <div className="editor-meta">
