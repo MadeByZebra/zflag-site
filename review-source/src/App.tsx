@@ -521,6 +521,8 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [nativeFeedback, setNativeFeedback] = useState<string | null>(null)
   const [saveFeedback, setSaveFeedback] = useState<string | null>(null)
+  const [resetLocalConfirm, setResetLocalConfirm] = useState(false)
+  const [resetLocalBusy, setResetLocalBusy] = useState(false)
   const [backendReachable, setBackendReachable] = useState(false)
   const [settings, setSettings] = useState<SettingsState>(loadSettings)
   const [draftSettings, setDraftSettings] = useState<SettingsState>(settings)
@@ -1197,6 +1199,32 @@ export default function App() {
     } finally {
       applyInProgressRef.current = false
       setBusy(false)
+    }
+  }
+
+  async function resetRobloxLocalSettings() {
+    if (resetLocalBusy) return
+    setResetLocalBusy(true)
+    try {
+      const response = await fetch(`${settings.apiUrl}/reset-local-settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+        signal: AbortSignal.timeout(10000),
+      })
+      const result = await response.json() as { ok?: boolean; removed?: boolean; backup?: string; message?: string; error?: string }
+      if (!response.ok || !result.ok) throw new Error(result.error || "Could not reset local settings")
+      setSaveFeedback(result.removed
+        ? `Local Roblox overrides were backed up and removed. Restart Roblox to return to default settings. Backup: ${result.backup || "saved"}`
+        : result.message || "No custom local settings were found.")
+      setResetLocalConfirm(false)
+      showToast(result.removed ? "Roblox settings reset" : "No local overrides to reset",
+        result.message || "Restart Roblox to apply changes.", result.removed ? "success" : "info")
+      await refreshStatus(settings.apiUrl, true)
+    } catch (error) {
+      showToast("Reset failed", error instanceof Error ? error.message : "Backend unavailable", "error")
+    } finally {
+      setResetLocalBusy(false)
     }
   }
 
@@ -2357,7 +2385,12 @@ export default function App() {
         </div>
         {nativeFeedback && <div role="status" className="native-inject-feedback"><span>ROBLOX DETECTION</span><p>{nativeFeedback}</p><button type="button" title="Dismiss inject result" onClick={() => setNativeFeedback(null)}>×</button></div>}
         {saveFeedback && <div role="status" className="native-inject-feedback zflag-save-feedback"><span>LOCAL SAVE</span><p>{saveFeedback}</p><button type="button" onClick={() => { setEditorBottomTab("failures"); setBottomPanelOpen(true) }}>Skipped details</button><button type="button" aria-label="Dismiss save result" onClick={() => setSaveFeedback(null)}>×</button></div>}
-        {parsed.ok && Object.keys(parsed.value).length >= 50 && <div role="status" className="zflag-large-preset-notice"><Shield className="size-3.5" /><p><strong>{Object.keys(parsed.value).length.toLocaleString()}-flag preset:</strong> Roblox's local allowlist is limited. Run Preflight to see which entries can actually be saved. Unknown network, physics and scheduler flags are skipped, not injected.</p><button type="button" disabled={preflightBusy || !status.ready} onClick={() => void runPreflight()}>{preflightBusy ? "Checking…" : "Check compatibility"}</button></div>}
+        {parsed.ok && Object.keys(parsed.value).length >= 50 && <div role="status" className="zflag-large-preset-notice"><Shield className="size-3.5" /><p><strong>{Object.keys(parsed.value).length.toLocaleString()}-flag preset:</strong> Roblox's local allowlist is limited. Run Preflight to see which entries can actually be saved. Unknown network, physics and scheduler flags are skipped, not injected.</p><button type="button" disabled={preflightBusy || !status.ready} onClick={() => void runPreflight()}>{preflightBusy ? "Checking…" : "Check compatibility"}</button><button type="button" className="zflag-reset-action" disabled={resetLocalBusy} onClick={() => setResetLocalConfirm(true)}>Reset local flags</button></div>}
+        {resetLocalConfirm && <div role="alertdialog" aria-label="Confirm Roblox local settings reset" className="zflag-reset-confirm">
+          <div><strong>Restore default Roblox local settings?</strong><p>Backs up and removes the current Roblox Player ClientAppSettings overrides. Your saved ZFLAG presets are not deleted. Restart Roblox afterward.</p></div>
+          <button type="button" onClick={() => setResetLocalConfirm(false)} disabled={resetLocalBusy}>Cancel</button>
+          <button type="button" className="confirm" onClick={() => void resetRobloxLocalSettings()} disabled={resetLocalBusy}>{resetLocalBusy ? "Backing up…" : "Back up and reset"}</button>
+        </div>}
         <div className="diff-strip">
           <div className="diff-left"><span>Changes vs last apply</span><b className="diff-add">+{diffSummary.added}</b><b className="diff-change">~{diffSummary.changed}</b><b className="diff-remove">-{diffSummary.removed}</b></div>
           <div className="apply-result-summary">
@@ -2462,7 +2495,7 @@ export default function App() {
                   <div><span>Last apply</span><strong>{lastApplyStats.success} / {lastApplyStats.total}</strong></div>
                   <div><span>Success rate</span><strong>{lastApplyStats.rate}%</strong></div>
                 </div>
-                <div className="diagnostic-actions"><button type="button" onClick={() => void refreshStatus(settings.apiUrl, false)}><RefreshCw className="size-3.5" /> Refresh</button>{isDesktop && <button type="button" onClick={() => void startOrRestartDesktopBackend("manual")}><RotateCcw className="size-3.5" /> Restart backend</button>}<button type="button" onClick={() => void exportDiagnosticReport()}><Download className="size-3.5" /> Export report</button></div>
+                <div className="diagnostic-actions"><button type="button" onClick={() => void refreshStatus(settings.apiUrl, false)}><RefreshCw className="size-3.5" /> Refresh</button>{isDesktop && <button type="button" onClick={() => void startOrRestartDesktopBackend("manual")}><RotateCcw className="size-3.5" /> Restart backend</button>}<button type="button" onClick={() => setResetLocalConfirm(true)}><RotateCcw className="size-3.5" /> Reset local flags</button><button type="button" onClick={() => void exportDiagnosticReport()}><Download className="size-3.5" /> Export report</button></div>
               </div>}
             </div>
           </div>
