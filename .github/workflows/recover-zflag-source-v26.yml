@@ -40,8 +40,23 @@ jobs:
           assert hashlib.sha256(patch).hexdigest()=="9019605c17a5c2f4b8d8ed996bfaf20e0683c1382c03bc4a4d519233fff8f02e"
           pathlib.Path("recover-patch.py").write_bytes(patch)
           subprocess.run([sys.executable,"recover-patch.py",str(root)],check=True)
+          # Repair function indentation in the historical compatibility patch.
+          import ast
+          server=root/"backend/server.py"
+          code=server.read_text(encoding="utf-8")
+          start_class=code.index("class Runtime:")
+          for name in ("acquire_process","refresh_offsets","preflight","apply","rollback_last"):
+              marker="\\ndef "+name+"("
+              start=code.index(marker,start_class)+1
+              end_candidates=[p for p in (code.find("\\ndef ",start+1),code.find("\\n    def ",start+1)) if p>=0]
+              end=min(end_candidates) if end_candidates else len(code)
+              block=code[start:end]
+              fixed="".join(("    "+line if line.strip() else line) for line in block.splitlines(keepends=True))
+              code=code[:start]+fixed+code[end:]
+          ast.parse(code)
+          server.write_text(code,encoding="utf-8")
           dest=pathlib.Path("review-source")
-          for relative in ("src","backend/server.py","backend/__init__.py","src-tauri/src","src-tauri/tauri.conf.json","package.json"):
+          for relative in ("src","backend/server.py","backend/zflag_supported.py","backend/__init__.py","src-tauri/src","src-tauri/tauri.conf.json","package.json"):
               p=root/relative
               if not p.exists():continue
               d=dest/relative
