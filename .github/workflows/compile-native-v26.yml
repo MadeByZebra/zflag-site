@@ -59,9 +59,22 @@ jobs:
           '@ | Set-Content -Encoding utf8 generate-native-smoke.py
           python generate-native-smoke.py
           & native/zflag-native.exe --apply native/smoke.json --report native/smoke-report.json
-          Write-Host "Native engine exit code: $LASTEXITCODE"
+          $engineExit=$LASTEXITCODE
+          Write-Host "Native engine exit code: $engineExit"
+          if ($engineExit -ne 3) { throw "Expected Roblox-unavailable exit code on CI" }
           if (-not (Test-Path native/smoke-report.json)) { throw "Expected report missing" }
-          Get-Content native/smoke-report.json | Select-Object -First 1
+          @'
+          import json
+          from pathlib import Path
+          report=json.loads(Path("native/smoke-report.json").read_text(encoding="utf-8"))
+          assert report["total"] == 25000, report
+          assert report["succeeded"] == 0, report
+          assert "not running" in report["error"], report
+          print("25,000 entries parsed correctly; unavailable Roblox reported accurately")
+          '@ | Set-Content -Encoding utf8 native/verify-smoke.py
+          python native/verify-smoke.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $global:LASTEXITCODE=0
       - uses: actions/upload-artifact@v4
         with:
           name: ZFLAG-2.0.26-native-engine-Windows-experimental
