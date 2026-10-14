@@ -117,10 +117,17 @@ def save_eligible(flags,pid=None):
     rows=[{"name":e["name"],"ok":bool(e["valid"]),"value":e["value"],
            "message":"Saved; restart Roblox for effect" if e["valid"] else e["message"],
            "status":"saved" if e["valid"] else e["status"]} for e in checked["entries"]]
+    # Put skipped entries first so the UI can explain huge presets without
+    # hiding their failure reasons behind hundreds of successful rows.
+    skipped=[row for row in rows if not row["ok"]]
+    saved=[row for row in rows if row["ok"]]
+    visible=(skipped+saved)[:1200]
     return {"ok":True,"applied":len(eligible),"errors":checked["unsupported"]+checked["invalid"],
-            "results":rows[:500],"resultsTruncated":max(0,len(rows)-500),"restartRequired":pid is not None,"configPath":str(target),
+            "unsupported":checked["unsupported"],"invalid":checked["invalid"],
+            "results":visible,"resultsTruncated":max(0,len(rows)-len(visible)),
+            "restartRequired":True,"configPath":str(target),
             "rollback":{"target":str(target),"backup":str(backup) if old is not None else None},
-            "message":"Supported local settings written; restart Roblox to take effect"}
+            "message":f"Saved {len(eligible):,} allowed flags; skipped {checked['unsupported']:,} not allowlisted and {checked['invalid']:,} invalid. Restart Roblox."}
 
 def restore(entry):
     path=Path(entry["target"])
