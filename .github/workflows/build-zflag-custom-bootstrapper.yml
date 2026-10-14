@@ -1,0 +1,122 @@
+name: Build branded ZFLAG WPF installer v2.0.31 test
+on:
+  push:
+    paths:
+      - ".github/workflows/build-zflag-custom-bootstrapper.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  windows:
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download tested ZFLAG 2.0.30 stability payload (memory scanner disabled)
+        uses: actions/download-artifact@v4
+        with:
+          name: ZFLAG-v2.0.30-Stability-Windows-TEST
+          run-id: 38600858199
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: downloaded
+      - name: Extract stable app from NSIS and embed in custom installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $archive=Get-ChildItem downloaded -File -Filter "*.exe" | Select-Object -First 1
+          if (-not $archive) { throw "Missing ZFLAG v2.0.30 stable build" }
+          $seven="C:\Program Files\7-Zip\7z.exe"
+          if (-not (Test-Path $seven)) { $seven=(Get-Command 7z -ErrorAction Stop).Source }
+          & $seven x $archive.FullName "-oextracted" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "Could not extract stable app" }
+          @'
+          from pathlib import Path
+          import zipfile,hashlib
+          source=[p for p in Path("extracted").rglob("*") if p.is_file()]
+          dest=Path("custom-installer/Payload")
+          dest.mkdir(parents=True,exist_ok=True)
+          selected={}
+          for name in ["fflag-studio.exe","fflag-backend.exe","zflag-native.exe"]:
+              matches=[p for p in source if p.name.lower()==name]
+              if not matches:raise SystemExit("Required Windows binary missing: "+name)
+              found=max(matches,key=lambda p:p.stat().st_size)
+              if found.stat().st_size<10000 or found.open("rb").read(2)!=b"MZ":
+                  raise SystemExit("Invalid Win32 binary: "+name)
+              selected[name]=found
+          archive=dest/"zflag-payload.zip"
+          with zipfile.ZipFile(archive,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=7) as z:
+              for name,path in selected.items():z.write(path,name)
+          with zipfile.ZipFile(archive) as z:
+              if z.testzip() or sorted(z.namelist())!=sorted(selected):raise SystemExit("Bad ZFLAG embedded package")
+          for name,p in selected.items():print(name,p.stat().st_size,hashlib.sha256(p.read_bytes()).hexdigest())
+          print("Packed stable payload",archive.stat().st_size)
+          '@ | Set-Content -Encoding utf8 make-payload.py
+          python make-payload.py
+          if ($LASTEXITCODE -ne 0) { throw "Payload creation failed" }
+      - name: Generate ZFLAG image and executable icon from official brand mark
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check Pillow
+          @'
+          from pathlib import Path
+          from PIL import Image,ImageDraw
+          out=Path("custom-installer/Assets")
+          out.mkdir(parents=True,exist_ok=True)
+          n=1024
+          im=Image.new("RGBA",(n,n),(0,0,0,0))
+          d=ImageDraw.Draw(im)
+          S=lambda v: round(v*n/128)
+          d.rounded_rectangle((S(10),S(10),S(118),S(118)),radius=S(28),fill="#0a0d12",outline="#222835",width=S(4))
+          pts=[(34,34),(94,34),(94,44),(52,84),(94,84),(94,94),(34,94),(34,84),(76,44),(34,44)]
+          d.polygon([(S(x),S(y)) for x,y in pts],fill="#e6ebf4")
+          d.line((S(34),S(100),S(94),S(100)),fill="#2f3a4f",width=S(4))
+          im.save(out/"zflag-logo.png")
+          im.save(out/"zflag.ico",format="ICO",sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
+          '@ | Set-Content -Encoding utf8 logo.py
+          python logo.py
+          if ($LASTEXITCODE -ne 0) { throw "ZFLAG logo generation failed" }
+      - name: Publish single-file self-contained WPF installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          dotnet publish custom-installer/ZFLAGBootstrapper.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o publish
+          if ($LASTEXITCODE -ne 0) { throw "WPF installer compile failed" }
+          Copy-Item publish/ZFLAGInstaller.exe "ZFLAG-Custom-Installer-v2.0.31-TEST.exe"
+          $size=(Get-Item "ZFLAG-Custom-Installer-v2.0.31-TEST.exe").Length
+          if ($size -lt 12000000) { throw "Installer unexpectedly small" }
+          Write-Output "Branded installer build size $size bytes"
+      - name: Windows verify embedded payload and actual isolated installation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $exe=(Resolve-Path "ZFLAG-Custom-Installer-v2.0.31-TEST.exe").Path
+          $check=Start-Process -FilePath $exe -ArgumentList "--verify" -Wait -PassThru
+          if ($check.ExitCode -ne 0) { throw "Embedded installer verification failed $($check.ExitCode)" }
+          $root=Join-Path $env:RUNNER_TEMP "ZFLAG-WPF-bootstrap-QA"
+          $run=Start-Process -FilePath $exe -ArgumentList @("--qa-install",('"' + $root + '"')) -Wait -PassThru
+          if ($run.ExitCode -ne 0) { throw "WPF installer extraction failed $($run.ExitCode)" }
+          foreach($file in @("fflag-studio.exe","fflag-backend.exe","zflag-native.exe")) {
+            $fp=Join-Path $root $file
+            if (-not (Test-Path $fp) -or (Get-Item $fp).Length -lt 10000) { throw "Installed file missing/invalid: $file" }
+          }
+          $app=Start-Process -FilePath (Join-Path $root "fflag-studio.exe") -WorkingDirectory $root -PassThru
+          Start-Sleep -Seconds 5
+          $app.Refresh()
+          if ($app.HasExited) { throw "ZFLAG application exited after initial launch" }
+          Stop-Process -Id $app.Id -Force
+          Write-Output "PASS: packaged, installed and launched ZFLAG from custom installer"
+          Write-Output "TEST ONLY: public site unchanged"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ZFLAG-Custom-Branded-Installer-v2.0.31-TEST
+          path: ZFLAG-Custom-Installer-v2.0.31-TEST.exe
+          if-no-files-found: error
