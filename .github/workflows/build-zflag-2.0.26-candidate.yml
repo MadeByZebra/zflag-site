@@ -208,6 +208,8 @@ jobs:
               content=path.read_text(encoding="utf-8")
               content=content.replace("ZFLAG-Setup-v2.0.23.exe","ZFLAG-Setup-v2.0.26.exe")
               content=content.replace("2.0.23","2.0.26")
+              content=content.replace("2.0.25","2.0.26")
+              content=content.replace("2.0.24","2.0.26")
               if filename=="index.html" and "id=\"compatibility-note-2026\"" not in content:
                   note='''<section id="compatibility-note-2026" class="section" style="padding:38px 0" aria-label="Roblox FastFlag compatibility"><div class="wrap" style="border:1px solid var(--line);padding:22px;border-radius:10px;background:var(--panel)"><div class="kicker">Roblox compatibility · October 2026</div><p style="font-size:14px;line-height:1.6;color:var(--muted)">ZFLAG 2.0.26 detects Roblox without requesting memory-writing access, checks large JSON presets, and saves <strong>Roblox-allowlisted local FastFlags</strong> to ClientAppSettings.json. Restart Roblox after applying. Roblox ignores non-allowlisted flags. The optional Live Inject button is experimental and writes Roblox memory. Current-game compatibility is not verified.</p><a class="text-link" href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569/">Roblox official policy</a></div></section>'''
                   content=content.replace("</main>",note+"\n</main>",1)
