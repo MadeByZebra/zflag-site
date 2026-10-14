@@ -2529,3 +2529,14 @@ html.native-shell .app-shell::after { box-shadow: none !important; }
 .theme-light .zflag-save-feedback { background: rgba(0,0,0,.035); }
 .theme-light .native-inject-feedback p { color: #35383e; }
 .theme-light .native-inject-feedback span { color: #555c63; }
+
+/* Stability build: explicit read-only Roblox detection, never hidden in toolbar. */
+.editor-toolbar .toolbar-right .zflag-probe-button {
+  display:inline-flex !important; height:30px; align-items:center; gap:7px;
+  border:1px solid rgba(255,255,255,.15) !important; border-radius:10px !important;
+  color:#bcd5d0 !important; background:#10211f !important; padding:0 11px !important;
+  font-size:10px; font-family:inherit; font-weight:620;
+}
+.editor-toolbar .toolbar-right .zflag-probe-button:hover:not(:disabled) {
+  background:#18302c !important; color:#e6fff7 !important;
+}
