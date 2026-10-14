@@ -324,7 +324,9 @@ jobs:
           }
           if (-not $health) { throw "Stability backend not listening on isolated port 18766" }
           if ($health.backendVersion -ne "6.5-stable") { throw "Wrong bridge backend version: $($health.backendVersion)" }
-          $result=Invoke-RestMethod "$base/native-probe" -Method POST -ContentType "application/json" -Body "{}" -TimeoutSec 4
+          $probe=Invoke-WebRequest "$base/native-probe" -Method POST -ContentType "application/json" -Body "{}" -TimeoutSec 4 -SkipHttpErrorCheck
+          if ($probe.StatusCode -notin @(200,400)) { throw "Unexpected Roblox probe status $($probe.StatusCode)" }
+          $result=$probe.Content | ConvertFrom-Json
           if ($result.found -eq $true) { throw "Unexpected Roblox process in clean Windows runner" }
           if ($result.error -notmatch "memory" -and $result.error -notmatch "process") { throw "Missing safe process-detection status" }
           Write-Output "PASS: isolated 18766 backend is healthy and safe process check returned immediately"
