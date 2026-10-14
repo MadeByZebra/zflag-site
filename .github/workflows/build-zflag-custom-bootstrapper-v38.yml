@@ -1,5 +1,8 @@
 name: ZFLAG v2.0.38 branded installer with isolated 2.0.37 stability app
 on:
+  push:
+    paths:
+      - ".github/workflows/build-zflag-custom-bootstrapper-v38.yml"
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,7 +24,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ZFLAG-v2.0.37-Stability-Windows-TEST
-          run-id: 38656009422
+          run-id: 38656395541
           repository: ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: downloaded
