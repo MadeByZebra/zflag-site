@@ -71,10 +71,12 @@ internal static class InstallEngine
             Progress(2, "Checking installation package");
             VerifyEmbeddedPayload();
             cancel.ThrowIfCancellationRequested();
-            if (register && Process.GetProcessesByName("fflag-studio").Length != 0)
-                throw new IOException("Close any running ZFLAG window first, then retry installation.");
-
             var installPath = Path.GetFullPath(destination).TrimEnd(Path.DirectorySeparatorChar);
+            // Preview installs are separate from older ZFLAG installations.
+            // Only a process running FROM THIS destination can block replacement.
+            // Other fflag-studio.exe processes must never prevent first-time install.
+            if (register && Directory.Exists(installPath) && IsThisPreviewRunning(installPath))
+                throw new IOException("Close ZFLAG Studio Preview (not your older ZFLAG) before updating this preview, then retry.");
             var parent = Directory.GetParent(installPath)?.FullName ??
                          throw new IOException("An installation directory is required.");
             Directory.CreateDirectory(parent);
@@ -180,6 +182,27 @@ internal static class InstallEngine
         }
 
         void Progress(double value, string message) => progress?.Report(new InstallProgress(value, message));
+    }
+
+    private static bool IsThisPreviewRunning(string installPath)
+    {
+        var wanted = Path.GetFullPath(Path.Combine(installPath, "fflag-studio.exe"));
+        foreach (var process in Process.GetProcessesByName("fflag-studio"))
+        {
+            using (process)
+            {
+                try
+                {
+                    var actual = process.MainModule?.FileName;
+                    if (actual != null && string.Equals(
+                        Path.GetFullPath(actual), wanted, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+                catch (System.ComponentModel.Win32Exception) { /* inaccessible other application */ }
+                catch (InvalidOperationException) { /* process exited during inspection */ }
+            }
+        }
+        return false;
     }
 
     private static void RegisterUninstaller(string dir)
