@@ -2,13 +2,13 @@ name: Build ZFLAG 2.0.27 experimental Windows installer
 on:
   push:
     paths:
-      - ".github/workflows/build-zflag-2.0.27-candidate.yml"
+      - ".github/workflows/build-zflag-2.0.26-candidate.yml"
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   build:
-    if: github.ref_name == 'zflag-native-engine-2.0.27'
+    if: github.ref_name == 'zflag-native-engine-2.0.26'
     runs-on: windows-latest
     timeout-minutes: 50
     steps:
