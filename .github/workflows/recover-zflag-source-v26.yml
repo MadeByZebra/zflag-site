@@ -50,4 +50,10 @@ jobs:
           git config user.name "ZFLAG Build Bot"
           git config user.email "actions@users.noreply.github.com"
           git add review-source
-          git diff --cached --quiet || (git commit -m "Recover inspectable ZFLAG application source for native integration"; git push origin HEAD:zflag-native-engine-2.0.26)
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "Recover inspectable ZFLAG application source for native integration"
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+            git push origin HEAD:zflag-native-engine-2.0.26
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
