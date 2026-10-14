@@ -210,7 +210,7 @@ internal static class InstallEngine
         using var key = Registry.CurrentUser.CreateSubKey(UninstallKey);
         if (key == null) throw new IOException("Couldn't register ZFLAG preview in Installed Apps.");
         key.SetValue("DisplayName", "ZFLAG Studio Preview", RegistryValueKind.String);
-        key.SetValue("DisplayVersion", "2.0.37", RegistryValueKind.String);
+        key.SetValue("DisplayVersion", "2.0.38", RegistryValueKind.String);
         key.SetValue("Publisher", "Zebra", RegistryValueKind.String);
         key.SetValue("InstallLocation", dir, RegistryValueKind.String);
         key.SetValue("DisplayIcon", Path.Combine(dir, "fflag-studio.exe"), RegistryValueKind.String);
