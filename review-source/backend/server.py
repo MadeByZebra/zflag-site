@@ -924,9 +924,18 @@ def agent_chat(payload: object) -> dict[str, object]:
         return {"ok": False, "error": f"AI request failed: {exc}"}
 
 
+# The request handlers and startup worker share exactly one runtime.
+# It must exist BEFORE the worker starts; otherwise /status, /native-probe
+# and /apply raise NameError and the browser reports a dropped connection.
+runtime = Runtime()
+
+
 def init_worker() -> None:
-    runtime.acquire_process()
-    runtime.refresh_offsets()
+    try:
+        runtime.acquire_process()
+        runtime.refresh_offsets()
+    except Exception as exc:
+        runtime.log(f"Backend initialization failed: {type(exc).__name__}: {exc}", "error")
 
 
 threading.Thread(target=init_worker, daemon=True).start()
