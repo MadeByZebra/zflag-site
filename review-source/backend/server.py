@@ -1016,7 +1016,7 @@ class Handler(BaseHTTPRequestHandler):
             bundle = _browser_bundle_check()
             self._json(200, {
                 "ok": True,
-                "backendVersion": "6.4-local",
+                "backendVersion": "6.5-stable",
                 "browserUi": bool(bundle.get("browserUi")),
                 "browserUrl": f"http://{HOST}:{PORT}/app/",
             })
