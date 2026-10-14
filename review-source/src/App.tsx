@@ -2323,7 +2323,7 @@ export default function App() {
           </div>
         </div>
         {nativeFeedback && <div role="status" className="native-inject-feedback"><span>LIVE INJECT</span><p>{nativeFeedback}</p><button type="button" title="Dismiss inject result" onClick={() => setNativeFeedback(null)}>×</button></div>}
-        {saveFeedback && <div role="status" className="native-inject-feedback zflag-save-feedback"><span>LOCAL SAVE</span><p>{saveFeedback}</p><button type="button" onClick={() => { setEditorBottomTab("failures"); setBottomPanelOpen(true) }}>Skipped details</button><button type="button" aria-label="Dismiss save result" onClick={() => setSaveFeedback(null)}>×</button></div>
+        {saveFeedback && <div role="status" className="native-inject-feedback zflag-save-feedback"><span>LOCAL SAVE</span><p>{saveFeedback}</p><button type="button" onClick={() => { setEditorBottomTab("failures"); setBottomPanelOpen(true) }}>Skipped details</button><button type="button" aria-label="Dismiss save result" onClick={() => setSaveFeedback(null)}>×</button></div>}
         <div className="diff-strip">
           <div className="diff-left"><span>Changes vs last apply</span><b className="diff-add">+{diffSummary.added}</b><b className="diff-change">~{diffSummary.changed}</b><b className="diff-remove">-{diffSummary.removed}</b></div>
           <div className="apply-result-summary">
