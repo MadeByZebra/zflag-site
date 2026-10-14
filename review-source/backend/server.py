@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Optional
 
-from zflag_supported import ALLOWED, REFERENCE, preflight as local_preflight, save_eligible, restore, target_install
+from zflag_supported import ALLOWED, REFERENCE, preflight as local_preflight, save_eligible, restore, target_install, reset_local_settings
 
 TARGET = "RobloxPlayerBeta.exe"
 HOST = "127.0.0.1"
@@ -645,6 +645,19 @@ class Runtime:
         else:self.log(str(result.get("error","No compatible flags")),"warning")
         return result
 
+    def reset_local_flags(self) -> dict[str, object]:
+        # User explicitly requested reset: back up the file, then remove custom
+        # overrides. Does not touch Roblox game memory or terminate the client.
+        try:
+            result = reset_local_settings(self.pid)
+            self.log("Local Roblox settings reset; backup saved" if result.get("removed") else
+                     str(result.get("message", result.get("error", "No overrides"))),
+                     "success" if result.get("ok") else "warning")
+            return result
+        except (OSError, ValueError, TypeError) as exc:
+            self.log(f"Local reset failed: {exc}", "error")
+            return {"ok": False, "error": "Could not back up Roblox local settings: " + str(exc)}
+
     def rollback_last(self) -> dict[str, object]:
         with self.lock:
             if not self.rollback_stack:
@@ -1085,6 +1098,10 @@ class Handler(BaseHTTPRequestHandler):
             result = runtime.apply(flags, source=source[:40])
             # A valid /apply request always returns JSON with the real outcome.
             self._json(200, result)
+            return
+        if self.path == "/reset-local-settings":
+            result = runtime.reset_local_flags()
+            self._json(200 if result.get("ok") else 409, result)
             return
         if self.path == "/rollback-last":
             result = runtime.rollback_last()
