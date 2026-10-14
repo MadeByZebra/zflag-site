@@ -1121,7 +1121,8 @@ export default function App() {
     }
     setBusy(true)
     try {
-      const response = await fetch(`${settings.apiUrl}/apply`, {
+      const endpoint = source === "native" ? "/native-apply" : "/apply"
+      const response = await fetch(`${settings.apiUrl}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ flags, source }),
@@ -1132,7 +1133,7 @@ export default function App() {
       const successfulResults = Array.isArray(result.results) ? result.results.filter((entry) => entry?.ok === true).length : 0
       const applied = Math.max(Number(result.applied ?? 0) || 0, successfulResults)
       const errors = Math.max(Number(result.errors ?? 0) || 0, 0)
-      const normalizedResults: ApplyResultEntry[] = Array.isArray(result.results) ? result.results.map((entry) => ({
+      const normalizedResults: ApplyResultEntry[] = Array.isArray(result.results) ? result.results.slice(0, 1200).map((entry) => ({
         name: String(entry.name || "UnknownFlag"),
         ok: entry.ok === true,
         message: String(entry.message || (entry.ok ? "applied" : "failed")),
@@ -1140,18 +1141,18 @@ export default function App() {
       })) : []
       const snapshot: ApplySnapshot = {
         id: uid("apply"), tabId: activeTab?.id, name: labelOverride ?? activeTab?.name ?? "Untitled.json",
-        content: JSON.stringify(flags, null, 2), appliedAt: Date.now(), applied, errors, source,
+        content: Object.keys(flags).length > 3000 ? JSON.stringify({ _zflag_notice: "Full large profile is stored in the saved configuration, not history" }) : JSON.stringify(flags, null, 2), appliedAt: Date.now(), applied, errors, source,
         rollbackId: result.rollbackId ?? null, results: normalizedResults,
       }
-      setApplyHistory((current) => [snapshot, ...current].slice(0, 50))
+      setApplyHistory((current) => [snapshot, ...current].slice(0, Object.keys(flags).length > 3000 ? 8 : 50))
       if (applied > 0) {
-        showToast(errors ? "Saved with skips" : "Allowed settings saved", errors ? `${applied} saved · ${errors} ignored/invalid` : `${applied} allowed flag${applied === 1 ? "" : "s"} saved; restart Roblox`, errors ? "warning" : "success")
+        showToast(source === "native" ? (errors ? "Live injection partially succeeded" : "Live injection completed") : (errors ? "Saved with skips" : "Allowed settings saved"), source === "native" ? `${applied} written · ${errors} failed` : (errors ? `${applied} saved · ${errors} ignored/invalid` : `${applied} allowed flag${applied === 1 ? "" : "s"} saved; restart Roblox`), errors ? "warning" : "success")
         await refreshStatus(settings.apiUrl, true)
         return true
       }
-      throw new Error(result.error || (response.ok ? "No allowed flags could be saved" : `Apply request failed (HTTP ${response.status})`))
+      throw new Error(result.error || (response.ok ? (source === "native" ? "Native engine did not write any flags" : "No allowed flags could be saved") : `Apply request failed (HTTP ${response.status})`))
     } catch (error) {
-      showToast("Save failed", error instanceof Error ? error.message : "Could not reach local backend", "error")
+      showToast(source === "native" ? "Live inject failed" : "Save failed", error instanceof Error ? error.message : "Could not reach local backend", "error")
       return false
     } finally {
       setBusy(false)
@@ -2279,6 +2280,9 @@ export default function App() {
             <button type="button" disabled={preflightBusy || !parsed.ok || !status.ready} title={!parsed.ok ? "Fix invalid JSON first" : !status.ready ? "Local allowlist is not ready yet" : "Check Roblox local allowlist before saving"} onClick={() => void runPreflight()}><ScanSearch className="size-3.5" /> {preflightBusy ? "Checking…" : "Preflight"}</button>
             <button type="button" disabled={!status.rollbackDepth} onClick={() => void rollbackLastApply()} title={status.rollbackDepth ? "Restore values captured before the last successful Apply" : "No config backup is available yet"}><RotateCcw className="size-3.5" /> Rollback</button>
             <button type="button" onClick={() => setSaveDialog({ mode: "preset", value: activeTab?.name.replace(/\.json$/i, "") ?? "My preset" })}><WandSparkles className="size-3.5" /> Preset</button>
+            <Button size="sm" disabled={busy || !parsed.ok} variant="outline" title="Experimental: writes Roblox process memory. Requires Roblox to be running. No native rollback." onClick={() => void applyFlags("native")}>
+              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} Live Inject
+            </Button>
             <Button size="sm" disabled={busy || !parsed.ok || !status.ready} onClick={() => void applyFlags("manual")}>
               {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} {busy ? "Saving…" : "Save Allowed"}
             </Button>
