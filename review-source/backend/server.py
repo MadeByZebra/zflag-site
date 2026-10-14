@@ -560,7 +560,12 @@ class Runtime:
 
     def native_probe(self) -> dict[str, object]:
         # Instant non-invasive process check, independent of the cached UI status.
-        names = list_roblox_processes()
+        try:
+            names = list_roblox_processes()
+        except (OSError, ValueError, TypeError, AttributeError) as exc:
+            self.log(f"Windows process enumeration failed: {type(exc).__name__}: {exc}", "error")
+            return {"ok": False, "found": False, "pid": None,
+                    "error": f"Windows process detection failed safely ({type(exc).__name__}). No Roblox memory was accessed."}
         player = next((p for p in names if str(p["name"]).lower() == TARGET.lower()), None)
         pid = int(player["pid"]) if player else None
         with self.lock:
@@ -1051,7 +1056,13 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200 if result.get("ok") else 400, result)
             return
         if self.path == "/native-probe":
-            self._json(200, runtime.native_probe())
+            try:
+                result = runtime.native_probe()
+                self._json(200, result)
+            except Exception as exc:
+                runtime.log(f"Native detection error: {type(exc).__name__}: {exc}", "error")
+                self._json(500, {"ok": False, "found": False,
+                                 "error": f"Detection backend error: {type(exc).__name__}. No Roblox memory was accessed."})
             return
         if self.path == "/native-apply":
             flags = payload.get("flags") if isinstance(payload, dict) else None
