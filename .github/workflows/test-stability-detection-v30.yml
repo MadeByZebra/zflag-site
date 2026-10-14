@@ -1,4 +1,4 @@
-name: Test ZFLAG v30 safe Roblox detection API (Windows)
+name: Test ZFLAG v30 backend runtime initialization and safe Roblox detection
 on:
   push:
     paths:
