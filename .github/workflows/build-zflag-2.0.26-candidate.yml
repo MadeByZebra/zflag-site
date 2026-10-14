@@ -243,6 +243,24 @@ jobs:
           print("TEST ONLY",target,target.stat().st_size,"bytes",hashlib.sha256(target.read_bytes()).hexdigest())
           '@ | Set-Content -Encoding utf8 verify-installer.py
           python verify-installer.py
+      - name: Verify the installer can install all three executables on clean Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference="Stop"
+          $installer=(Resolve-Path "ZFLAG-Setup-v2.0.28-TEST.exe").Path
+          $sig=(Get-AuthenticodeSignature $installer).Status
+          Write-Output "Authenticode signature status: $sig"
+          $process=Start-Process -FilePath $installer -ArgumentList "/S" -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "NSIS silent installer exited with $($process.ExitCode)" }
+          $destination=Join-Path $env:LOCALAPPDATA "ZFLAG"
+          foreach($program in @("fflag-studio.exe","fflag-backend.exe","zflag-native.exe")) {
+            $path=Join-Path $destination $program
+            if (-not (Test-Path $path)) { throw "Installed app missing $path" }
+            $length=(Get-Item $path).Length
+            if ($length -lt 10000) { throw "Installed binary unexpectedly small: $path" }
+            Write-Output "Verified installed: $program ($length bytes)"
+          }
+          Write-Output "PASS: NSIS installer and all three executables installed"
       - name: Upload unverified Windows test installer
         uses: actions/upload-artifact@v4
         with:
