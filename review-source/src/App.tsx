@@ -520,6 +520,7 @@ export default function App() {
   const [view, setView] = useState<View>("home")
   const [status, setStatus] = useState<Status>(emptyStatus)
   const [busy, setBusy] = useState(false)
+  const [nativeFeedback, setNativeFeedback] = useState<string | null>(null)
   const [backendReachable, setBackendReachable] = useState(false)
   const [settings, setSettings] = useState<SettingsState>(loadSettings)
   const [draftSettings, setDraftSettings] = useState<SettingsState>(settings)
@@ -1119,6 +1120,7 @@ export default function App() {
       showToast("Nothing to apply", "The configuration is empty.", "info")
       return false
     }
+    if (source === "native") setNativeFeedback("Checking Roblox process and applying flags…")
     setBusy(true)
     try {
       const endpoint = source === "native" ? "/native-apply" : "/apply"
@@ -1146,13 +1148,15 @@ export default function App() {
       }
       setApplyHistory((current) => [snapshot, ...current].slice(0, Object.keys(flags).length > 3000 ? 8 : 50))
       if (applied > 0) {
+        if (source === "native") setNativeFeedback(`${applied.toLocaleString()} written to Roblox memory · ${errors.toLocaleString()} failed. ${errors ? "See injection results for individual failures." : "Verify the changed behavior in Roblox."}`)
         showToast(source === "native" ? (errors ? "Live injection partially succeeded" : "Live injection completed") : (errors ? "Saved with skips" : "Allowed settings saved"), source === "native" ? `${applied} written · ${errors} failed` : (errors ? `${applied} saved · ${errors} ignored/invalid` : `${applied} allowed flag${applied === 1 ? "" : "s"} saved; restart Roblox`), errors ? "warning" : "success")
         await refreshStatus(settings.apiUrl, true)
         return true
       }
       throw new Error(result.error || (response.ok ? (source === "native" ? "Native engine did not write any flags" : "No allowed flags could be saved") : `Apply request failed (HTTP ${response.status})`))
     } catch (error) {
-      showToast(source === "native" ? "Live inject failed" : "Save failed", error instanceof Error ? error.message : "Could not reach local backend", "error")
+      if (source === "native") setNativeFeedback(error instanceof Error ? error.message : "Could not reach local backend")
+      showToast(source === "native" ? "Inject failed" : "Save failed", error instanceof Error ? error.message : "Could not reach local backend", "error")
       return false
     } finally {
       setBusy(false)
@@ -2280,14 +2284,15 @@ export default function App() {
             <button type="button" disabled={preflightBusy || !parsed.ok || !status.ready} title={!parsed.ok ? "Fix invalid JSON first" : !status.ready ? "Local allowlist is not ready yet" : "Check Roblox local allowlist before saving"} onClick={() => void runPreflight()}><ScanSearch className="size-3.5" /> {preflightBusy ? "Checking…" : "Preflight"}</button>
             <button type="button" disabled={!status.rollbackDepth} onClick={() => void rollbackLastApply()} title={status.rollbackDepth ? "Restore values captured before the last successful Apply" : "No config backup is available yet"}><RotateCcw className="size-3.5" /> Rollback</button>
             <button type="button" onClick={() => setSaveDialog({ mode: "preset", value: activeTab?.name.replace(/\.json$/i, "") ?? "My preset" })}><WandSparkles className="size-3.5" /> Preset</button>
-            <Button size="sm" disabled={busy || !parsed.ok} variant="outline" title="Experimental: writes Roblox process memory. Requires Roblox to be running. No native rollback." onClick={() => void applyFlags("native")}>
-              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} Live Inject
+            <Button className="zflag-action zflag-action-primary" size="sm" disabled={busy || !parsed.ok} variant="outline" title="INJECT • Attempts to apply FastFlags to the running Roblox process using the original C++ native engine. Experimental; no memory rollback." onClick={() => void applyFlags("native")}>
+              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} {busy ? "Injecting…" : "Inject"}
             </Button>
-            <Button size="sm" disabled={busy || !parsed.ok || !status.ready} onClick={() => void applyFlags("manual")}>
-              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} {busy ? "Saving…" : "Save Allowed"}
+            <Button className="zflag-action zflag-action-secondary" size="sm" disabled={busy || !parsed.ok || !status.ready} variant="outline" title="SAVE ALLOWED • Writes only Roblox-allowlisted flags to the local settings file. Restart Roblox to load them." onClick={() => void applyFlags("manual")}>
+              {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Save className="size-3.5" />} {busy ? "Saving…" : "Save Allowed"}
             </Button>
           </div>
         </div>
+        {nativeFeedback && <div role="status" className="native-inject-feedback"><span>LIVE INJECT</span><p>{nativeFeedback}</p><button type="button" title="Dismiss inject result" onClick={() => setNativeFeedback(null)}>×</button></div>}
         <div className="diff-strip">
           <div className="diff-left"><span>Changes vs last apply</span><b className="diff-add">+{diffSummary.added}</b><b className="diff-change">~{diffSummary.changed}</b><b className="diff-remove">-{diffSummary.removed}</b></div>
           <div className="apply-result-summary">
