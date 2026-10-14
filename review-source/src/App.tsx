@@ -1719,6 +1719,23 @@ export default function App() {
     exportText(JSON.stringify(failedObject, null, 2), `${lastApplied.name.replace(/\.json$/i, "")}-failed.json`)
   }
 
+  async function exportCompleteSkippedReport() {
+    if (!parsed.ok) {
+      showToast("Cannot export", "The editor JSON is invalid.", "error")
+      return
+    }
+    const all = await runPreflight(parsed.value, false)
+    if (!all?.ok) return
+    const skipped = all.entries.filter((entry) => !entry.supported || !entry.valid)
+    exportText(JSON.stringify({
+      type: "ZFLAG local compatibility report",
+      note: "This report describes local ClientAppSettings allowlist compatibility, not live injection results.",
+      total: all.total, savedEligible: all.supported, unsupported: all.unsupported, invalid: all.invalid,
+      skipped,
+    }, null, 2), `${(activeTab?.name ?? "profile").replace(/\.json$/i, "")}-all-skipped.json`)
+    showToast("Complete report exported", `${skipped.length.toLocaleString()} skipped local flags, including reasons. Nothing was changed in Roblox.`, "info")
+  }
+
   function analyzeFailedFlagsWithAi() {
     if (!failedResults.length) { showToast("No failed flags", "Apply a profile first, then analyze the failures.", "info"); return }
     const summary = failedResults.slice(0, 120).map((entry) => `${entry.name}: ${entry.message}`).join("\n")
@@ -2384,6 +2401,7 @@ export default function App() {
                   <button className={cn(showUnsupportedOnly && "active")} type="button" onClick={() => setShowUnsupportedOnly((value) => !value)}><ListFilter className="size-3.5" /> Unsupported only</button>
                   <button type="button" onClick={() => void copyFailedFlags()}><Copy className="size-3.5" /> Copy names</button>
                   <button type="button" onClick={exportFailedFlags}><Download className="size-3.5" /> Export failed</button>
+                  {lastApplied?.source !== "native" && <button type="button" disabled={preflightBusy || !parsed.ok} onClick={() => void exportCompleteSkippedReport()}><Download className="size-3.5" /> Full skip report</button>}
                   <button type="button" onClick={analyzeFailedFlagsWithAi}><Bot className="size-3.5" /> Analyze with AI</button>
                 </div>
                 {visibleFailedResults.length === 0 ? <div className="empty-center">No failed flags in the current filter.</div> : <div className="failed-flags-list">{visibleFailedResults.map((entry) => <button type="button" key={`${entry.name}-${entry.message}`} onClick={() => jumpToFlag(entry.name)}><span className="failure-name">{entry.name}</span><span className="failure-reason">{entry.message}</span><span className="failure-jump">Jump ↗</span></button>)}</div>}
