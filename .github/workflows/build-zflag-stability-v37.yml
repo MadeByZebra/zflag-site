@@ -223,12 +223,12 @@ jobs:
           import json
           conf=Path("zflag-source/src-tauri/tauri.conf.json")
           obj=json.loads(conf.read_text(encoding="utf-8"))
-          obj["productName"]="ZFLAG Stability 34"
-          obj["identifier"]="com.zebra.zflag.stabilitytest"
+          obj["productName"]="ZFLAG Stability 37"
+          obj["identifier"]="com.zebra.zflag.stability37"
           obj["app"]["windows"][0]["title"]="ZFLAG"
           bundle=obj.setdefault("bundle",{})
           bundle["publisher"]="Zebra"
-          bundle.setdefault("windows",{}).setdefault("nsis",{})["startMenuFolder"]="ZFLAG Test"
+          bundle.setdefault("windows",{}).setdefault("nsis",{})["startMenuFolder"]="ZFLAG Stability 37"
           bundle["windows"]["nsis"]["installMode"]="currentUser"
           conf.write_text(json.dumps(obj,indent=2)+"\n",encoding="utf-8")
           print("Separate installation identity:",obj["productName"],obj["identifier"])
@@ -318,7 +318,7 @@ jobs:
           Write-Output "Authenticode signature status: $sig"
           $process=Start-Process -FilePath $installer -ArgumentList "/S" -Wait -PassThru
           if ($process.ExitCode -ne 0) { throw "NSIS silent installer exited with $($process.ExitCode)" }
-          $destination=Join-Path $env:LOCALAPPDATA "ZFLAG Stable Test"
+          $destination=Join-Path $env:LOCALAPPDATA "ZFLAG Stability 37"
           foreach($program in @("fflag-studio.exe","fflag-backend.exe","zflag-native.exe")) {
             $path=Join-Path $destination $program
             if (-not (Test-Path $path)) { throw "Installed app missing $path" }
