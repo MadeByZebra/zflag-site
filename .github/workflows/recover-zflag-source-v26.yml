@@ -46,9 +46,9 @@ jobs:
           code=server.read_text(encoding="utf-8")
           start_class=code.index("class Runtime:")
           for name in ("acquire_process","refresh_offsets","preflight","apply","rollback_last"):
-              marker="\\ndef "+name+"("
+              marker=chr(10)+"def "+name+"("
               start=code.index(marker,start_class)+1
-              end_candidates=[p for p in (code.find("\\ndef ",start+1),code.find("\\n    def ",start+1)) if p>=0]
+              end_candidates=[p for p in (code.find(chr(10)+"def ",start+1),code.find(chr(10)+"    def ",start+1)) if p>=0]
               end=min(end_candidates) if end_candidates else len(code)
               block=code[start:end]
               fixed="".join(("    "+line if line.strip() else line) for line in block.splitlines(keepends=True))
