@@ -35,7 +35,7 @@ jobs:
           print("Extracted:",len(files),"files")
           for f in files:
               if f.suffix.lower()==".exe": print(f,f.stat().st_size)
-          main=[x for x in files if x.name.lower()=="zflag.exe"]
+          main=[x for x in files if x.name.lower() in ("fflag-studio.exe","zflag.exe")]
           python=[x for x in files if x.name.lower().startswith("fflag-backend") and x.suffix.lower()==".exe"]
           native=[x for x in files if x.name.lower().startswith("zflag-native") and x.suffix.lower()==".exe"]
           if not main or not python or not native:
@@ -44,9 +44,9 @@ jobs:
           else:
               folder=Path("ZFLAG-Portable-v2.0.26")
               folder.mkdir(exist_ok=True)
-              for name,candidates in (("ZFLAG.exe",main),("fflag-backend.exe",python),("zflag-native.exe",native)):
+              for name,candidates in (("fflag-studio.exe",main),("fflag-backend.exe",python),("zflag-native.exe",native)):
                   shutil.copy2(max(candidates,key=lambda f:f.stat().st_size),folder/name)
-              (folder/"README.txt").write_text("ZFLAG experimental portable v2.0.26\nUnzip the entire folder, then double-click ZFLAG.exe on Windows 10/11 x64.\nKeep both sidecar executables next to ZFLAG.exe.\nWindows WebView2 is required.\nThis is an experimental native-memory injection build; live Roblox functionality has not been verified.\nDon't disable antivirus or Windows security to run this build.\n",encoding="utf-8")
+              (folder/"README.txt").write_text("ZFLAG experimental portable v2.0.26\nUnzip the entire folder, then double-click fflag-studio.exe on Windows 10/11 x64.\nKeep both sidecar executables next to fflag-studio.exe.\nWindows WebView2 is required.\nThis is an experimental native-memory injection build; live Roblox functionality has not been verified.\nDon't disable antivirus or Windows security to run this build.\n",encoding="utf-8")
               with zipfile.ZipFile("ZFLAG-Portable-v2.0.26.zip","w",compression=zipfile.ZIP_DEFLATED,compresslevel=7) as z:
                   for f in folder.rglob("*"):
                       if f.is_file():z.write(f,f.as_posix())
