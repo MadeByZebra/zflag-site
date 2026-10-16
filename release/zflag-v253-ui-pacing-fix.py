@@ -90,7 +90,7 @@ class UI253(unittest.TestCase):
         fn=ui[ui.index('  async function injectLiveBulk() {'):ui.index('  async function stopLiveBulk() {')]
         self.assertNotIn('window.confirm',fn)
         self.assertTrue('confirmed:true' in fn or 'confirmed: true' in fn)
-        self.assertIn('liveBulkStartedAt',fn)
+        self.assertIn('setLiveBulkStartedAt',fn)
     def test_native_batch_safety_preserved(self):
         server=(ROOT/'backend/server.py').read_text(encoding='utf-8')
         self.assertIn('BULK_LIVE_CHUNK = 32',server)
