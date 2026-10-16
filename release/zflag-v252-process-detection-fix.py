@@ -159,9 +159,15 @@ edit('src/App.tsx', '''Manage presets. Large files use safe bulk staging instead
 # Confirm dialog uses real line breaks and hides previous-preset metrics.
 app_file=root/'src/App.tsx'
 app=app_file.read_text(encoding='utf-8')
-start=app.index('    const confirmed = window.confirm(`Inject ${flagCount.toLocaleString()} FastFlags')
-end=app.index('\n    if (!confirmed) return',start)
-app=app[:start]+'''    const confirmed = window.confirm(`Inject ${flagCount.toLocaleString()} FastFlags into running Roblox?\n\nEXPERIMENTAL: flags can freeze or crash the game. The app processes small batches and reports confirmed writes.\n\nOK starts the attempt; Cancel does nothing.`)'''+app[end:]
+start=app.index('    if (!window.confirm("Inject " + flagCount.toLocaleString()')
+end=app.index('\n    setBusy(true)',start)
+app=app[:start]+'''    if (!window.confirm(`Inject ${flagCount.toLocaleString()} FastFlags into Roblox?
+
+EXPERIMENTAL: a flag can freeze or crash the game.
+
+ZFLAG attempts small batches and reports native writes. OK starts the attempt; Cancel does nothing.
+
+Use Stage safe config if you prefer startup settings instead.`)) return'''+app[end:]
 app=app.replace('{lastApplyStats.total > 0 && <div className="apply-progress-row">','{lastApplyStats.total > 0 && lastApplyStats.total === flagCount && !liveBulkActive && <div className="apply-progress-row">',1)
 app_file.write_text(app,encoding='utf-8')
 
