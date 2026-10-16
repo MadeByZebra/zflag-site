@@ -87,9 +87,7 @@ put('src/App.tsx','''      setLiveBulkStartedAt(Date.now())
       setLiveBulkActive(true)''','''      liveBulkOwnerRef.current = activeTab ? { tabId: activeTab.id, name: activeTab.name, content: text } : null
       setLiveBulkStartedAt(Date.now())
       setLiveBulkActive(true)''')
-put('src/App.tsx','''      setLiveBulkActive(false)
-      showToast("Injection not started"''','''      liveBulkOwnerRef.current = null
-      setLiveBulkActive(false)
+put('src/App.tsx','''      showToast("Injection not started"''','''      liveBulkOwnerRef.current = null
       showToast("Injection not started"''')
 put('src/App.tsx','''        if (!state.active) {
           setLiveBulkActive(false)
