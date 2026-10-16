@@ -30,7 +30,7 @@ jobs:
           $encoded = (Get-Content -LiteralPath zflag-desktop-source.b64 -Raw).Trim()
           $bytes = [Convert]::FromBase64String($encoded)
           $actualHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
-          $expectedHash = '5495e2eb675d486e03172a46be09af218e8d1861c351065d2841928e673b212f'
+          $expectedHash = '42bf440ae355664951235c1a7987ecceb68e464e138df09f0b7ba2941c771faa'
           if ($actualHash -ne $expectedHash) { throw "Source integrity mismatch: $actualHash" }
           [IO.File]::WriteAllBytes((Join-Path $PWD 'zflag-desktop-source.zip'), $bytes)
           Expand-Archive -LiteralPath zflag-desktop-source.zip -DestinationPath _work -Force
