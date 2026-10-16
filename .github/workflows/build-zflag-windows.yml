@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'zflag-desktop-source.b64'
+      - 'release/v2.0.44-outcome-ui.patch'
       - 'release/v2.0.41-upgrade-fix.ps1'
       - '.github/workflows/build-zflag-windows.yml'
 
@@ -57,6 +58,19 @@ jobs:
           if ($cfg.version -ne '2.0.43' -or $cfg.app.windows[0].transparent -ne $false) {
             throw '2.0.43 version or opaque WebView configuration invalid'
           }
+      - name: Apply verified partial-success and matte UI patch
+        shell: pwsh
+        run: |
+          $patch = Join-Path $env:GITHUB_WORKSPACE 'release/v2.0.44-outcome-ui.patch'
+          git -C _work/ZFLAG-Studio apply --check $patch
+          if ($LASTEXITCODE -ne 0) { throw 'The verified outcome/UI source patch no longer applies cleanly' }
+          git -C _work/ZFLAG-Studio apply $patch
+          if ($LASTEXITCODE -ne 0) { throw 'Could not apply 2.0.44 fix' }
+          foreach ($path in @('_work/ZFLAG-Studio/package.json','_work/ZFLAG-Studio/src-tauri/tauri.conf.json','_work/ZFLAG-Studio/scripts/smoke-test-installed-app.ps1')) {
+            $contents = Get-Content $path -Raw
+            if (-not $contents.Contains('2.0.43')) { throw "Incorrect version in $path" }
+            $contents.Replace('2.0.43','2.0.44') | Set-Content $path -Encoding utf8
+          }
       - name: Verify UI stability and branding regression tests
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
@@ -66,7 +80,7 @@ jobs:
           $source = Get-Content $integrity -Raw
           if (-not $source.Contains("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)")) { throw 'Unexpected NSIS regression test' }
           $source = $source.Replace("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)", "self.assertIn('NSIS_HOOK_PREINSTALL',hook)")
-          $source = $source.Replace("('2.0.40','2.0.40')", "('2.0.43','2.0.43')")
+          $source = $source.Replace("('2.0.40','2.0.40')", "('2.0.44','2.0.44')")
           $source | Set-Content $integrity -Encoding utf8
           $env:PYTHONUTF8 = '1'
           python -m pip install pytest pillow --disable-pip-version-check -q
@@ -117,7 +131,7 @@ jobs:
         run: ./scripts/smoke-test-installed-app.ps1
       - uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.43-Windows-EXE
+          name: ZFLAG-v2.0.44-Windows-EXE
           path: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
@@ -125,8 +139,8 @@ jobs:
       - name: Publish verified EXE for the website download
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.43
-          name: ZFLAG 2.0.43 for Windows
+          tag_name: v2.0.44
+          name: ZFLAG 2.0.44 for Windows
           body: |
             One-click Windows x64 installer. Download `ZFLAG_Setup.exe`, run it, and launch ZFLAG.
             No .bat, ZIP extraction, or development tools needed.
