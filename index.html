@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#080808" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2730%27 fill=%27%23090909%27/%3E%3Cpath d=%27M32 19 L44 41 H20 Z%27 fill=%27%23f5f5f5%27/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/png" href="./zflag-logo.png" />
+  <link rel="apple-touch-icon" href="./zflag-logo.png" />
   <meta name="application-name" content="ZFLAG" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and upcoming categorized flag library." />
   <meta name="zflag-release" content="2.0.41" />
@@ -142,7 +143,11 @@ html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--pane
 .zflag-install-footer small{color:var(--muted);font-size:11px;line-height:1.6}
 @media(max-width:700px){.zflag-install-steps{grid-template-columns:1fr}.zflag-install-step{min-height:110px}.zflag-install-step h3{margin-top:15px}.zflag-install-heading{align-items:flex-start;flex-direction:column}}
 
-</style>
+
+/* Official ZFLAG metallic-Z image, supplied by the app owner. */
+.zmark{background:#080a10 url('./zflag-logo.png') center/cover no-repeat!important;color:transparent!important;font-size:0!important;border:1px solid rgba(126,159,255,.25)!important;box-shadow:0 0 0 1px rgba(77,109,231,.06)!important}
+.zmark:before,.zmark:after{content:none!important}
+  </style>
 </head>
 <body>
   <header class="nav-shell"><div class="wrap nav">
