@@ -1,0 +1,282 @@
+--- a/native-enhanced/fastflag_injector_gui_enhanced.cpp
++++ b/native-enhanced/fastflag_injector_gui_enhanced.cpp
+@@ -2937,7 +2937,10 @@
+     }
+     close_roblox_processes();
+     if (headless) {
+-        result.AddMember("ok", failures == 0 && successes > 0, allocator);
++        // The batch may partially succeed. Report verified writes separately from failures.
++        result.AddMember("ok", successes > 0, allocator);
++        result.AddMember("complete", successes > 0 && failures == 0, allocator);
++        result.AddMember("partial", successes > 0 && failures > 0, allocator);
+         result.AddMember("applied", successes, allocator);
+         result.AddMember("errors", failures, allocator);
+         result.AddMember("results", details, allocator);
+@@ -2948,7 +2951,9 @@
+         sprintf_s(message, sizeof(message), "Injection complete. Applied: %d, failed: %d", successes, failures);
+         MessageBoxA(nullptr, message, "ZFLAG Injector", MB_OK | (failures ? MB_ICONWARNING : MB_ICONINFORMATION));
+     }
+-    return failures || !successes ? 1 : 0;
++    // A partially successful write operation is not a total transport failure.
++    // The full per-flag results still expose every failed entry.
++    return successes > 0 ? 0 : 1;
+ }
+ 
+ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpCmdLine, int nCmdShow)
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -532,11 +532,25 @@
+                 return {"ok": False, "error": "Native injector result counts do not match the submitted flags", "applied": 0, "errors": 0}
+         elif output.get("ok") or int(output.get("applied", 0)) > 0:
+             return {"ok": False, "error": "Native injector returned success without per-flag evidence", "applied": 0, "errors": 0}
+-        if result.returncode != 0 and output.get("ok"):
+-            return {"ok": False, "error": "Native injector exited with an error despite reporting success", "applied": 0, "errors": 0}
+         applied = int(output.get("applied", 0))
+         errors = int(output.get("errors", 0))
+-        runtime.log(f"Enhanced engine: {applied} applied, {errors} failed · {source}", "success" if applied and not errors else "warning")
++        # A mixed batch is NOT a total failure. Old Enhanced CLI releases used
++        # exit code 1 / ok=false when any individual flag failed. Accept that
++        # legacy partial report ONLY if the validated per-flag rows prove writes.
++        legacy_partial = result.returncode == 1 and applied > 0 and errors > 0 and output.get("ok") is False
++        if result.returncode != 0 and not legacy_partial:
++            return {"ok": False, "error": "Native injector exited abnormally (code %d)" % result.returncode, "applied": 0, "errors": 0}
++        if applied < 0 or errors < 0 or (applied > 0 and not isinstance(details, list)):
++            return {"ok": False, "error": "Unverifiable native injection counts", "applied": 0, "errors": 0}
++        output["ok"] = applied > 0
++        output["complete"] = applied > 0 and errors == 0
++        output["partial"] = applied > 0 and errors > 0
++        output["outcome"] = "applied" if applied and not errors else "partial" if applied else "failed"
++        if applied > 0:
++            # A partial result is not an error at the batch level. Failures stay
++            # visible in results[], counts and optional warning for the UI.
++            output.pop("error", None)
++        runtime.log(f"Enhanced engine: {applied} applied, {errors} failed · {source}", "success" if applied and not errors else "warning" if applied else "error")
+         output["engine"] = "enhanced"
+         return output
+     except subprocess.TimeoutExpired:
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1155,10 +1155,20 @@
+       const raw = await response.text()
+       let result: { ok?: boolean; applied?: number; errors?: number; error?: string | null; rollbackId?: string | null; results?: Array<{ name?: string; ok?: boolean; message?: string; value?: unknown }> } = {}
+       try { result = raw ? JSON.parse(raw) : {} } catch { /* handled below */ }
+-      if (!response.ok || result.ok === false) throw new Error(result.error || `Injection request failed (HTTP ${response.status})`)
+-      const successfulResults = Array.isArray(result.results) ? result.results.filter((entry) => entry?.ok === true).length : 0
+-      const applied = Math.max(Number(result.applied ?? 0) || 0, successfulResults)
+-      const errors = Math.max(Number(result.errors ?? 0) || 0, 0)
++      const resultRows = Array.isArray(result.results) ? result.results : []
++      const successfulResults = resultRows.filter((entry) => entry?.ok === true).length
++      const failedResults = resultRows.filter((entry) => entry?.ok !== true).length
++      // Never infer successful writes from an unverified HTTP response or an
++      // unsubstantiated "ok" property. Backend validates one native row per flag.
++      const applied = resultRows.length ? successfulResults : Math.max(0, Number(result.applied ?? 0) || 0)
++      const errors = resultRows.length ? failedResults : Math.max(0, Number(result.errors ?? 0) || 0)
++      const confirmedPartial = successfulResults > 0 && failedResults > 0
++      if ((!response.ok || result.ok === false) && !confirmedPartial) {
++        throw new Error(result.error || `Injection request failed (HTTP ${response.status})`)
++      }
++      if (resultRows.length && (Number(result.applied ?? 0) !== successfulResults || Number(result.errors ?? 0) !== failedResults)) {
++        throw new Error("Injection result counts did not match individual flag results")
++      }
+       const normalizedResults: ApplyResultEntry[] = Array.isArray(result.results) ? result.results.map((entry) => ({
+         name: String(entry.name || "UnknownFlag"),
+         ok: entry.ok === true,
+@@ -1172,7 +1182,7 @@
+       }
+       setApplyHistory((current) => [snapshot, ...current].slice(0, 50))
+       if (applied > 0) {
+-        showToast(errors ? "Applied with skips" : "Configuration applied", errors ? `${applied} applied · ${errors} skipped/failed` : `${applied} flag${applied === 1 ? "" : "s"} applied`, errors ? "warning" : "success")
++        showToast(errors ? "Partially applied" : "Configuration applied", errors ? `${applied} applied · ${errors} failed — review individual flags` : `${applied} flag${applied === 1 ? "" : "s"} applied`, errors ? "warning" : "success")
+         if (errors > 0) {
+           setEditorBottomTab("failures")
+           setBottomPanelOpen(true)
+@@ -2284,7 +2294,7 @@
+   function renderEditor() {
+     return (
+       <div className={cn("editor-layout", bottomPanelMaximized && "bottom-maximized")}>
+-        <div className="editor-toolbar">
++        <div className="editor-toolbar zflag-commandbar">
+           <div className="toolbar-left">
+             <button type="button" onClick={() => newTab()}><FilePlus2 className="size-3.5" /> New</button>
+             <button type="button" onClick={() => fileInput.current?.click()}><FolderOpen className="size-3.5" /> Open</button>
+@@ -2313,13 +2323,13 @@
+               </button>
+             </div>
+           </div>
+-          <div className="toolbar-right">
++          <div className="toolbar-right zflag-inject-group">
+             <button type="button" onClick={() => { setCompareLeftId("current"); setCompareRightId(savedConfigs[0]?.id ?? "current"); setCompareOpen(true) }}><GitCompareArrows className="size-3.5" /> Compare</button>
+             <button type="button" disabled={preflightBusy || !parsed.ok || !status.ready || settings.injectionEngine === "enhanced"} title={settings.injectionEngine === "enhanced" ? "Offset-based preflight belongs to the original engine" : !parsed.ok ? "Fix invalid JSON first" : !status.ready ? "Offsets are not ready yet" : "Validate flags before injection"} onClick={() => void runPreflight()}><ScanSearch className="size-3.5" /> {preflightBusy ? "Checking…" : "Preflight"}</button>
+             <button type="button" disabled={!status.rollbackDepth || settings.injectionEngine === "enhanced"} onClick={() => void rollbackLastApply()} title={status.rollbackDepth ? "Restore values captured before the last successful Apply" : "No rollback snapshot is available yet"}><RotateCcw className="size-3.5" /> Rollback</button>
+             <button type="button" onClick={() => setSaveDialog({ mode: "preset", value: activeTab?.name.replace(/\.json$/i, "") ?? "My preset" })}><WandSparkles className="size-3.5" /> Preset</button>
+             <span className="inject-engine-label" title="Runtime engine · change in Settings → General">{settings.injectionEngine === "enhanced" ? "ENHANCED" : "OFFSETS"}</span>
+-            <Button className="zflag-inject-button" size="sm" disabled={busy || !parsed.ok || (settings.injectionEngine === "original" ? (!status.connected || !status.ready) : !status.enhancedAvailable)} onClick={() => void applyFlags("manual")}>
++            <Button className="zflag-inject-button zflag-control-primary" size="sm" aria-label={busy ? "Applying FastFlags" : "Inject FastFlags"} title={!parsed.ok ? "Invalid JSON" : settings.injectionEngine === "enhanced" && !status.enhancedAvailable ? "Waiting for Enhanced engine" : "Apply current FastFlags"} disabled={busy || !parsed.ok || (settings.injectionEngine === "original" ? (!status.connected || !status.ready) : !status.enhancedAvailable)} onClick={() => void applyFlags("manual")}>
+               {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Play className="size-3.5" />} {busy ? "Injecting…" : "Inject"}
+             </Button>
+           </div>
+--- a/src/index.css
++++ b/src/index.css
+@@ -2677,3 +2677,54 @@
+ .app-shell:not(.theme-light) :is(input,select,textarea){color:#e6e7ea;}
+ .app-shell:not(.theme-light) :is(.search-box,.library-search){background:#141619;border:1px solid #2c3037;}
+ @media(prefers-reduced-motion:reduce){.app-shell *, .app-shell *::after, .app-shell *::before{transition:none!important;animation:none!important;}}
++
++/* v2.0.44: Single command surface, shared matte component tokens. These rules
++   intentionally override earlier experimental pastel/high-glow Inject styles. */
++.app-shell:not(.theme-light) {
++  --z-control-bg:#17191c; --z-control-hover:#23262b; --z-control-border:#2a2d32;
++  --z-control-foreground:#c8cdd5; --z-control-focus:#a5b2c6;
++}
++.app-shell:not(.theme-light) .zflag-commandbar {
++  display:flex; align-items:center; gap:12px; min-height:54px; padding:8px 13px;
++  border-bottom:1px solid #25282c!important; background:#101113!important;
++}
++.app-shell:not(.theme-light) .zflag-commandbar :is(.toolbar-left,.toolbar-right) { gap:6px; align-items:center; }
++.app-shell:not(.theme-light) .zflag-commandbar button:not(.zflag-inject-button),
++.app-shell:not(.theme-light) .zflag-inject-group button:not(.zflag-inject-button) {
++  min-height:32px; height:32px; padding:0 11px; border:1px solid transparent!important;
++  border-radius:7px!important; background:transparent!important; color:#a8adb5!important;
++  font-family:Inter,'Segoe UI',system-ui,sans-serif!important; font-size:11px!important;
++  font-weight:550!important; letter-spacing:0!important; text-shadow:none!important;
++  box-shadow:none!important; transform:none!important; transition:color 130ms ease,background-color 130ms ease,border-color 130ms ease!important;
++}
++.app-shell:not(.theme-light) .zflag-commandbar button:not(.zflag-inject-button):hover:not(:disabled){background:#1e2125!important;color:#f0f1f2!important;border-color:#33363b!important;}
++.app-shell:not(.theme-light) .zflag-commandbar .inject-engine-label {
++  font-family:Inter,'Segoe UI',system-ui,sans-serif!important; font-size:9px!important;
++  letter-spacing:.08em!important; border-radius:6px!important; color:#b7bcc4!important;
++  background:#191b20!important; border:1px solid #2a2d32!important; padding:7px 9px!important;
++}
++.app-shell:not(.theme-light) .zflag-commandbar .zflag-inject-button {
++  display:inline-flex!important; align-items:center!important; justify-content:center!important;
++  min-width:104px!important; height:34px!important; min-height:34px!important;
++  background:#1e2125!important; color:#e8e9ec!important; border:1px solid #4b5159!important;
++  padding:0 14px!important; border-radius:7px!important; font:600 11.5px/1 Inter,'Segoe UI',system-ui,sans-serif!important;
++  box-shadow:none!important; text-shadow:none!important; letter-spacing:0!important;
++  transition:background-color 140ms ease,border-color 140ms ease,color 140ms ease!important;
++}
++.app-shell:not(.theme-light) .zflag-commandbar .zflag-inject-button:hover:not(:disabled){background:#2c3036!important;color:#fff!important;border-color:#747b86!important;transform:none!important;box-shadow:none!important;}
++.app-shell:not(.theme-light) .zflag-commandbar .zflag-inject-button:disabled{background:#1b1d20!important;color:#777e88!important;border-color:#292c30!important;opacity:1!important;}
++.app-shell:not(.theme-light) :is(.zflag-control,.library-primary,.library-secondary,.settings-footer-actions button,.agent-send) {
++  font-family:Inter,'Segoe UI',system-ui,sans-serif!important; border-radius:7px!important; box-shadow:none!important;
++  text-shadow:none!important; background-image:none!important;
++}
++.app-shell:not(.theme-light) :is(.settings-footer-actions button,.library-secondary,.agent-send) {
++  background:#1b1d21!important; color:#c9cdd4!important; border:1px solid #30343a!important;
++}
++.app-shell:not(.theme-light) :is(.settings-footer-actions button,.library-secondary,.agent-send):hover:not(:disabled) {
++  background:#292c31!important; color:#fff!important; border-color:#474b53!important;
++}
++.app-shell:not(.theme-light) .settings-footer-actions button:last-child,
++.app-shell:not(.theme-light) .library-primary {
++  background:#c7cbd3!important; color:#16191d!important; border:1px solid #c7cbd3!important;
++}
++@media (prefers-reduced-motion:reduce){.zflag-commandbar *{animation:none!important; transition:none!important;}}
+--- a/src/components/ui/button.tsx
++++ b/src/components/ui/button.tsx
+@@ -3,13 +3,13 @@
+ import { cn } from "@/lib/utils"
+ 
+ const buttonVariants = cva(
+-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
++  "zflag-control inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60",
+   {
+     variants: {
+       variant: {
+-        default: "bg-primary text-primary-foreground shadow-sm hover:-translate-y-px hover:bg-primary/90 active:translate-y-0",
+-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+-        outline: "border border-border bg-background/70 hover:-translate-y-px hover:bg-accent hover:text-accent-foreground active:translate-y-0",
++        default: "zflag-control-primary bg-primary text-primary-foreground hover:bg-primary/90",
++        secondary: "zflag-control-secondary bg-secondary text-secondary-foreground hover:bg-secondary/80",
++        outline: "zflag-control-outline border border-border bg-background/70 hover:bg-accent hover:text-accent-foreground",
+         ghost: "hover:bg-accent hover:text-accent-foreground",
+         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+       },
+--- a/tests/test_zflag_integration.py
++++ b/tests/test_zflag_integration.py
+@@ -56,6 +56,8 @@
+         self.assertNotIn('lookup_entry(proc,', cli)
+         self.assertIn('g_OffsetsMap.clear();', cli)
+         self.assertIn('details.PushBack(entry, allocator)', cli)
++        self.assertIn('result.AddMember("ok", successes > 0, allocator)', cli)
++        self.assertIn('result.AddMember("partial", successes > 0 && failures > 0, allocator)', cli)
+ 
+     def test_no_forced_browser_open_and_no_stale_exe(self):
+         self.assertNotIn('ShellExecuteA(NULL, "open", "https://guns.lol', NATIVE)
+@@ -91,7 +93,27 @@
+         apply, _ = get_adapter(report=report, code=1)
+         result = apply({'FFlagA': True, 'FFlagB': False})
+         self.assertEqual((result['applied'], result['errors']), (1, 1))
++        self.assertTrue(result['ok'])
++        self.assertTrue(result['partial'])
++        self.assertFalse(result['complete'])
++        self.assertEqual(result['outcome'], 'partial')
++
++    def test_native_partial_success_is_not_reported_as_failed(self):
++        report = {'ok': True, 'applied': 1, 'errors': 1, 'partial': True,
++                  'results': [{'name': 'FFlagA', 'ok': True}, {'name': 'FFlagB', 'ok': False}]}
++        apply, _ = get_adapter(report=report, code=0)
++        result = apply({'FFlagA': True, 'FFlagB': False})
++        self.assertTrue(result['ok'])
++        self.assertTrue(result['partial'])
++        self.assertEqual(len(result['results']), 2)
++
++    def test_total_failure_stays_failed(self):
++        report = {'ok': False, 'applied': 0, 'errors': 2,
++                  'results': [{'name': 'FFlagA', 'ok': False}, {'name': 'FFlagB', 'ok': False}]}
++        apply, _ = get_adapter(report=report, code=1)
++        result = apply({'FFlagA': True, 'FFlagB': False})
+         self.assertFalse(result['ok'])
++        self.assertEqual(result['applied'], 0)
+ 
+     def test_unsubstantiated_success_rejected(self):
+         apply, _ = get_adapter(report={'ok': True, 'applied': 1, 'errors': 0, 'results': []})
+--- a/tests/test_design_system_243.py
++++ b/tests/test_design_system_243.py
+@@ -22,7 +22,7 @@
+ 
+ def test_apply_checks_http_and_native_result_before_success_and_displays_failures():
+     app=(ROOT/'src/App.tsx').read_text(encoding='utf-8')
+-    assert 'if (!response.ok || result.ok === false)' in app
++    assert 'const confirmedPartial = successfulResults > 0 && failedResults > 0' in app
+     assert 'if (errors > 0)' in app
+     assert 'setEditorBottomTab("failures")' in app
+     assert 'value.enhancedAvailable ? 1 : 0' in app
+--- /dev/null
++++ b/tests/test_inject_outcome_244.py
+@@ -0,0 +1,35 @@
++"""Protect batch-result truthfulness and the visual Inject control contract."""
++from pathlib import Path
++ROOT = Path(__file__).resolve().parents[1]
++
++def test_native_partial_success_has_distinct_outcome_and_exit_code():
++    text=(ROOT/'native-enhanced/fastflag_injector_gui_enhanced.cpp').read_text(encoding='utf-8')
++    code=text.split('int CommandLineInject(',1)[1].split('int WINAPI WinMain(',1)[0]
++    assert 'result.AddMember("ok", successes > 0, allocator)' in code
++    assert 'result.AddMember("partial", successes > 0 && failures > 0, allocator)' in code
++    assert 'return successes > 0 ? 0 : 1;' in code
++    assert 'details.PushBack(entry, allocator)' in code
++
++def test_app_does_not_claim_partial_batch_fully_failed():
++    text=(ROOT/'src/App.tsx').read_text(encoding='utf-8')
++    assert 'confirmedPartial = successfulResults > 0 && failedResults > 0' in text
++    assert 'if ((!response.ok || result.ok === false) && !confirmedPartial)' in text
++    assert 'showToast(errors ? "Partially applied" : "Configuration applied"' in text
++    assert 'Injection result counts did not match individual flag results' in text
++
++def test_matched_button_design_and_busy_control():
++    text=(ROOT/'src/App.tsx').read_text(encoding='utf-8')
++    css=(ROOT/'src/index.css').read_text(encoding='utf-8')
++    shared=(ROOT/'src/components/ui/button.tsx').read_text(encoding='utf-8')
++    assert 'zflag-commandbar' in text and 'zflag-inject-group' in text
++    assert 'zflag-control-primary' in text
++    assert 'v2.0.44: Single command surface' in css
++    assert '.zflag-commandbar .zflag-inject-button' in css
++    assert 'zflag-control inline-flex' in shared
++    assert 'if (applyingNowRef.current) return false' in text
++
++def test_no_writes_without_verifiable_per_flag_evidence():
++    backend=(ROOT/'backend/server.py').read_text(encoding='utf-8')
++    assert 'Native injector result counts do not match the submitted flags' in backend
++    assert 'Native injector returned success without per-flag evidence' in backend
++    assert 'output["outcome"] = "applied" if applied and not errors else "partial" if applied else "failed"' in backend
