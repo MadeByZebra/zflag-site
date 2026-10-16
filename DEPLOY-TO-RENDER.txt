@@ -1,17 +1,17 @@
 ZFLAG — public release and website deployment
 
-Current public version: 2.0.40
+Current public version: 2.0.41
 Direct standalone EXE:
-https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.40/ZFLAG_Setup.exe
+https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.41/ZFLAG_Setup.exe
 
-Installer size (bytes): 13460521
-SHA-256: cd7bc2b7922fcff27513f8ea98b46cb8c7fad9459563ed1364d6023cb67374f1
+Installer size (bytes): 13467160
+SHA-256: f4345518f0e69f1bab529a034f724d99a0926b08fd25ddddde9c64e504559de6
 
 A real Windows GitHub Actions runner successfully compiled the C++ Enhanced
 injector and Python backend, built a Tauri NSIS installer, silently installed
 the application, verified old ZFLAG shortcut replacement, verified installed
 shortcut targets, and launched the backend from the installed folder.
-See: https://github.com/MadeByZebra/zflag-site/actions/runs/38859855928
+See: https://github.com/MadeByZebra/zflag-site/actions/runs/38861527875
 
 Live Roblox injection was NOT verified by GitHub Actions.
 The installer is unsigned; Windows SmartScreen may display a warning.
@@ -25,3 +25,5 @@ commit to main; otherwise deploy the latest commit in Render dashboard.
 
 FOR USERS: DOWNLOAD -> RUN EXE -> INSTALL -> OPEN
 NO .BAT/.CMD FILES OR DEVELOPMENT TOOLS ARE REQUIRED.
+
+ZFLAG v2.0.41 additionally passes a Windows regression test that installs again while its own GUI and backend are still running, then verifies the locked backend was replaced and restarted.
