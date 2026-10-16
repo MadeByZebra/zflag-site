@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - 'zflag-desktop-source.b64'
+      - 'release/v2.0.41-upgrade-fix.ps1'
+      - '.github/workflows/build-zflag-windows.yml'
 
 permissions:
   contents: write
@@ -35,6 +37,9 @@ jobs:
           if (-not (Test-Path '_work/ZFLAG-Studio/.github/workflows/release-windows.yml')) { throw 'The ZIP does not contain the complete ZFLAG Studio release source.' }
           $conf = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
           if ($conf.version -ne '2.0.40') { throw "Unexpected installer release version: $($conf.version)" }
+      - name: Patch installer to close locked ZFLAG backends on upgrade
+        shell: pwsh
+        run: ./release/v2.0.41-upgrade-fix.ps1
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -79,7 +84,7 @@ jobs:
         run: ./scripts/smoke-test-installed-app.ps1
       - uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.40-Windows-EXE
+          name: ZFLAG-v2.0.41-Windows-EXE
           path: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
@@ -87,12 +92,14 @@ jobs:
       - name: Publish verified EXE for the website download
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.40
-          name: ZFLAG 2.0.40 for Windows
+          tag_name: v2.0.41
+          name: ZFLAG 2.0.41 for Windows
           body: |
             One-click Windows x64 installer. Download `ZFLAG_Setup.exe`, run it, and launch ZFLAG.
             No .bat, ZIP extraction, or development tools needed.
-            Installer and local backend integration passed automated Windows checks. Live in-game Roblox FastFlag injection is not certified by CI.
+            Installer and local backend integration passed automated Windows checks, including a reinstallation while the ZFLAG GUI and backend are still running.
+            Fixes error opening fflag-backend.exe for writing during upgrades.
+            Live in-game Roblox FastFlag injection is not certified by CI.
             Unsigned EXE: Windows SmartScreen may warn.
           files: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
