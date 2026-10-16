@@ -1,19 +1,27 @@
-ZFLAG — Render deployment files
+ZFLAG — public release and website deployment
 
-Keep these files together in the root of your GitHub repository:
-  index.html
-  ZFLAG-Setup-v2.0.25.exe
-  render.yaml
+Current public version: 2.0.40
+Direct standalone EXE:
+https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.40/ZFLAG_Setup.exe
 
-Installer SHA-256:
-40e9bb0ea2de7523c004e58d2ff9dea3cbc04a4fe46bfb4ecf05cf6d9dd7a7a6
+Installer size (bytes): 13460521
+SHA-256: cd7bc2b7922fcff27513f8ea98b46cb8c7fad9459563ed1364d6023cb67374f1
 
-Installer size (bytes):
-13059660
+A real Windows GitHub Actions runner successfully compiled the C++ Enhanced
+injector and Python backend, built a Tauri NSIS installer, silently installed
+the application, verified old ZFLAG shortcut replacement, verified installed
+shortcut targets, and launched the backend from the installed folder.
+See: https://github.com/MadeByZebra/zflag-site/actions/runs/38859855928
 
-Every visible Download button in index.html is wired directly to:
-  ZFLAG-Setup-v2.0.25.exe
+Live Roblox injection was NOT verified by GitHub Actions.
+The installer is unsigned; Windows SmartScreen may display a warning.
 
-The render.yaml also sends Content-Disposition: attachment for the installer,
-so browsers download it instead of attempting to display it.
+The download buttons in index.html now use the direct GitHub release URL above
+rather than the old in-repository 2.0.25 EXE. This works with Render static
+hosting: no binaries or command-line tools need to run on Render.
 
+If Render has automatic deploy enabled, the site should update after the new
+commit to main; otherwise deploy the latest commit in Render dashboard.
+
+FOR USERS: DOWNLOAD -> RUN EXE -> INSTALL -> OPEN
+NO .BAT/.CMD FILES OR DEVELOPMENT TOOLS ARE REQUIRED.
