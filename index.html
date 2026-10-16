@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#080808" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2730%27 fill=%27%23090909%27/%3E%3Cpath d=%27M32 19 L44 41 H20 Z%27 fill=%27%23f5f5f5%27/%3E%3C/svg%3E" />
   <meta name="application-name" content="ZFLAG" />
+  <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and upcoming categorized flag library." />
   <meta name="zflag-release" content="2.0.25" />
   <title>ZFLAG — FFlag control, refined.</title>
   <meta name="description" content="ZFLAG is a focused Windows FFlag configuration utility built for fast editing, presets, import/export, and launch control." />
@@ -95,12 +96,33 @@
     @media(max-width:1100px){.studio-titlebar{padding-left:12px}.studio-runtime{display:none}}
     @media(max-width:650px){.studio-layout{grid-template-columns:105px minmax(0,1fr)}.studio-sidenav{padding:10px 6px}.studio-nav-entry{padding:9px 5px;font-size:9px}.studio-wordmark small,.studio-credit{display:none}.studio-body{padding:12px 9px}.studio-metrics{grid-template-columns:1fr}.studio-metrics>div:not(:first-child){display:none}.studio-titlebar-center{font-size:10px}.studio-actions>div{height:37px}}
 
+  
+/* Bklit-inspired ZFLAG studio landing refresh */
+:root{--app-accent:#a6b0ff;--bg:#0b0c10;--bg-2:#0f1117;--panel:#13151d;--panel-2:#181b25;--raised:#1e2230;--line:#282c39;--line-2:#404759;--button:#d9dfff;--button-text:#171a2a;--glass:rgba(14,16,23,.82)}
+html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--panel:#fff;--panel-2:#f3f5fb;--raised:#ecf0f9;--line:#dce0ec;--line-2:#c8cede;--button:#242d5b;--button-text:#fff;--glass:rgba(248,250,255,.87)}
+.nav,.btn,.iconbtn,.modal-card,.app-window{border-radius:12px}
+.btn.primary{background:linear-gradient(135deg,var(--button),color-mix(in srgb,var(--button) 78%,var(--app-accent)));box-shadow:0 7px 28px rgba(128,144,255,.16)}
+.app-window{box-shadow:0 28px 90px rgba(0,0,0,.47),0 0 80px rgba(115,130,255,.09)}
+.site-library-section{padding:96px 0;background:radial-gradient(650px 500px at 82% 12%,rgba(130,146,255,.075),transparent 70%);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.site-library-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:60px;align-items:center}
+.site-library-copy h2{font-size:clamp(42px,5.5vw,74px);line-height:1;letter-spacing:-.055em;margin:22px 0}
+.site-library-copy h2 span{color:var(--app-accent)}.site-library-copy p{color:var(--muted);font-size:15px;line-height:1.75;max-width:480px}
+.site-library-steps{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}.site-library-steps span{font-size:11px;border-radius:9px;padding:10px 12px;border:1px solid var(--line);background:var(--panel)}
+.site-library-copy .site-library-note{font-size:11px;color:var(--soft);margin-top:25px}
+.site-library-preview{border:1px solid var(--line-2);border-radius:17px;padding:18px;background:linear-gradient(145deg,var(--panel-2),var(--bg-2));box-shadow:0 26px 80px rgba(0,0,0,.19)}
+.site-library-preview-header{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:11px;font-weight:650;letter-spacing:.09em}.site-library-preview-header span{font-size:10px;font-weight:500;color:var(--app-accent)}
+.site-library-search{padding:13px;margin:20px 0 11px;border:1px solid var(--line);border-radius:9px;color:var(--muted);font-size:11px}
+.site-library-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}.site-library-tabs i{font-size:10px;font-style:normal;border-radius:7px;border:1px solid var(--line);padding:7px 9px;color:var(--muted)}.site-library-tabs i:first-child{background:var(--raised);color:var(--text)}
+.site-library-row{display:flex;justify-content:space-between;align-items:center;padding:16px 6px;gap:16px;border-top:1px solid var(--line)}.site-library-row b{font:500 12px monospace;overflow-wrap:anywhere}.site-library-row small{display:block;margin-top:6px;font-size:10px;color:var(--muted)}.site-library-row>span{font:11px monospace;color:var(--app-accent)}
+.site-library-foot{background:var(--button);color:var(--button-text);padding:13px;border-radius:9px;font-weight:650;font-size:11px;margin-top:13px}
+@media(max-width:930px){.site-library-grid{grid-template-columns:1fr;gap:28px}.site-library-section{padding:68px 0}}
+
   </style>
 </head>
 <body>
   <header class="nav-shell"><div class="wrap nav">
     <a class="brand" href="#home"><span class="zmark">Z</span><span>ZFLAG</span></a>
-    <nav class="navlinks"><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#why" data-i18n="nav.why">Why ZFLAG</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
+    <nav class="navlinks"><a href="#library-next">Next: Flag Library</a><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#why" data-i18n="nav.why">Why ZFLAG</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
     <div class="nav-actions"><button class="iconbtn lang-top" id="languageTop" aria-label="Select language" data-tooltip="Language"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></button><button class="iconbtn" id="themeToggle" aria-label="Toggle website theme">◐</button><button class="btn primary" data-download data-i18n="nav.download">Download</button></div>
   </div></header>
 
@@ -191,6 +213,28 @@
         <div class="faq-item"><button class="faq-q"><span data-i18n="faq.q4">What platform is the included installer for?</span><span>+</span></button><div class="faq-a" data-i18n="faq.a4">The download packaged with this site is the Windows x64 installer.</div></div>
       </div>
     </div></section>
+
+    
+    <section class="site-library-section" id="library-next">
+      <div class="wrap site-library-grid">
+        <div class="site-library-copy reveal">
+          <div class="eyebrow">Next in ZFLAG · v2.0.40 preview</div>
+          <h2>A library for<br><span>every flag.</span></h2>
+          <p>The next ZFLAG desktop release adds a searchable library of 2,199 unique FastFlag entries imported from your supplied lists, organized by Rendering, Physics, Networking, UI and more, with a focused draft builder and AI-assisted workflows.</p>
+          <div class="site-library-steps"><span>Search</span><span>Filter by category</span><span>Build a draft</span><span>Review before applying</span></div>
+          <p class="site-library-note">Preview only: v2.0.40 installer is still being built. The current download remains v2.0.25. Imported flags are not guaranteed to work with current Roblox.</p>
+        </div>
+        <div class="site-library-preview reveal" aria-label="Preview of the upcoming FastFlag library">
+          <div class="site-library-preview-header">✦ ZFLAG / FLAG LIBRARY <span>2,199 ENTRIES</span></div>
+          <div class="site-library-search">⌕ &nbsp; Search flags, categories, descriptions...</div>
+          <div class="site-library-tabs"><i>All</i><i>Rendering</i><i>Physics</i><i>Networking</i></div>
+          <div class="site-library-row"><div><b>DFIntTaskSchedulerTargetFps</b><small>Rendering · documented reference</small></div><span>240 &nbsp; +</span></div>
+          <div class="site-library-row"><div><b>FFlagDebugGraphicsPreferD3D12</b><small>Rendering · unverified import</small></div><span>true &nbsp; +</span></div>
+          <div class="site-library-row"><div><b>DFFlagDisableDPIScale</b><small>Rendering · documented reference</small></div><span>true &nbsp; +</span></div>
+          <div class="site-library-foot">Build in ZFLAG Editor ↗</div>
+        </div>
+      </div>
+    </section>
 
     <section class="cta"><div class="wrap cta-box reveal"><div class="kicker">ZFLAG v2.0.25</div><h2 data-i18n="cta.title">Ready when you are.</h2><p data-i18n="cta.body">Install ZFLAG for Windows and keep your FFlag workflow in one place.</p><div class="cta-actions"><button class="btn primary" data-download data-i18n="cta.download">Download ZFLAG</button><a class="btn" href="#product" data-i18n="cta.view">View product</a></div><div class="download-note">Windows 10 / 11 · x64 · Prebuilt installer · no developer toolchain required</div></div></section>
   <section id="compatibility-note-2026" class="section" style="padding:38px 0" aria-label="Roblox FastFlag compatibility"><div class="wrap" style="border:1px solid var(--line);padding:22px;border-radius:10px;background:var(--panel)"><div class="kicker">Roblox compatibility · October 2026</div><p style="font-size:14px;line-height:1.6;color:var(--muted)">ZFLAG 2.0.25 detects Roblox without requesting memory-writing access, checks large JSON presets, and saves <strong>Roblox-allowlisted local FastFlags</strong> to ClientAppSettings.json. Restart Roblox after applying. Roblox ignores non-allowlisted flags. This release does not bypass client protections or inject arbitrary memory flags.</p><a class="text-link" href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569/">Roblox official policy</a></div></section>
