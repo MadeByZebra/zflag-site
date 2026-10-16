@@ -1,17 +1,17 @@
 ZFLAG — public release and website deployment
 
-Current public version: 2.0.41
+Current public version: 2.0.42
 Direct standalone EXE:
-https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.41/ZFLAG_Setup.exe
+https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.42/ZFLAG_Setup.exe
 
-Installer size (bytes): 13467160
-SHA-256: f4345518f0e69f1bab529a034f724d99a0926b08fd25ddddde9c64e504559de6
+Installer size (bytes): 13727373
+SHA-256: a967909f8c5f6828e29e3c46d900fd251cbaa1b896bbf6054f7898fb57b90667
 
 A real Windows GitHub Actions runner successfully compiled the C++ Enhanced
 injector and Python backend, built a Tauri NSIS installer, silently installed
 the application, verified old ZFLAG shortcut replacement, verified installed
 shortcut targets, and launched the backend from the installed folder.
-See: https://github.com/MadeByZebra/zflag-site/actions/runs/38861527875
+See: https://github.com/MadeByZebra/zflag-site/actions/runs/38865411587
 
 Live Roblox injection was NOT verified by GitHub Actions.
 The installer is unsigned; Windows SmartScreen may display a warning.
@@ -26,4 +26,6 @@ commit to main; otherwise deploy the latest commit in Render dashboard.
 FOR USERS: DOWNLOAD -> RUN EXE -> INSTALL -> OPEN
 NO .BAT/.CMD FILES OR DEVELOPMENT TOOLS ARE REQUIRED.
 
-ZFLAG v2.0.41 additionally passes a Windows regression test that installs again while its own GUI and backend are still running, then verifies the locked backend was replaced and restarted.
+ZFLAG v2.0.42 additionally passes a Windows regression test that installs again while its own GUI and backend are still running, then verifies the locked backend was replaced and restarted.
+
+The v2.0.42 release uses the owner's blue metallic Z artwork across the desktop app, installer, shortcut and website icon. Desktop fixes include an opaque Windows WebView2 surface, less expensive CSS effects and safer polling/apply request behavior. Automated Windows installation passed; live Roblox memory injection and user-specific GPU flickering remain untested.
