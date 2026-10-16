@@ -4,7 +4,7 @@ This repository contains the [ZFLAG desktop website](index.html), its Render sta
 
 ## Download for Windows 10/11 (x64)
 
-**[Download ZFLAG_Setup.exe — v2.0.41](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.41/ZFLAG_Setup.exe)**
+**[Download ZFLAG_Setup.exe — v2.0.42](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.42/ZFLAG_Setup.exe)**
 
 - One standalone **.exe installer** for end users: download → install → open.
 - No BAT, CMD, PowerShell, ZIP extraction, Python, Rust, Node.js, or Visual Studio required for people installing it.
@@ -14,9 +14,9 @@ This repository contains the [ZFLAG desktop website](index.html), its Render sta
 - Windows SmartScreen may warn because the installer is **unsigned**.
 - Actual in-game Roblox FastFlag injection **was not tested in CI**. Roblox updates may change what flags are supported.
 
-SHA-256: `f4345518f0e69f1bab529a034f724d99a0926b08fd25ddddde9c64e504559de6`.
+SHA-256: `a967909f8c5f6828e29e3c46d900fd251cbaa1b896bbf6054f7898fb57b90667`.
 
-Build run: [Windows CI #38861527875](https://github.com/MadeByZebra/zflag-site/actions/runs/38861527875). Release: [v2.0.41](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.41).
+Build run: [Windows CI #38865411587](https://github.com/MadeByZebra/zflag-site/actions/runs/38865411587). Release: [v2.0.42](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.42).
 
 ## Website and hosting
 
@@ -30,4 +30,6 @@ For an existing connected Render service with auto-deploy enabled, pushing to `m
 
 Source/build scripts are **maintainer-only** and are not part of the installer workflow exposed to downloaders.
 
-ZFLAG v2.0.41 additionally passes a Windows regression test that installs again while its own GUI and backend are still running, then verifies the locked backend was replaced and restarted.
+ZFLAG v2.0.42 additionally passes a Windows regression test that installs again while its own GUI and backend are still running, then verifies the locked backend was replaced and restarted.
+
+The v2.0.42 release uses the owner's blue metallic Z artwork across the desktop app, installer, shortcut and website icon. Desktop fixes include an opaque Windows WebView2 surface, less expensive CSS effects and safer polling/apply request behavior. Automated Windows installation passed; live Roblox memory injection and user-specific GPU flickering remain untested.
