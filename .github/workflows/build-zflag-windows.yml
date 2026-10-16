@@ -62,6 +62,10 @@ jobs:
         shell: pwsh
         run: |
           $patch = Join-Path $env:GITHUB_WORKSPACE 'release/v2.0.44-outcome-ui.patch'
+          # The extracted desktop project is nested inside the website repo.
+          # Give it its own Git root so 'git apply' is not anchored at the website.
+          git -C _work/ZFLAG-Studio init --quiet
+          if ($LASTEXITCODE -ne 0) { throw 'Could not isolate desktop patch workspace' }
           git -C _work/ZFLAG-Studio apply --check $patch
           if ($LASTEXITCODE -ne 0) { throw 'The verified outcome/UI source patch no longer applies cleanly' }
           git -C _work/ZFLAG-Studio apply $patch
