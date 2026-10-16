@@ -147,7 +147,17 @@ html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--pane
 /* Official ZFLAG metallic-Z image, supplied by the app owner. */
 .zmark{background:#080a10 url('./zflag-logo.png') center/cover no-repeat!important;color:transparent!important;font-size:0!important;border:1px solid rgba(126,159,255,.25)!important;box-shadow:0 0 0 1px rgba(77,109,231,.06)!important}
 .zmark:before,.zmark:after{content:none!important}
-  </style>
+  
+/* Official understated silver-Z and unified desktop-inspired UI. */
+:root{--app-accent:#b8c0d0;--button:#c6cbd6;--button-text:#17191e;--bg:#0b0c0e;--bg-2:#101113;--panel:#121416;--panel-2:#16181b;--raised:#1e2024;--line:#272a30;--line-2:#393e46;--glass:rgba(15,17,19,.96);}
+html[data-theme="light"]{--app-accent:#535b68;--button:#272d37;--button-text:#fff;--bg:#f5f6f7;--bg-2:#e9ebef;--panel:#fff;--panel-2:#f3f4f5;--raised:#e9ebee;--line:#dcdee3;--line-2:#aeb4bf;--glass:rgba(248,249,251,.96);}
+.btn,.iconbtn,.zmark,.site-library-preview,.zflag-install-wrap,.modal-card{border-radius:9px!important;box-shadow:none!important;}
+.btn.primary,html[data-theme=dark] .btn.primary{background:var(--button)!important;color:var(--button-text)!important;border:1px solid var(--button)!important;box-shadow:none!important;font-weight:650!important;}
+.btn.primary:hover{filter:brightness(1.085);transform:translateY(-1px)!important;box-shadow:none!important;}
+.zmark{background:#0b0c0e url('./zflag-logo.png') center/cover no-repeat!important;border:1px solid #2a2d32!important;box-shadow:none!important;}
+.zflag-install-step,.site-library-preview{background:var(--panel)!important;box-shadow:none!important;border-color:var(--line)!important;}
+body{font-family:"Geist","Segoe UI Variable Text","Segoe UI",sans-serif;}
+</style>
 </head>
 <body>
   <header class="nav-shell"><div class="wrap nav">

@@ -30,7 +30,7 @@ jobs:
           $encoded = (Get-Content -LiteralPath zflag-desktop-source.b64 -Raw).Trim()
           $bytes = [Convert]::FromBase64String($encoded)
           $actualHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
-          $expectedHash = '42bf440ae355664951235c1a7987ecceb68e464e138df09f0b7ba2941c771faa'
+          $expectedHash = '705bb7b8a264d2c71790d5e8f47e9264d984d2c9d0a161857a9f83539f0bb1ac'
           if ($actualHash -ne $expectedHash) { throw "Source integrity mismatch: $actualHash" }
           [IO.File]::WriteAllBytes((Join-Path $PWD 'zflag-desktop-source.zip'), $bytes)
           Expand-Archive -LiteralPath zflag-desktop-source.zip -DestinationPath _work -Force
@@ -40,7 +40,7 @@ jobs:
       - name: Preserve reliable ZFLAG 2.0.41 installer upgrade fix
         shell: pwsh
         run: ./release/v2.0.41-upgrade-fix.ps1
-      - name: Set new 2.0.42 product version and regression expectations
+      - name: Set new 2.0.43 product version and regression expectations
         shell: pwsh
         run: |
           $targets = @(
@@ -51,11 +51,11 @@ jobs:
           foreach ($path in $targets) {
             $contents = Get-Content $path -Raw
             if (-not $contents.Contains('2.0.41')) { throw "Missing 2.0.41 upgrade version in $path" }
-            $contents.Replace('2.0.41','2.0.42') | Set-Content $path -Encoding utf8
+            $contents.Replace('2.0.41','2.0.43') | Set-Content $path -Encoding utf8
           }
           $cfg = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
-          if ($cfg.version -ne '2.0.42' -or $cfg.app.windows[0].transparent -ne $false) {
-            throw '2.0.42 version or opaque WebView configuration invalid'
+          if ($cfg.version -ne '2.0.43' -or $cfg.app.windows[0].transparent -ne $false) {
+            throw '2.0.43 version or opaque WebView configuration invalid'
           }
       - name: Verify UI stability and branding regression tests
         shell: pwsh
@@ -66,10 +66,10 @@ jobs:
           $source = Get-Content $integrity -Raw
           if (-not $source.Contains("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)")) { throw 'Unexpected NSIS regression test' }
           $source = $source.Replace("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)", "self.assertIn('NSIS_HOOK_PREINSTALL',hook)")
-          $source = $source.Replace("('2.0.40','2.0.40')", "('2.0.42','2.0.42')")
+          $source = $source.Replace("('2.0.40','2.0.40')", "('2.0.43','2.0.43')")
           $source | Set-Content $integrity -Encoding utf8
           $env:PYTHONUTF8 = '1'
-          python -m pip install pytest --disable-pip-version-check -q
+          python -m pip install pytest pillow --disable-pip-version-check -q
           if ($LASTEXITCODE -ne 0) { throw 'pytest setup failed' }
           python -m pytest -q tests
           if ($LASTEXITCODE -ne 0) { throw 'UI stability regression tests failed' }
@@ -117,7 +117,7 @@ jobs:
         run: ./scripts/smoke-test-installed-app.ps1
       - uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.42-Windows-EXE
+          name: ZFLAG-v2.0.43-Windows-EXE
           path: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
@@ -125,14 +125,14 @@ jobs:
       - name: Publish verified EXE for the website download
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.42
-          name: ZFLAG 2.0.42 for Windows
+          tag_name: v2.0.43
+          name: ZFLAG 2.0.43 for Windows
           body: |
             One-click Windows x64 installer. Download `ZFLAG_Setup.exe`, run it, and launch ZFLAG.
             No .bat, ZIP extraction, or development tools needed.
             Installer and local backend integration passed automated Windows checks, including a reinstallation while the ZFLAG GUI and backend are still running.
             Preserves the running-backend installer repair; uses an opaque Windows WebView2 window and the user's new metallic Z branding; limits UI polling and prevents duplicate apply requests.
-            Live in-game Roblox FastFlag injection is not certified by CI.
+            Updated to the owner's official matte silver Z mark and consistent Bklit-inspired UI controls in Editor, Settings, Library and Agent.\n            Enhanced engine availability updates now refresh Inject correctly. Partial apply results show failed flags.\n            Live in-game Roblox FastFlag injection and exact end-user GPU flickering remain untested in CI.
             Unsigned EXE: Windows SmartScreen may warn.
           files: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
