@@ -57,6 +57,44 @@
     @media(max-width:980px){.navlinks{display:none}.hero-grid{grid-template-columns:1fr;gap:44px}.hero{padding-top:125px}.app-window{transform:none!important}.section-head{grid-template-columns:1fr;gap:25px}.features{grid-template-columns:1fr 1fr}.feature:nth-child(3n){border-right:1px solid var(--line)}.feature:nth-child(2n){border-right:0}.feature:nth-last-child(-n+3){border-bottom:1px solid var(--line)}.feature:nth-last-child(-n+2){border-bottom:0}.showcase{grid-template-columns:1fr}.showcase-nav{position:static;display:flex;overflow:auto}.showcase-nav button{min-width:150px}.personalize{grid-template-columns:1fr}.footer-main{grid-template-columns:1.3fr 1fr 1fr;gap:40px}.footer-brand{grid-column:1/-1}.footer-bottom{align-items:flex-start;flex-wrap:wrap}}
     @media(max-width:620px){.wrap{width:min(100% - 24px,var(--max))}.nav-shell{top:10px}.nav{height:52px}.nav-actions .btn,.nav-actions .lang-top{display:none}h1{font-size:58px}.hero-actions{flex-direction:column}.hero-actions .btn{width:100%;height:44px}.app-main{grid-template-columns:1fr}.sidebar{display:none}.app-content{padding:17px}.status-strip{grid-template-columns:1fr}.stat{border-right:0;border-bottom:1px solid var(--line)}.stat:last-child{border:0}.section{padding:80px 0}.features,.why-grid{grid-template-columns:1fr}.feature,.feature:nth-child(n),.why-card,.why-card:nth-child(n){border-right:0;border-bottom:1px solid var(--line)}.feature:last-child,.why-card:last-child{border-bottom:0}.swatches{grid-template-columns:repeat(2,1fr)}.mini-app-body{grid-template-columns:88px 1fr}.cta{padding:80px 0}.cta-box{padding:65px 0}.cta-actions{flex-direction:column}.cta-actions .btn{height:44px}.hero-meta{flex-wrap:wrap}.footer-main{grid-template-columns:1fr 1fr;gap:34px}.footer-brand{grid-column:1/-1}.footer-bottom{flex-direction:column;align-items:flex-start}.footer-bottom-right{font-size:10px}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}.app-window{transform:none!important}}
+
+    /* ZFLAG original Studio layout, not a substitute injector UI. */
+    .hero-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:34px}
+    .studio-window.app-window{background:#0b0b0c;border:1px solid #2c2c2c;min-height:0;transform:rotateY(-2deg) rotateX(1deg)}
+    .studio-window{color:#ebebeb;font-family:"Geist",sans-serif}
+    .studio-titlebar{height:41px;display:flex;align-items:center;gap:7px;padding:0 12px 0 170px;border-bottom:1px solid #252525;background:#0d0d0e;font-size:10px;font-weight:650;white-space:nowrap}
+    .studio-mini-mark{display:inline-grid;place-items:center;width:23px;height:23px;border:1px solid #343434;border-radius:6px;background:#161719;color:#e9e9e9;font-size:13px;font-weight:750}
+    .studio-titlebar-center{margin:auto;color:#888;font-size:14px}
+    .studio-runtime{font-size:8px;padding:6px 9px;border:1px solid #292929;border-radius:14px;color:#9a9a9a;font-weight:400}
+    .studio-layout{display:grid;grid-template-columns:170px minmax(0,1fr);min-height:470px}
+    .studio-sidenav{display:flex;flex-direction:column;gap:4px;background:#0b0b0c;padding:14px 11px 11px;border-right:1px solid #252525}
+    .studio-wordmark{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;margin-bottom:15px}
+    .studio-wordmark small{display:block;color:#686868;font-size:7px;font-weight:400;letter-spacing:.09em}
+    .studio-nav-label{font-size:11px;color:#777;margin:5px 3px}
+    .studio-nav-entry{font-size:11px;color:#929292;padding:9px 10px;border-radius:7px}
+    .studio-nav-entry.current{background:#1e1f20;color:#f0f0f0;box-shadow:inset 2px 0 #eee;font-weight:600}
+    .studio-grow{flex:1;min-height:15px}
+    .studio-credit{border:1px solid #292929;border-radius:8px;padding:9px;font-size:10px;color:#dedede}
+    .studio-credit small{display:block;font-size:8px;color:#727272;margin-top:3px}
+    .studio-body{padding:19px 17px;background:#0d0d0e;min-width:0}
+    .studio-body h3{font-size:17px;letter-spacing:-.045em;margin:0;color:#f0f0f0}
+    .studio-body>p{color:#777;margin:4px 0 14px;font-size:9px}
+    .studio-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+    .studio-metrics>div{display:grid;gap:6px;min-width:0;padding:10px;border:1px solid #292929;border-radius:9px;background:#111}
+    .studio-metrics span{font-size:8px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .studio-metrics b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .studio-kicker{font:600 8px/1 "Geist Mono",monospace;letter-spacing:.12em;color:#737373;margin:18px 2px 8px}
+    .studio-actions{display:grid;gap:5px}
+    .studio-actions>div{display:flex;align-items:center;gap:10px;height:38px;padding:0 11px;border:1px solid #272727;border-radius:8px;background:#111;font-size:11px}
+    .studio-actions span{display:block;min-width:0}
+    .studio-actions b{font-size:10px;font-weight:600}
+    .studio-actions small{display:block;font-size:8px;color:#777;margin-top:3px}
+    .studio-actions em{margin-left:auto;color:#6a6a6a;font-size:17px;font-style:normal}
+    .studio-placeholder{padding:10px;border:1px solid #292929;border-radius:7px;font-size:9px;color:#888}
+    .studio-placeholder i{font-style:normal;color:#4bbf90;padding-right:8px}
+    @media(max-width:1100px){.studio-titlebar{padding-left:12px}.studio-runtime{display:none}}
+    @media(max-width:650px){.studio-layout{grid-template-columns:105px minmax(0,1fr)}.studio-sidenav{padding:10px 6px}.studio-nav-entry{padding:9px 5px;font-size:9px}.studio-wordmark small,.studio-credit{display:none}.studio-body{padding:12px 9px}.studio-metrics{grid-template-columns:1fr}.studio-metrics>div:not(:first-child){display:none}.studio-titlebar-center{font-size:10px}.studio-actions>div{height:37px}}
+
   </style>
 </head>
 <body>
@@ -76,29 +114,25 @@
         <div class="hero-meta"><span>Windows 10 / 11</span><span>x64</span><span data-i18n="hero.metaTheme">Website: Dark / Light</span><span data-i18n="hero.metaNoFake">No fake benchmarks</span></div>
       </div>
       <div class="product-stage reveal" id="product">
-        <div class="app-window" id="tiltWindow">
-          <div class="app-title"><div class="titleleft"><span class="zmark" style="width:24px;height:24px;border-radius:6px">Z</span>ZFLAG</div><div class="dots">— □ ×</div></div>
-          <div class="app-main">
-            <aside class="sidebar">
-              <div class="side-label">Workspace</div>
-              <div class="side-item active"><span class="side-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10.5 12 6l5 4.5v7.5H7z"/><path d="M10 18v-4h4v4"/></svg></span>Overview</div>
-              <div class="side-item"><span class="side-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="4.5"/><path d="m14 14 4 4"/></svg></span>FFlag Browser</div>
-              <div class="side-item"><span class="side-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5 6 7-6 7-6-7z"/></svg></span>Presets</div>
-              <div class="side-item"><span class="side-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10"/><path d="m14 5 3 3-3 3"/><path d="M17 16H7"/><path d="m10 13-3 3 3 3"/></svg></span>Import / Export</div>
-              <div class="side-label">Launch</div>
-              <div class="side-item"><span class="side-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6 10 6-10 6z"/></svg></span>Roblox</div>
-              <div class="side-item"><span class="side-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M12 4.9v1.4M12 17.7v1.4M19.1 12h-1.4M6.3 12H4.9M17 7l-1 1M8 16l-1 1M17 17l-1-1M8 8 7 7"/><circle cx="12" cy="12" r="6.1"/></svg></span>Settings</div>
-              <div class="side-label">Accent</div><div class="accent-row" data-accent-scope="hero"><button class="accent-dot active" aria-label="Graphite" data-accent="#8a8a8a" style="background:#8a8a8a;color:#8a8a8a"></button><button class="accent-dot" aria-label="Blue" data-accent="#4f8cff" style="background:#4f8cff;color:#4f8cff"></button><button class="accent-dot" aria-label="Purple" data-accent="#9a6cff" style="background:#9a6cff;color:#9a6cff"></button><button class="accent-dot" aria-label="Red" data-accent="#ff5b64" style="background:#ff5b64;color:#ff5b64"></button></div>
+
+        <div class="app-window studio-window" id="tiltWindow" aria-label="ZFLAG Studio desktop user interface preview">
+          <div class="studio-titlebar"><span class="studio-mini-mark">Z</span> ZFLAG <span class="studio-titlebar-center">⌂　{ }　✧　♧　∿　⚙</span><span class="studio-runtime">● Roblox not running</span></div>
+          <div class="studio-layout">
+            <aside class="studio-sidenav"><div class="studio-wordmark"><span class="studio-mini-mark">Z</span><span>ZFLAG<small>FFLAG STUDIO · BY ZEBRA</small></span></div>
+              <div class="studio-nav-label">Home</div>
+              <div class="studio-nav-entry current">⌂ &nbsp;Overview</div><div class="studio-nav-entry">{ } &nbsp;Editor</div><div class="studio-nav-entry">✧ &nbsp;Presets</div><div class="studio-nav-entry">♧ &nbsp;AI Agent</div><div class="studio-nav-entry">∿ &nbsp;Activity</div>
+              <div class="studio-grow"></div><div class="studio-credit"><b>Made by Zebra</b><small>FFlag Studio desktop app</small></div><div class="studio-nav-entry">▣ &nbsp;Desktop app</div><div class="studio-nav-entry">⚙ &nbsp;Settings</div>
             </aside>
-            <div class="app-content">
-              <div class="app-top"><h3>FFlag Browser</h3><div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.7" cy="10.7" r="5.2"/><path d="m14.6 14.6 4 4"/></svg><span>Search flags...</span></div></div>
-              <div class="status-strip"><div class="stat"><b>Configuration</b><small class="accent">READY</small></div><div class="stat"><b>Preset</b><small>COMPETITIVE</small></div><div class="stat"><b>Changes</b><small>04 UNSAVED</small></div></div>
-              <div class="flag-list">
-                <div class="flag-row"><div><div class="flag-name">Rendering Optimization</div><div class="flag-value">DFIntTaskSchedulerTargetFps · 240</div></div><div class="toggle on"><i></i></div></div>
-                <div class="flag-row"><div><div class="flag-name">Texture Quality Override</div><div class="flag-value">DFFlagTextureQualityOverrideEnabled · true</div></div><div class="toggle on"><i></i></div></div>
-                <div class="flag-row"><div><div class="flag-name">Debug Lighting Mode</div><div class="flag-value">FFlagDebugForceFutureIsBrightPhase3 · false</div></div><div class="toggle"><i></i></div></div>
-                <div class="flag-row"><div><div class="flag-name">Network Configuration</div><div class="flag-value">Custom profile · inherited from preset</div></div><div class="toggle on"><i></i></div></div>
+            <div class="studio-body"><h3>Overview</h3><p>Everything you need at a glance.</p>
+              <div class="studio-metrics"><div><span>Process</span><b>Offline</b><span>Launch Roblox to connect</span></div><div><span>Offsets</span><b>—</b><span>Waiting for backend</span></div><div><span>Client</span><b>Not connected</b><span>Local desktop integration</span></div></div>
+              <div class="studio-kicker">GET STARTED</div>
+              <div class="studio-actions"><div>⌁ <span><b>New configuration</b><small>Open a clean FFlag JSON tab</small></span><em>›</em></div>
+                <div>▱ <span><b>Open JSON file</b><small>Import an existing configuration</small></span><em>›</em></div>
+                <div>✧ <span><b>Browse presets</b><small>Load built-in or saved profiles</small></span><em>›</em></div>
+                <div>♧ <span><b>Ask the AI agent</b><small>Answers and app actions in one place</small></span><em>›</em></div>
+                <div>↻ <span><b>Refresh offsets</b><small>Update local compatibility data</small></span><em>›</em></div>
               </div>
+              <div class="studio-kicker">RECENT ACTIVITY</div><div class="studio-placeholder"><i>●</i> Local session events appear here</div><div class="studio-kicker">LAST APPLY</div><div class="studio-placeholder">No apply history yet.</div>
             </div>
           </div>
         </div>
@@ -225,7 +259,7 @@
     const win=document.getElementById('tiltWindow');
     if(matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
       win.addEventListener('mousemove',e=>{const r=win.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;win.style.transform=`rotateY(${x*7-5}deg) rotateX(${-y*5+2}deg) translateZ(0)`});
-      win.addEventListener('mouseleave',()=>win.style.transform='rotateY(-7deg) rotateX(3deg)');
+      win.addEventListener('mouseleave',()=>win.style.transform='rotateY(-2deg) rotateX(1deg)');
     }
     const io=new IntersectionObserver(entries=>entries.forEach(e=>e.isIntersecting&&e.target.classList.add('in')),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
