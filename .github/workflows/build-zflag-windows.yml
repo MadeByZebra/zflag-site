@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'zflag-desktop-source.zip'
+      - 'zflag-desktop-source.b64'
 
 permissions:
   contents: write
@@ -23,7 +23,14 @@ jobs:
       - name: Verify maintainer source archive exists
         shell: pwsh
         run: |
-          if (-not (Test-Path zflag-desktop-source.zip)) { throw 'Missing zflag-desktop-source.zip in the repository. Upload the maintainer source zip first.' }
+          if (-not (Test-Path zflag-desktop-source.b64)) { throw 'Missing zflag-desktop-source.b64 in the repository. Upload the maintainer source zip first.' }
+
+          $encoded = (Get-Content -LiteralPath zflag-desktop-source.b64 -Raw).Trim()
+          $bytes = [Convert]::FromBase64String($encoded)
+          $actualHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
+          $expectedHash = '72bdc544589881e13790b5be236df5c143676542a470568335b16f0ce97749d3'
+          if ($actualHash -ne $expectedHash) { throw "Source integrity mismatch: $actualHash" }
+          [IO.File]::WriteAllBytes((Join-Path $PWD 'zflag-desktop-source.zip'), $bytes)
           Expand-Archive -LiteralPath zflag-desktop-source.zip -DestinationPath _work -Force
           if (-not (Test-Path '_work/ZFLAG-Studio/.github/workflows/release-windows.yml')) { throw 'The ZIP does not contain the complete ZFLAG Studio release source.' }
           $conf = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
