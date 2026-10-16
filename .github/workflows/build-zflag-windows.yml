@@ -1,4 +1,4 @@
-name: Build and publish ZFLAG v2.0.50 Windows installer
+name: Build and publish ZFLAG v2.0.51 Windows installer
 
 on:
   workflow_dispatch:
@@ -50,6 +50,38 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'ZFLAG 2.0.50 source upgrade failed' }
           $cfg=Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
           if ($cfg.version -ne '2.0.50') { throw 'Expected patched app version 2.0.50' }
+      - name: Restore tested pre-install shutdown hook and upgrade regression (v2.0.51)
+        shell: pwsh
+        run: |
+          # v2.0.50 regressed the old installer upgrade hook: a running backend
+          # keeps its executable locked. Reapply the earlier tested fix against
+          # the updated v2.0.50 source, with v2.0.51 installer metadata.
+          $legacy = Get-Content 'release/v2.0.41-upgrade-fix.ps1' -Raw
+          if (-not $legacy.Contains('NSIS_HOOK_PREINSTALL')) { throw 'Reliable upgrade hook source missing' }
+          $repair = $legacy.Replace('2.0.40','2.0.50').Replace('2.0.41','2.0.51')
+          Set-Content -LiteralPath 'release/v2.0.51-upgrade-fix.ps1' -Value $repair -Encoding utf8
+          & ./release/v2.0.51-upgrade-fix.ps1
+          if (-not (Test-Path '_work/ZFLAG-Studio/src-tauri/installer/zflag-shortcuts.nsh')) { throw 'Installer hook missing' }
+          $hook = Get-Content '_work/ZFLAG-Studio/src-tauri/installer/zflag-shortcuts.nsh' -Raw
+          if (-not $hook.Contains('!macro NSIS_HOOK_PREINSTALL') -or -not $hook.Contains('taskkill.exe')) { throw 'Pre-install backend shutdown hook missing' }
+          # Update the source tests that explicitly asserted the obsolete
+          # no-preinstall-hook behavior and the previous application version.
+          $integrity = '_work/ZFLAG-Studio/tests/test_release_integrity.py'
+          $test = Get-Content $integrity -Raw
+          if (-not $test.Contains("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)")) { throw 'Installer regression test anchor changed' }
+          $test = $test.Replace("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)","self.assertIn('NSIS_HOOK_PREINSTALL',hook)")
+          $test = $test.Replace("('2.0.50','2.0.50')","('2.0.51','2.0.51')")
+          $test | Set-Content -LiteralPath $integrity -Encoding utf8
+          $bulkTest = '_work/ZFLAG-Studio/tests/test_large_json_safety_248.py'
+          (Get-Content $bulkTest -Raw).Replace('2.0.50','2.0.51') | Set-Content -LiteralPath $bulkTest -Encoding utf8
+          # Keep Tauri, package and Rust metadata consistent.
+          $cargo = '_work/ZFLAG-Studio/src-tauri/Cargo.toml'
+          $cargoData = Get-Content $cargo -Raw
+          $cargoData = $cargoData.Replace('version = "2.0.49"','version = "2.0.51"')
+          $cargoData | Set-Content -LiteralPath $cargo -Encoding utf8
+          $cfg = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
+          $pkg = Get-Content '_work/ZFLAG-Studio/package.json' -Raw | ConvertFrom-Json
+          if ($cfg.version -ne '2.0.51' -or $pkg.version -ne '2.0.51') { throw 'Version bump failed' }
       - name: Validate bulk-safety, UI, and release regressions
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
@@ -102,41 +134,41 @@ jobs:
       - name: Upload tested EXE
         uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.50-Windows-EXE
+          name: ZFLAG-v2.0.51-Windows-EXE
           path: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
           if-no-files-found: error
-      - name: Publish official v2.0.50 release after successful smoke test
+      - name: Publish official v2.0.51 release after successful smoke test
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.50
-          name: ZFLAG v2.0.50 for Windows
+          tag_name: v2.0.51
+          name: ZFLAG v2.0.51 for Windows
           draft: false
           prerelease: false
           body: |
             Standalone Windows installer. Large JSON presets now offer an explicitly confirmed experimental Inject action using paced 32-flag Enhanced native batches, per-batch progress and Stop control. A separate Stage safe config action retains allowlist-only startup staging. Includes one-click updater.
-            Live injection can still freeze or crash Roblox even with small batches; this build does not guarantee 20k flags take effect. The live path is manually confirmed, stops if Roblox exits/restarts, and does not attempt a huge single memory-write batch.
+            Fixes the installer regression that left older ZFLAG backends running, locking fflag-backend.exe during upgrades. Includes a Windows smoke test that reinstalls with GUI/backend running. Live injection can still freeze or crash Roblox; this build does not guarantee 20k flags take effect. The live path is manually confirmed, stops if Roblox exits/restarts, and does not attempt a huge single memory-write batch.
             Automated offline regressions, Windows installer smoke test, backend startup, and update authorization tests passed. In-game Roblox injection is not covered by CI. Installer is unsigned.
           files: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
-      - name: Switch official website to verified v2.0.50 EXE
+      - name: Switch official website to verified v2.0.51 EXE
         shell: pwsh
         run: |
           $site='index.html'
           $raw=Get-Content -LiteralPath $site -Raw
-          if (-not $raw.Contains('v2.0.49')) { throw 'Expected v2.0.49 website fallback not found; site left untouched' }
-          $new=$raw.Replace('2.0.49','2.0.50')
+          if (-not $raw.Contains('v2.0.50')) { throw 'Expected v2.0.50 website fallback not found; site left untouched' }
+          $new=$raw.Replace('2.0.50','2.0.51')
           $new | Set-Content -LiteralPath $site -Encoding utf8
           $readme='README.md'
           $info=Get-Content -LiteralPath $readme -Raw
-          $info=$info.Replace('Download ZFLAG_Setup.exe — v2.0.49','Download ZFLAG_Setup.exe — v2.0.50').Replace('releases/download/v2.0.49/ZFLAG_Setup.exe','releases/download/v2.0.50/ZFLAG_Setup.exe')
+          $info=$info.Replace('Download ZFLAG_Setup.exe — v2.0.50','Download ZFLAG_Setup.exe — v2.0.51').Replace('releases/download/v2.0.50/ZFLAG_Setup.exe','releases/download/v2.0.51/ZFLAG_Setup.exe')
           $info | Set-Content -LiteralPath $readme -Encoding utf8
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html README.md
-          git commit -m 'Update ZFLAG website download to verified v2.0.50'
+          git commit -m 'Update ZFLAG website download to verified v2.0.51'
           if ($LASTEXITCODE -ne 0) { throw 'Could not commit website release update' }
           git push origin HEAD:main
           if ($LASTEXITCODE -ne 0) { throw 'Could not publish updated website' }
