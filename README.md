@@ -4,7 +4,7 @@ This repository contains the [ZFLAG desktop website](index.html), its Render sta
 
 ## Download for Windows 10/11 (x64)
 
-**[Download ZFLAG_Setup.exe — v2.0.50](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.50/ZFLAG_Setup.exe)**
+**[Download ZFLAG_Setup.exe — v2.0.51](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.51/ZFLAG_Setup.exe)**
 
 - One standalone **.exe installer** for end users: download → install → open.
 - No BAT, CMD, PowerShell, ZIP extraction, Python, Rust, Node.js, or Visual Studio required for people installing it.
@@ -43,5 +43,6 @@ ZFLAG 2.0.47: The native engine writes flushed per-flag result checkpoints. Afte
 ZFLAG 2.0.47: Inject, Home injection shortcut, and Apply Supported controls now use a clear syringe icon instead of a generic Play triangle. 36 source tests passed, frontend/native engines built, installer and live-backend upgrade tests passed. Existing injection result logic preserved; live Roblox injection remains outside CI verification.
 
 ZFLAG v2.0.47: Settings → General now has a one-click built-in updater that checks the latest stable official GitHub release, downloads and verifies its SHA-256, installs silently via a detached helper, then reopens ZFLAG. Existing local settings/flag data remain intact. The Editor toolbar flex-wraps rather than clipping the Inject control in narrow windows. Windows runner: 46 passing tests, frontend/native compilation, updater endpoint security check, fresh install, and reinstall while backend was running. A real cross-release update and GPU rendering at a user's display size have not been independently tested.
+
 
 
