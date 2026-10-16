@@ -111,7 +111,7 @@ put('src/App.tsx','''        if (!state.active) {
           }
           setLiveBulkActive(false)
           const details =''')
-put('src/App.tsx','''            <span className="inject-engine-label" title="Runtime engine · change in Settings → General">''','''            {liveBulkActive && liveBulkOwnerRef.current?.tabId !== activeTab?.id && <span className="zflag-inject-progress">Injecting another tab: {liveBulkOwnerRef.current?.name}</span>}
+put('src/App.tsx','''            <span className="inject-engine-label" title="Runtime engine">''','''            {liveBulkActive && liveBulkOwnerRef.current?.tabId !== activeTab?.id && <span className="zflag-inject-progress">Injecting another tab: {liveBulkOwnerRef.current?.name}</span>}
             <span className="inject-engine-label" title="Runtime engine · change in Settings → General">''')
 put('src/App.tsx','''{lastApplyStats.total > 0 && <div className="apply-progress-row">''','''{lastApplyStats.total > 0 && <div className="apply-progress-row">''') if False else None
 
