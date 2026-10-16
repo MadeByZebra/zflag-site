@@ -46,6 +46,9 @@ jobs:
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
         run: |
+          $env:PYTHONUTF8 = '1'
+          python -m pip install --disable-pip-version-check -q pillow
+          if ($LASTEXITCODE -ne 0) { throw 'Pillow dependency setup failed' }
           python -m unittest discover -s tests -p 'test_*.py' -q
           if ($LASTEXITCODE -ne 0) { throw 'Offline regression tests failed; no release will be published' }
       - uses: actions/setup-node@v4
