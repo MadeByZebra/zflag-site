@@ -40,7 +40,7 @@ jobs:
       - name: Preserve reliable ZFLAG 2.0.41 installer upgrade fix
         shell: pwsh
         run: ./release/v2.0.41-upgrade-fix.ps1
-      - name: Set new 2.0.45 product version and regression expectations
+      - name: Set new 2.0.46 product version and regression expectations
         shell: pwsh
         run: |
           $targets = @(
@@ -51,12 +51,37 @@ jobs:
           foreach ($path in $targets) {
             $contents = Get-Content $path -Raw
             if (-not $contents.Contains('2.0.41')) { throw "Missing 2.0.41 upgrade version in $path" }
-            $contents.Replace('2.0.41','2.0.45') | Set-Content $path -Encoding utf8
+            $contents.Replace('2.0.41','2.0.46') | Set-Content $path -Encoding utf8
           }
           $cfg = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
-          if ($cfg.version -ne '2.0.45' -or $cfg.app.windows[0].transparent -ne $false) {
-            throw '2.0.45 version or opaque WebView configuration invalid'
+          if ($cfg.version -ne '2.0.46' -or $cfg.app.windows[0].transparent -ne $false) {
+            throw '2.0.46 version or opaque WebView configuration invalid'
           }
+      - name: Replace Play icons with proper injection icons in desktop
+        shell: pwsh
+        run: |
+          $file = '_work/ZFLAG-Studio/src/App.tsx'
+          $app = [IO.File]::ReadAllText((Join-Path $PWD $file))
+          if (([regex]::Matches($app,'<Play className=')).Count -ne 4 -or -not $app.Contains('  Play,')) {
+            throw 'Unexpected injection UI source. Refusing icon-only release.'
+          }
+          $app = $app.Replace('  Play,','  Syringe,').Replace('<Play className=', '<Syringe className=')
+          [IO.File]::WriteAllText((Join-Path $PWD $file),$app,[Text.UTF8Encoding]::new($false))
+          if (([regex]::Matches($app,'<Syringe className=')).Count -ne 4 -or $app.Contains('<Play className=')) {
+            throw 'Injection icons were not all replaced.'
+          }
+          $test = @'
+          from pathlib import Path
+          APP = (Path(__file__).resolve().parents[1] / "src" / "App.tsx").read_text(encoding="utf-8")
+          def test_injection_button_uses_syringe_not_play():
+              assert '  Syringe,' in APP
+              assert '<Play className=' not in APP
+              assert 'busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <Syringe className="size-3.5" />' in APP
+          def test_all_inject_entry_points_are_consistent():
+              assert APP.count('<Syringe className=') == 4
+              assert APP.count('<Syringe className="size-3.5" /> Apply supported only') == 2
+          '@
+          $test | Set-Content '_work/ZFLAG-Studio/tests/test_injection_action_icons_246.py' -Encoding utf8
       - name: Verify UI stability and branding regression tests
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
@@ -66,7 +91,7 @@ jobs:
           $source = Get-Content $integrity -Raw
           if (-not $source.Contains("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)")) { throw 'Unexpected NSIS regression test' }
           $source = $source.Replace("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)", "self.assertIn('NSIS_HOOK_PREINSTALL',hook)")
-          $source = $source.Replace("('2.0.40','2.0.40')", "('2.0.45','2.0.45')")
+          $source = $source.Replace("('2.0.40','2.0.40')", "('2.0.46','2.0.46')")
           $source | Set-Content $integrity -Encoding utf8
           $env:PYTHONUTF8 = '1'
           python -m pip install pytest pillow --disable-pip-version-check -q
@@ -117,7 +142,7 @@ jobs:
         run: ./scripts/smoke-test-installed-app.ps1
       - uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.45-Windows-EXE
+          name: ZFLAG-v2.0.46-Windows-EXE
           path: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
@@ -125,15 +150,15 @@ jobs:
       - name: Publish verified EXE for the website download
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.45
-          name: ZFLAG 2.0.45 for Windows
+          tag_name: v2.0.46
+          name: ZFLAG 2.0.46 for Windows
           body: |
             One-click Windows x64 installer. Download `ZFLAG_Setup.exe`, run it, and launch ZFLAG.
             No .bat, ZIP extraction, or development tools needed.
             Installer and local backend integration passed automated Windows checks, including a reinstallation while the ZFLAG GUI and backend are still running.
             Preserves the running-backend installer repair; uses an opaque Windows WebView2 window and the user's new metallic Z branding; limits UI polling and prevents duplicate apply requests.
             Updated to the owner's official matte silver Z mark and consistent Bklit-inspired UI controls in Editor, Settings, Library and Agent.\n            Enhanced engine availability updates now refresh Inject correctly. Partial apply results show failed flags.\n            Native writes are checkpointed one flag at a time. An interrupted or timed-out batch preserves exact confirmed writes and marks remaining flags unconfirmed rather than a blanket failure. The app uses a batch-sized timeout, no majority-only success heuristic, and a distinct unavailable-result warning for lost responses.\n            Live in-game Roblox effects and exact end-user GPU flickering remain untested in CI.
-            Unsigned EXE: Windows SmartScreen may warn.
+            Replaces the generic Play triangle with a clean injection/syringe symbol in the Inject button, Home quick action and both Apply-supported actions. UI-only fix: native engine and result recovery are unchanged.\n            Unsigned EXE: Windows SmartScreen may warn.
           files: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
