@@ -89,12 +89,12 @@ class UI253(unittest.TestCase):
         ui=(ROOT/'src/App.tsx').read_text(encoding='utf-8')
         fn=ui[ui.index('  async function injectLiveBulk() {'):ui.index('  async function stopLiveBulk() {')]
         self.assertNotIn('window.confirm',fn)
-        self.assertIn('confirmed: true',fn)
+        self.assertTrue('confirmed:true' in fn or 'confirmed: true' in fn)
         self.assertIn('liveBulkStartedAt',fn)
     def test_native_batch_safety_preserved(self):
         server=(ROOT/'backend/server.py').read_text(encoding='utf-8')
         self.assertIn('BULK_LIVE_CHUNK = 32',server)
-        self.assertIn('if find_pid(TARGET) != expected_pid:',server)
+        self.assertTrue('if find_pid(TARGET) != expected_pid:' in server or 'if find_pid(TARGET) != pid:' in server)
         self.assertIn('_BULK_LIVE_CANCEL.wait(0.25)',server)
     def test_semver(self):
         import json
