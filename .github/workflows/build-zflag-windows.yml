@@ -1,11 +1,10 @@
-name: Build ZFLAG Windows one-click installer
+name: Build and publish ZFLAG v2.0.49 Windows installer
 
 on:
   workflow_dispatch:
   push:
     paths:
       - 'zflag-desktop-source.b64'
-      - 'release/v2.0.41-upgrade-fix.ps1'
       - '.github/workflows/build-zflag-windows.yml'
 
 permissions:
@@ -17,125 +16,116 @@ concurrency:
 
 jobs:
   build-installer:
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-2022
     timeout-minutes: 90
     steps:
-      - name: Checkout site and release source
-        uses: actions/checkout@v4
-      - name: Verify maintainer source archive exists
+      - uses: actions/checkout@v4
+      - name: Decode and verify ZFLAG v2.0.49 release source
         shell: pwsh
         run: |
-          if (-not (Test-Path zflag-desktop-source.b64)) { throw 'Missing zflag-desktop-source.b64 in the repository. Upload the maintainer source zip first.' }
-
-          $encoded = (Get-Content -LiteralPath zflag-desktop-source.b64 -Raw).Trim()
+          $encoded = (Get-Content -LiteralPath 'zflag-desktop-source.b64' -Raw).Trim()
           $bytes = [Convert]::FromBase64String($encoded)
-          $actualHash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
-          $expectedHash = 'a402a7ac17ec26892e714db14f1a22320ca5a711fed89006aca2aa6a96bc3f91'
-          if ($actualHash -ne $expectedHash) { throw "Source integrity mismatch: $actualHash" }
+          $hash = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
+          if ($hash -ne '6ed33023f232918b0fc3d3191c3a8264a99ff2bed95b30755b19f223f155fd9e') {
+            throw "Source hash mismatch: $hash"
+          }
           [IO.File]::WriteAllBytes((Join-Path $PWD 'zflag-desktop-source.zip'), $bytes)
-          Expand-Archive -LiteralPath zflag-desktop-source.zip -DestinationPath _work -Force
-          if (-not (Test-Path '_work/ZFLAG-Studio/.github/workflows/release-windows.yml')) { throw 'The ZIP does not contain the complete ZFLAG Studio release source.' }
-          $conf = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
-          if ($conf.version -ne '2.0.40') { throw "Unexpected installer release version: $($conf.version)" }
-      - name: Preserve reliable ZFLAG 2.0.41 installer upgrade fix
-        shell: pwsh
-        run: ./release/v2.0.41-upgrade-fix.ps1
-      - name: Set new 2.0.47 product version and regression expectations
-        shell: pwsh
-        run: |
-          $targets = @(
-            '_work/ZFLAG-Studio/src-tauri/tauri.conf.json',
-            '_work/ZFLAG-Studio/package.json',
-            '_work/ZFLAG-Studio/scripts/smoke-test-installed-app.ps1'
-          )
-          foreach ($path in $targets) {
-            $contents = Get-Content $path -Raw
-            if (-not $contents.Contains('2.0.41')) { throw "Missing 2.0.41 upgrade version in $path" }
-            $contents.Replace('2.0.41','2.0.47') | Set-Content $path -Encoding utf8
-          }
-          $cfg = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
-          if ($cfg.version -ne '2.0.47' -or $cfg.app.windows[0].transparent -ne $false) {
-            throw '2.0.47 version or opaque WebView configuration invalid'
-          }
-      - name: Verify UI stability and branding regression tests
-        shell: pwsh
-        working-directory: _work/ZFLAG-Studio
-        run: |
-          # Maintain the baseline test expectations across the verified 2.0.41 upgrade patch.
-          $integrity = 'tests/test_release_integrity.py'
-          $source = Get-Content $integrity -Raw
-          if (-not $source.Contains("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)")) { throw 'Unexpected NSIS regression test' }
-          $source = $source.Replace("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)", "self.assertIn('NSIS_HOOK_PREINSTALL',hook)")
-          $source = $source.Replace("('2.0.40','2.0.40')", "('2.0.47','2.0.47')")
-          $source | Set-Content $integrity -Encoding utf8
-          $env:PYTHONUTF8 = '1'
-          python -m pip install pytest pillow --disable-pip-version-check -q
-          if ($LASTEXITCODE -ne 0) { throw 'pytest setup failed' }
-          python -m pytest -q tests
-          if ($LASTEXITCODE -ne 0) { throw 'UI stability regression tests failed' }
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
+          Expand-Archive -LiteralPath 'zflag-desktop-source.zip' -DestinationPath '_work' -Force
+          $root = '_work/ZFLAG-Studio'
+          if (-not (Test-Path "$root/backend/zflag_bulk_safe.py")) { throw '20k bulk-safety module missing' }
+          if (-not (Test-Path "$root/backend/zflag_updater.py")) { throw 'Updater missing' }
+          if (-not (Test-Path "$root/native-enhanced/fastflag_injector_gui_enhanced.cpp")) { throw 'Enhanced injector missing' }
+          $cfg = Get-Content "$root/src-tauri/tauri.conf.json" -Raw | ConvertFrom-Json
+          $package = Get-Content "$root/package.json" -Raw | ConvertFrom-Json
+          if ($cfg.version -ne '2.0.49' -or $package.version -ne '2.0.49') { throw 'App versions are not 2.0.49' }
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Validate bulk-safety, UI, and release regressions
+        shell: pwsh
+        working-directory: _work/ZFLAG-Studio
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -q
+          if ($LASTEXITCODE -ne 0) { throw 'Offline regression tests failed; no release will be published' }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
-      - name: Install and build frontend
+      - name: Build React UI
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
         run: |
           npm install --no-audit --no-fund
           if ($LASTEXITCODE -ne 0) { throw 'npm install failed' }
           npm run build
-          if ($LASTEXITCODE -ne 0) { throw 'frontend compile failed' }
-      - name: Compile the original working C++ injector and backend
+          if ($LASTEXITCODE -ne 0) { throw 'Frontend build failed' }
+      - name: Compile Enhanced C++ injector and bundle Python sidecar
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
         run: ./scripts/build-sidecar.ps1
-      - name: Package branded one-file ZFLAG NSIS installer
+      - name: Compile NSIS one-click Windows installer
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
         run: ./scripts/build-tauri-with-msvc.ps1
-      - name: Verify native CLI and installer output
+      - name: Verify native engine, sidecar, and installer files
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
         run: ./scripts/verify-windows-release.ps1
-      - name: Prepare one public Windows installer
+      - name: Stage EXE and checksum
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
         run: |
-          New-Item -ItemType Directory -Force -Path release | Out-Null
-          $setup = Get-ChildItem 'src-tauri/target/release/bundle/nsis/*.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          if (-not $setup) { throw 'NSIS .exe missing' }
-          Copy-Item $setup.FullName 'release/ZFLAG_Setup.exe' -Force
-          (Get-FileHash 'release/ZFLAG_Setup.exe' -Algorithm SHA256).Hash | Set-Content 'release/ZFLAG_Setup_SHA256.txt'
-      - name: Test the real installer on Windows, including shortcut replacement
+          New-Item -ItemType Directory -Force -Path 'release' | Out-Null
+          $exe = Get-ChildItem 'src-tauri/target/release/bundle/nsis/*.exe' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $exe) { throw 'NSIS installer not found' }
+          Copy-Item $exe.FullName 'release/ZFLAG_Setup.exe' -Force
+          (Get-FileHash 'release/ZFLAG_Setup.exe' -Algorithm SHA256).Hash.ToLowerInvariant() | Set-Content 'release/ZFLAG_Setup_SHA256.txt'
+          if ((Get-Item 'release/ZFLAG_Setup.exe').Length -lt 5000000) { throw 'Installer unexpectedly small' }
+      - name: Smoke-test installed app and updater on Windows
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
         run: ./scripts/smoke-test-installed-app.ps1
-      - uses: actions/upload-artifact@v4
+      - name: Upload tested EXE
+        uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.47-Windows-EXE
+          name: ZFLAG-v2.0.49-Windows-EXE
           path: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
           if-no-files-found: error
-      - name: Publish verified EXE for the website download
+      - name: Publish official v2.0.49 release after successful smoke test
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.47
-          name: ZFLAG 2.0.47 for Windows
+          tag_name: v2.0.49
+          name: ZFLAG v2.0.49 for Windows
+          draft: false
+          prerelease: false
           body: |
-            One-click Windows x64 installer. Download `ZFLAG_Setup.exe`, run it, and launch ZFLAG.
-            No .bat, ZIP extraction, or development tools needed.
-            Installer and local backend integration passed automated Windows checks, including a reinstallation while the ZFLAG GUI and backend are still running.
-            Preserves the running-backend installer repair; uses an opaque Windows WebView2 window and the user's new metallic Z branding; limits UI polling and prevents duplicate apply requests.
-            Updated to the owner's official matte silver Z mark and consistent Bklit-inspired UI controls in Editor, Settings, Library and Agent.\n            Enhanced engine availability updates now refresh Inject correctly. Partial apply results show failed flags.\n            Native writes are checkpointed one flag at a time. An interrupted or timed-out batch preserves exact confirmed writes and marks remaining flags unconfirmed rather than a blanket failure. The app uses a batch-sized timeout, no majority-only success heuristic, and a distinct unavailable-result warning for lost responses.\n            Live in-game Roblox effects and exact end-user GPU flickering remain untested in CI.
-            Adds a one-click updater in Settings that downloads only official GitHub releases, validates their size and SHA-256, silently installs through a separate helper, and restarts ZFLAG. The toolbar now wraps controls rather than clipping Inject at narrow window widths. Native injection/result recovery remain intact.\n            Unsigned EXE: Windows SmartScreen may warn.
+            Standalone branded Windows 10/11 x64 installer. Includes 20k+ JSON bulk-safe parsing and preview, no unsafe bulk live memory writes, the Enhanced engine for small batches, and one-click Settings updater.
+            For bulk presets the app stages only officially allowlisted flags for the next Roblox launch; it cannot guarantee arbitrary Roblox FastFlags or in-game behavior.
+            Automated offline regressions, Windows installer smoke test, backend startup, and update authorization tests passed. In-game Roblox injection is not covered by CI. Installer is unsigned.
           files: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
-          draft: false
-          prerelease: false
+      - name: Switch official website to verified v2.0.49 EXE
+        shell: pwsh
+        run: |
+          $site='index.html'
+          $raw=Get-Content -LiteralPath $site -Raw
+          if (-not $raw.Contains('v2.0.47')) { throw 'Expected v2.0.47 website fallback not found; site left untouched' }
+          $new=$raw.Replace('2.0.47','2.0.49')
+          $new | Set-Content -LiteralPath $site -Encoding utf8
+          $readme='README.md'
+          $info=Get-Content -LiteralPath $readme -Raw
+          $info=$info.Replace('Download ZFLAG_Setup.exe — v2.0.47','Download ZFLAG_Setup.exe — v2.0.49').Replace('releases/download/v2.0.47/ZFLAG_Setup.exe','releases/download/v2.0.49/ZFLAG_Setup.exe')
+          $info | Set-Content -LiteralPath $readme -Encoding utf8
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html README.md
+          git commit -m 'Update ZFLAG website download to verified v2.0.49'
+          if ($LASTEXITCODE -ne 0) { throw 'Could not commit website release update' }
+          git push origin HEAD:main
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish updated website' }
