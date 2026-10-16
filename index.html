@@ -333,18 +333,18 @@ html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--pane
       if(releaseStatus) releaseStatus.textContent='Available now: v2.0.25 · Windows x64 · one EXE (v2.0.40 being tested)';
       return releaseChoice;
     }
-    async function downloadInstaller(){
-      const buttons=[...document.querySelectorAll('[data-download]')];
-      buttons.forEach(b=>{b.disabled=true;b.setAttribute('aria-busy','true');});
-      try {
-        const chosen=await resolveRelease();
-        const link=document.createElement('a');
-        link.href=chosen.href; link.download=chosen.name;
-        link.rel='noopener noreferrer';
-        document.body.appendChild(link); link.click(); link.remove();
-      } finally {
-        buttons.forEach(b=>{b.disabled=false;b.removeAttribute('aria-busy');});
-      }
+    // Resolve the newest release in the background instead of delaying a user click.
+    // If the release endpoint is unavailable, a real previous Windows EXE remains downloadable.
+    void resolveRelease();
+    function downloadInstaller(){
+      const chosen=releaseChoice||{href:stableInstaller,name:stableInstaller,version:'v2.0.25'};
+      const link=document.createElement('a');
+      link.href=chosen.href;
+      link.download=chosen.name;
+      link.rel='noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     }
     document.querySelectorAll('[data-download]').forEach(b=>b.onclick=downloadInstaller);
     document.querySelectorAll('[data-close="download"]').forEach(b=>b.onclick=()=>downloadModal.classList.remove('open'));
