@@ -1,17 +1,17 @@
 ZFLAG — public release and website deployment
 
-Current public version: 2.0.44
+Current public version: 2.0.45
 Direct standalone EXE:
-https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.44/ZFLAG_Setup.exe
+https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.45/ZFLAG_Setup.exe
 
-Installer size (bytes): 13602271
-SHA-256: 70cd88860ef9797c140049bb170b2491c4da0f1cc7aa52864dfcc94bdb0518d3
+Installer size (bytes): 13607208
+SHA-256: 9da92ca87622f723abf0a7d70cd1ea0bc0c291c9674feb430d757ac76f48f6eb
 
 A real Windows GitHub Actions runner successfully compiled the C++ Enhanced
 injector and Python backend, built a Tauri NSIS installer, silently installed
 the application, verified old ZFLAG shortcut replacement, verified installed
 shortcut targets, and launched the backend from the installed folder.
-See: https://github.com/MadeByZebra/zflag-site/actions/runs/38924554022
+See: https://github.com/MadeByZebra/zflag-site/actions/runs/38951730747
 
 Live Roblox injection was NOT verified by GitHub Actions.
 The installer is unsigned; Windows SmartScreen may display a warning.
@@ -26,10 +26,12 @@ commit to main; otherwise deploy the latest commit in Render dashboard.
 FOR USERS: DOWNLOAD -> RUN EXE -> INSTALL -> OPEN
 NO .BAT/.CMD FILES OR DEVELOPMENT TOOLS ARE REQUIRED.
 
-ZFLAG v2.0.44 additionally passes a Windows regression test that installs again while its own GUI and backend are still running, then verifies the locked backend was replaced and restarted.
+ZFLAG v2.0.45 additionally passes a Windows regression test that installs again while its own GUI and backend are still running, then verifies the locked backend was replaced and restarted.
 
-The v2.0.44 release uses the owner's blue metallic Z artwork across the desktop app, installer, shortcut and website icon. Desktop fixes include an opaque Windows WebView2 surface, less expensive CSS effects and safer polling/apply request behavior. Automated Windows installation passed; live Roblox memory injection and user-specific GPU flickering remain untested.
+The v2.0.45 release uses the owner's blue metallic Z artwork across the desktop app, installer, shortcut and website icon. Desktop fixes include an opaque Windows WebView2 surface, less expensive CSS effects and safer polling/apply request behavior. Automated Windows installation passed; live Roblox memory injection and user-specific GPU flickering remain untested.
 
-ZFLAG v2.0.44: owner's actual silver Z icon (without the previous artificial blue-glow treatment), unified matte/dark UI controls across Inject/Settings/Library/Agent, stronger native engine availability status, guard against backend restart during injections, accurate partial-result reporting, and activity chart improvements. 23/23 source tests, frontend/native builds, Windows NSIS install and running-backend reinstall tests passed. Live Roblox injection and end-user GPU/WebView2 flicker were not tested in CI.
+ZFLAG v2.0.45: owner's actual silver Z icon (without the previous artificial blue-glow treatment), unified matte/dark UI controls across Inject/Settings/Library/Agent, stronger native engine availability status, guard against backend restart during injections, accurate partial-result reporting, and activity chart improvements. 23/23 source tests, frontend/native builds, Windows NSIS install and running-backend reinstall tests passed. Live Roblox injection and end-user GPU/WebView2 flicker were not tested in CI.
 
-ZFLAG v2.0.44: verified per-flag native result counts classify a mixed FastFlag batch as partial success, not a total 'Inject failed' error. The editor still displays which flags failed. Matched matte Inject/Editor/Agent/Library/Settings controls. Windows CI passed 29 source regressions, native and frontend builds, and installed-app/upgrade smoke tests. In-game effect and GPU-specific rendering issues are not verified by CI.
+ZFLAG v2.0.45: verified per-flag native result counts classify a mixed FastFlag batch as partial success, not a total 'Inject failed' error. The editor still displays which flags failed. Matched matte Inject/Editor/Agent/Library/Settings controls. Windows CI passed 29 source regressions, native and frontend builds, and installed-app/upgrade smoke tests. In-game effect and GPU-specific rendering issues are not verified by CI.
+
+ZFLAG 2.0.45: The native engine writes flushed per-flag result checkpoints. After a timeout or lost final native report, the backend can recover validated native write acknowledgements, report the number that failed, and mark unprocessed flags unconfirmed. The browser's wait budget scales with batch size rather than ending at the old 90-second cutoff. Windows build: 34 tests passing, successful frontend/native compilation and install/upgrade smoke tests. Actual in-game effect and user-specific graphics issues remain unverified.
