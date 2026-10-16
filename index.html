@@ -124,12 +124,30 @@ html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--pane
 @keyframes zflag-release-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){[data-download][aria-busy=true]:after{animation:none}}
 
-  </style>
+  
+/* ZFLAG one-step installer flow */
+.zflag-install-flow{padding:76px 0 92px;background:var(--bg);border-bottom:1px solid var(--line)}
+.zflag-install-wrap{border:1px solid var(--line-2);background:linear-gradient(135deg,var(--panel-2),var(--panel));box-shadow:var(--shadow);border-radius:20px;padding:clamp(22px,4vw,45px)}
+.zflag-install-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:34px}
+.zflag-install-heading h2{font-size:clamp(28px,3.5vw,46px);line-height:1.06;margin:9px 0;letter-spacing:-.06em}
+.zflag-install-heading p{color:var(--muted);font-size:13px;line-height:1.6;max-width:510px;margin:0}
+.zflag-install-pill{padding:9px 12px;border-radius:40px;font:10px "Geist Mono",monospace;border:1px solid var(--line-2);color:var(--app-accent);white-space:nowrap}
+.zflag-install-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.zflag-install-step{min-height:164px;padding:22px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 72%,transparent);border-radius:13px;transition:transform .2s ease,border-color .2s ease}
+.zflag-install-step:hover{transform:translateY(-3px);border-color:var(--line-2)}
+.zflag-install-number{display:flex;align-items:center;justify-content:space-between;font:11px "Geist Mono",monospace;color:var(--app-accent)}
+.zflag-install-step h3{font-size:19px;letter-spacing:-.04em;margin:23px 0 8px;font-weight:650}
+.zflag-install-step p{font-size:12px;line-height:1.5;color:var(--muted);margin:0}
+.zflag-install-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-top:22px}
+.zflag-install-footer small{color:var(--muted);font-size:11px;line-height:1.6}
+@media(max-width:700px){.zflag-install-steps{grid-template-columns:1fr}.zflag-install-step{min-height:110px}.zflag-install-step h3{margin-top:15px}.zflag-install-heading{align-items:flex-start;flex-direction:column}}
+
+</style>
 </head>
 <body>
   <header class="nav-shell"><div class="wrap nav">
     <a class="brand" href="#home"><span class="zmark">Z</span><span>ZFLAG</span></a>
-    <nav class="navlinks"><a href="#library-next">Next: Flag Library</a><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#why" data-i18n="nav.why">Why ZFLAG</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
+    <nav class="navlinks"><a href="#install-flow">Install</a><a href="#library-next">Next: Flag Library</a><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#why" data-i18n="nav.why">Why ZFLAG</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
     <div class="nav-actions"><button class="iconbtn lang-top" id="languageTop" aria-label="Select language" data-tooltip="Language"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></button><button class="iconbtn" id="themeToggle" aria-label="Toggle website theme">◐</button><button class="btn primary" data-download data-i18n="nav.download">Download</button></div>
   </div></header>
 
@@ -222,6 +240,21 @@ html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--pane
     </div></section>
 
     
+    
+    <section class="zflag-install-flow" id="install-flow">
+      <div class="wrap">
+        <div class="zflag-install-wrap">
+          <div class="zflag-install-heading"><div><div class="eyebrow">ZFLAG FOR WINDOWS</div><h2>Download. Install. Open.</h2><p>Get ZFLAG as one Windows installer. No ZIP extraction, terminal commands, batch files, or development tools for people installing the app.</p></div><span class="zflag-install-pill">WINDOWS 10 / 11 · x64</span></div>
+          <div class="zflag-install-steps">
+            <div class="zflag-install-step"><div class="zflag-install-number"><span>01 / DOWNLOAD</span><span>↘</span></div><h3>One .exe</h3><p>Download ZFLAG's published Windows setup executable.</p></div>
+            <div class="zflag-install-step"><div class="zflag-install-number"><span>02 / INSTALL</span><span>↘</span></div><h3>Set up ZFLAG</h3><p>Run the installer. Existing ZFLAG shortcuts are replaced with the current app shortcut.</p></div>
+            <div class="zflag-install-step"><div class="zflag-install-number"><span>03 / OPEN</span><span>↗</span></div><h3>Start creating</h3><p>Open ZFLAG from the desktop or Start Menu to use the editor, native engine, AI tools, and flag library.</p></div>
+          </div>
+          <div class="zflag-install-footer"><button class="btn primary" data-download type="button">Download for Windows ↓</button><small>Download selects the newest published release; if none exists, it uses the existing installer.</small></div>
+        </div>
+      </div>
+    </section>
+
     <section class="site-library-section" id="library-next">
       <div class="wrap site-library-grid">
         <div class="site-library-copy reveal">
