@@ -156,6 +156,15 @@ edit('src/App.tsx', '''        <div className="engine-status-banner">''', '''   
 edit('src/App.tsx','''<p>The native engine uses the working C++ injector source you supplied. Choose Enhanced, then Save settings. Original mode and all existing UI features remain available. Preflight and rollback are specific to the offset-based engine.</p>''','''<p>The Enhanced engine uses its own Roblox attachment. "Roblox detected" only confirms Windows can see the game process, not that injection will succeed. {status.connectionIssue ? `Diagnostic: ${status.connectionIssue}. ` : ""}Choose Enhanced and Save settings. Preflight and rollback apply to the original engine.</p>''')
 edit('src/App.tsx', '''Manage presets. Large files use safe bulk staging instead of live injection.''','''Manage presets, run Enhanced injection in batches, or stage startup configs.''')
 
+# Confirm dialog uses real line breaks and hides previous-preset metrics.
+app_file=root/'src/App.tsx'
+app=app_file.read_text(encoding='utf-8')
+start=app.index('    const confirmed = window.confirm(`Inject ${flagCount.toLocaleString()} FastFlags')
+end=app.index('\n    if (!confirmed) return',start)
+app=app[:start]+'''    const confirmed = window.confirm(`Inject ${flagCount.toLocaleString()} FastFlags into running Roblox?\n\nEXPERIMENTAL: flags can freeze or crash the game. The app processes small batches and reports confirmed writes.\n\nOK starts the attempt; Cancel does nothing.`)'''+app[end:]
+app=app.replace('{lastApplyStats.total > 0 && <div className="apply-progress-row">','{lastApplyStats.total > 0 && lastApplyStats.total === flagCount && !liveBulkActive && <div className="apply-progress-row">',1)
+app_file.write_text(app,encoding='utf-8')
+
 # Versions in the release source after the v2.0.51 patch. Leave old download
 # fixtures alone; the GitHub workflow updates public website after smoke test.
 for rel in ("package.json", "src-tauri/tauri.conf.json", "scripts/smoke-test-installed-app.ps1", "tests/test_release_integrity.py", "tests/test_large_json_safety_248.py"):
