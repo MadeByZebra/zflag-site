@@ -116,6 +116,14 @@ html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--pane
 .site-library-foot{background:var(--button);color:var(--button-text);padding:13px;border-radius:9px;font-weight:650;font-size:11px;margin-top:13px}
 @media(max-width:930px){.site-library-grid{grid-template-columns:1fr;gap:28px}.site-library-section{padding:68px 0}}
 
+  
+/* Production download transparency and polished Bklit interaction states */
+.release-bridge-status{margin:15px 0 0;color:var(--muted);font-family:"Geist Mono",monospace;font-size:11px;line-height:1.6;letter-spacing:.005em}
+[data-download]:disabled{opacity:.68;cursor:progress;transform:none!important}
+[data-download][aria-busy=true]:after{content:"";width:10px;height:10px;display:inline-block;margin-left:9px;border:1.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:zflag-release-spin .75s linear infinite}
+@keyframes zflag-release-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){[data-download][aria-busy=true]:after{animation:none}}
+
   </style>
 </head>
 <body>
@@ -131,7 +139,7 @@ html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--pane
         <div class="eyebrow" data-i18n="hero.eyebrow">Windows configuration utility · v2.0.25</div>
         <h1 data-i18n-html="hero.title">FFlags,<br><span>without the noise.</span></h1>
         <p data-i18n="hero.body">ZFLAG is a focused workspace for finding, editing, organizing, importing, exporting, and launching with the configuration you actually want.</p>
-        <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a></div>
+        <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a></div><p class="release-bridge-status" id="releaseBridgeStatus" aria-live="polite">Current download: v2.0.25 · Windows x64 · one EXE (v2.0.40 pending Windows testing)</p>
         <div class="hero-meta"><span>Windows 10 / 11</span><span>x64</span><span data-i18n="hero.metaTheme">Website: Dark / Light</span><span data-i18n="hero.metaNoFake">No fake benchmarks</span></div>
       </div>
       <div class="product-stage reveal" id="product">
@@ -265,14 +273,45 @@ html[data-theme="light"]{--app-accent:#6676d0;--bg:#f7f8fc;--bg-2:#eff1f8;--pane
     document.getElementById('footerTheme').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
 
     const downloadModal=document.getElementById('downloadModal');
-    const installerFile='ZFLAG-Setup-v2.0.25.exe';
-    function downloadInstaller(){
-      const a=document.createElement('a');
-      a.href=installerFile;
-      a.download=installerFile;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+    const stableInstaller='ZFLAG-Setup-v2.0.25.exe';
+    const releaseApi='https://api.github.com/repos/MadeByZebra/zflag-site/releases/latest';
+    const releaseStatus=document.getElementById('releaseBridgeStatus');
+    let releaseChoice=null;
+    async function resolveRelease(){
+      if(releaseChoice) return releaseChoice;
+      // Only promote an actual downloadable Windows EXE from a published release.
+      try {
+        const controller=new AbortController();
+        const timeout=window.setTimeout(()=>controller.abort(),4500);
+        let response;
+        try { response=await fetch(releaseApi,{signal:controller.signal,cache:'no-store',headers:{Accept:'application/vnd.github+json'}}); }
+        finally { window.clearTimeout(timeout); }
+        if(response.ok){
+          const release=await response.json();
+          const asset=(release.assets||[]).find(a=>a.name==='ZFLAG_Setup.exe' && a.size>=5000000 && /^https:\/\/github\.com\/MadeByZebra\/zflag-site\/releases\/download\//.test(a.browser_download_url||''));
+          if(!release.draft && !release.prerelease && asset && /^v2\.0\.(?:[4-9]\d|\d{3,})$/.test(release.tag_name||'')){
+            releaseChoice={href:asset.browser_download_url,name:asset.name,version:release.tag_name};
+            if(releaseStatus) releaseStatus.textContent='Latest published installer: '+release.tag_name+' · Windows x64 · one EXE';
+            return releaseChoice;
+          }
+        }
+      }catch(e){ /* Keep the existing installer available when GitHub is offline. */ }
+      releaseChoice={href:stableInstaller,name:stableInstaller,version:'v2.0.25'};
+      if(releaseStatus) releaseStatus.textContent='Available now: v2.0.25 · Windows x64 · one EXE (v2.0.40 being tested)';
+      return releaseChoice;
+    }
+    async function downloadInstaller(){
+      const buttons=[...document.querySelectorAll('[data-download]')];
+      buttons.forEach(b=>{b.disabled=true;b.setAttribute('aria-busy','true');});
+      try {
+        const chosen=await resolveRelease();
+        const link=document.createElement('a');
+        link.href=chosen.href; link.download=chosen.name;
+        link.rel='noopener noreferrer';
+        document.body.appendChild(link); link.click(); link.remove();
+      } finally {
+        buttons.forEach(b=>{b.disabled=false;b.removeAttribute('aria-busy');});
+      }
     }
     document.querySelectorAll('[data-download]').forEach(b=>b.onclick=downloadInstaller);
     document.querySelectorAll('[data-close="download"]').forEach(b=>b.onclick=()=>downloadModal.classList.remove('open'));
