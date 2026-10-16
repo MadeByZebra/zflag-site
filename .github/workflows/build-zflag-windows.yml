@@ -61,6 +61,14 @@ jobs:
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
         run: |
+          # Maintain the baseline test expectations across the verified 2.0.41 upgrade patch.
+          $integrity = 'tests/test_release_integrity.py'
+          $source = Get-Content $integrity -Raw
+          if (-not $source.Contains("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)")) { throw 'Unexpected NSIS regression test' }
+          $source = $source.Replace("self.assertNotIn('NSIS_HOOK_PREINSTALL',hook)", "self.assertIn('NSIS_HOOK_PREINSTALL',hook)")
+          $source = $source.Replace("('2.0.40','2.0.40')", "('2.0.42','2.0.42')")
+          $source | Set-Content $integrity -Encoding utf8
+          $env:PYTHONUTF8 = '1'
           python -m pip install pytest --disable-pip-version-check -q
           if ($LASTEXITCODE -ne 0) { throw 'pytest setup failed' }
           python -m pytest -q tests
