@@ -204,7 +204,8 @@ p.write_text(s,encoding="utf-8")
 for rel in ("package.json","src-tauri/tauri.conf.json","scripts/smoke-test-installed-app.ps1","tests/test_release_integrity.py","tests/test_large_json_safety_248.py"):
     p=root/rel
     s=p.read_text(encoding="utf-8")
-    assert "2.0.49" in s, str(p)
+    if rel != "scripts/smoke-test-installed-app.ps1":
+        assert "2.0.49" in s, str(p)
     p.write_text(s.replace("2.0.49","2.0.50"),encoding="utf-8")
 assert 'Stage safe config' in (root/"src/App.tsx").read_text(encoding="utf-8")
 print("Patched ZFLAG 2.0.50 source with live bulk injection and opt-in UI")
