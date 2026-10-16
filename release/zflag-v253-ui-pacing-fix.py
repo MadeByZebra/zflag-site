@@ -60,7 +60,7 @@ change("src/index.css",
 .runtime-pill .status-dot.detected { background: #f2b957 !important; box-shadow: 0 0 0 4px rgba(242,185,87,.10) !important; }
 """)
 change("backend/server.py",
-    "if _BULK_LIVE_CANCEL.wait(0.5):",
+    "if _BULK_LIVE_CANCEL.wait(.5):",
     """# Keep a pause for Roblox recovery and Stop requests. Native scan time
             # already provides additional spacing, so reduce only the idle gap.
             if _BULK_LIVE_CANCEL.wait(0.25):""")
