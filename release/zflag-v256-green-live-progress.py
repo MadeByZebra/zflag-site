@@ -108,55 +108,11 @@ for rel in ('package.json', 'src-tauri/tauri.conf.json', 'scripts/smoke-test-ins
     elif rel in ('package.json', 'src-tauri/tauri.conf.json', 'tests/test_release_integrity.py'):
         raise RuntimeError('Expected current app version missing from ' + rel)
 
-# Keep Rust package metadata aligned with the desktop release version.
+# Keep the Rust package metadata consistent with the desktop release version.
 cargo = root/'src-tauri/Cargo.toml'
 content = cargo.read_text(encoding='utf-8')
 import re
-content, changes = re.subn(r'(?m)^version = "2\\.0\\.\\d+"
-import threading
-import unittest
-from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
-
-class LiveCounterTests(unittest.TestCase):
-    def test_green_detection_and_memory_access_distinction(self):
-        css=(ROOT/'src/index.css').read_text(encoding='utf-8')
-        ui=(ROOT/'src/App.tsx').read_text(encoding='utf-8')
-        self.assertIn('.runtime-pill.detected { color: #9fe8c4',css)
-        self.assertIn('.status-dot.detected { background: #48d994',css)
-        self.assertIn('status.connected ? "connected" : status.processDetected ? "detected"',ui)
-        self.assertIn('status.connectionIssue ?? undefined',ui)
-    def test_streaming_does_not_invent_writes(self):
-        backend=(ROOT/'backend/server.py').read_text(encoding='utf-8')
-        body=ast.parse(backend)
-        fn=next(n for n in body.body if isinstance(n,ast.FunctionDef) and n.name=='live_bulk_status')
-        lock=threading.Lock()
-        state={'active':True,'total':100,'completed':32,'applied':12,'failed':20,'pending':68,'phase':'Scanning'}
-        ns={'_BULK_LIVE_LOCK':lock,'_BULK_LIVE_STATUS':state,
-            'BULK_LIVE_CHUNK':32,'injection_status':lambda:{'active':True,'completed':4,'applied':2,'failed':2}}
-        exec(compile(ast.Module(body=[fn],type_ignores=[]),str(ROOT/'backend/server.py'),'exec'),ns)
-        live=ns['live_bulk_status']()
-        self.assertEqual((live['completed'],live['applied'],live['failed'],live['pending']),(36,14,22,64))
-        self.assertEqual(state['completed'],32)
-        ns['injection_status']=lambda:{'active':False,'completed':0,'applied':0,'failed':0}
-        self.assertEqual(ns['live_bulk_status']()['completed'],32)
-    def test_live_per_tab_counters_are_real(self):
-        ui=(ROOT/'src/App.tsx').read_text(encoding='utf-8')
-        self.assertIn('isCurrentTabInjecting',ui)
-        self.assertIn('liveBulkProgress.applied',ui)
-        self.assertIn('liveBulkProgress.completed',ui)
-        self.assertIn('setInterval(() => void poll(), 500)',ui)
-        self.assertNotIn('window.confirm(`Inject',ui)
-    def test_cap_and_native_batch_still_bounded(self):
-        bulk=(ROOT/'backend/zflag_bulk_safe.py').read_text(encoding='utf-8')
-        server=(ROOT/'backend/server.py').read_text(encoding='utf-8')
-        self.assertIn('MAX_FLAGS = 100_000',bulk)
-        self.assertIn('BULK_LIVE_CHUNK = 32',server)
-        self.assertIn('_BULK_LIVE_CANCEL.wait(0.25)',server)
-
-if __name__=='__main__': unittest.main()
-''', encoding='utf-8')
-print('Applied v2.0.56 green detected status and live evidence-backed per-tab progress'), 'version = "2.0.56"', content, count=1)
+content, changes = re.subn(r'(?m)^version = "2\.0\.\d+"$', 'version = "2.0.56"', content, count=1)
 if changes != 1:
     raise RuntimeError('Rust release version anchor missing')
 cargo.write_text(content, encoding='utf-8')
