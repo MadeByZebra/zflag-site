@@ -90,8 +90,7 @@ put('src/App.tsx','''      setLiveBulkStartedAt(Date.now())
 put('src/App.tsx','''      showToast("Injection not started"''','''      liveBulkOwnerRef.current = null
       showToast("Injection not started"''')
 put('src/App.tsx','''        if (!state.active) {
-          setLiveBulkActive(false)
-          const details =''','''        if (!state.active) {
+          setLiveBulkActive(false)''','''        if (!state.active) {
           const owner = liveBulkOwnerRef.current
           if (owner) {
             const applied = Math.max(0, Number(state.applied) || 0)
@@ -107,8 +106,7 @@ put('src/App.tsx','''        if (!state.active) {
             setApplyHistory((current) => [snapshot, ...current].slice(0, 50))
             liveBulkOwnerRef.current = null
           }
-          setLiveBulkActive(false)
-          const details =''')
+          setLiveBulkActive(false)''')
 put('src/App.tsx','''            <span className="inject-engine-label" title="Runtime engine">''','''            {liveBulkActive && liveBulkOwnerRef.current?.tabId !== activeTab?.id && <span className="zflag-inject-progress">Injecting another tab: {liveBulkOwnerRef.current?.name}</span>}
             <span className="inject-engine-label" title="Runtime engine · change in Settings → General">''')
 put('src/App.tsx','''{lastApplyStats.total > 0 && <div className="apply-progress-row">''','''{lastApplyStats.total > 0 && <div className="apply-progress-row">''') if False else None
