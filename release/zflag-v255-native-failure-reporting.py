@@ -44,7 +44,7 @@ backend.write_text(s, encoding='utf-8')
 
 for rel in ('package.json','src-tauri/tauri.conf.json','scripts/smoke-test-installed-app.ps1',
             'tests/test_release_integrity.py','tests/test_large_json_safety_248.py',
-            'tests/test_live_ui_pacing_253.py'):
+            'tests/test_live_ui_pacing_253.py', 'tests/test_ui_pacing_253.py'):
     path = root / rel
     if not path.exists() and rel == 'tests/test_live_ui_pacing_253.py':
         continue  # prior releases name this regression test test_ui_pacing_253.py
