@@ -67,9 +67,11 @@ start = back.index('def _live_bulk_worker(')
 end = back.index('def start_live_bulk(', start)
 worker = back[start:end]
 marker = '            with _BULK_LIVE_LOCK:\n'
-if worker.count(marker) != 1:
+rows_at = worker.index('rows=result.get(')
+result_prefix, result_suffix = worker[:rows_at], worker[rows_at:]
+if result_suffix.count(marker) != 1:
     raise RuntimeError('Native worker result commit point changed')
-worker = worker.replace(marker, '''            with _BULK_LIVE_LOCK:
+result_suffix = result_suffix.replace(marker, '''            with _BULK_LIVE_LOCK:
                 _BULK_LIVE_RECENT.extend(
                     {"index":first+i+1, "name":row["name"], "ok":row["ok"],
                      "message":str(row.get("message", ""))[:500]}
@@ -80,6 +82,7 @@ worker = worker.replace(marker, '''            with _BULK_LIVE_LOCK:
                 if len(_BULK_LIVE_RECENT) > _BULK_LIVE_OUTPUT_LIMIT:
                     del _BULK_LIVE_RECENT[:-_BULK_LIVE_OUTPUT_LIMIT]
 ''',1)
+worker = result_prefix + result_suffix
 back = back[:start] + worker + back[end:]
 # Clear stale output only at the start of a new manually triggered bulk run.
 start = back.index('def start_live_bulk(')
