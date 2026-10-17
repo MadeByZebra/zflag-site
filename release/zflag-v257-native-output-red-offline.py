@@ -231,4 +231,19 @@ class NativeOutput(unittest.TestCase):
         self.assertIn('del _BULK_LIVE_RECENT[:-_BULK_LIVE_OUTPUT_LIMIT]',s)
         self.assertIn('recover_native_progress(native_path, native_flags)',s)
 ''',encoding='utf-8')
+# Update the prior streaming test fixture for the expanded status function.
+older = root/'tests/test_streaming_256.py'
+if older.is_file():
+    contents = older.read_text(encoding='utf-8')
+    fixture = "'injection_status':lambda:{'active':True,'completed':4,'applied':2,'failed':2}"
+    newer = """'_BULK_LIVE_RECENT':[], '_BULK_LIVE_OUTPUT_LIMIT':160,
+        '_INJECTION_STATUS_LOCK':threading.Lock(),
+        '_INJECTION_STATUS':{'active':True,'path':'mock','flags':{'a':1,'b':1,'c':1,'d':1}},
+        'recover_native_progress':lambda path, flags:[{'name':'a','ok':True,'message':'ok'},
+        {'name':'b','ok':True,'message':'ok'},{'name':'c','ok':False,'message':'no'},
+        {'name':'d','ok':False,'message':'no'}]"""
+    if contents.count(fixture)!=1:
+        raise RuntimeError('Old streaming regression fixture changed')
+    older.write_text(contents.replace(fixture,newer,1),encoding='utf-8')
+
 print('Applied ZFLAG v2.0.57: bounded native FastFlag output and red Roblox offline status')
