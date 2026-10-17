@@ -46,6 +46,8 @@ for rel in ('package.json','src-tauri/tauri.conf.json','scripts/smoke-test-insta
             'tests/test_release_integrity.py','tests/test_large_json_safety_248.py',
             'tests/test_live_ui_pacing_253.py'):
     path = root / rel
+    if not path.exists() and rel == 'tests/test_live_ui_pacing_253.py':
+        continue  # prior releases name this regression test test_ui_pacing_253.py
     data = path.read_text(encoding='utf-8')
     if '2.0.54' in data:
         path.write_text(data.replace('2.0.54','2.0.55'),encoding='utf-8')
