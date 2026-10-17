@@ -1,4 +1,4 @@
-name: Build and publish ZFLAG v2.0.54 Windows installer
+name: Build and publish ZFLAG v2.0.55 Windows installer
 
 on:
   workflow_dispatch:
@@ -10,6 +10,7 @@ on:
       - 'release/zflag-v252-process-detection-fix.py'
       - 'release/zflag-v253-ui-pacing-fix.py'
       - 'release/zflag-v254-tab-results-game-tuner.py'
+      - 'release/zflag-v255-native-failure-reporting.py'
 
 permissions:
   contents: write
@@ -112,6 +113,16 @@ jobs:
           if (-not $ui.Contains('snapshotMatchesTab') -or -not $ui.Contains('gameTunePlan')) { throw 'UI regression' }
           $preserve=Get-Content '_work/ZFLAG-Studio/src/gameTuner.ts' -Raw
           if (-not $preserve.Contains('const flags = { ...original }')) { throw 'Original flag preservation missing' }
+      - name: Preserve validated native failure details (v2.0.55)
+        shell: pwsh
+        run: |
+          $env:PYTHONUTF8 = '1'
+          python release/zflag-v255-native-failure-reporting.py _work/ZFLAG-Studio
+          if ($LASTEXITCODE -ne 0) { throw 'v2.0.55 native outcome repair failed' }
+          $cfg=Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
+          if ($cfg.version -ne '2.0.55') { throw 'Expected v2.0.55' }
+          $backend=Get-Content '_work/ZFLAG-Studio/backend/server.py' -Raw
+          if (-not $backend.Contains('verified_all_failed')) { throw 'Native failure-handling fix missing' }
       - name: Validate bulk-safety, UI, and release regressions
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
@@ -164,41 +175,41 @@ jobs:
       - name: Upload tested EXE
         uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.54-Windows-EXE
+          name: ZFLAG-v2.0.55-Windows-EXE
           path: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
           if-no-files-found: error
-      - name: Publish official v2.0.54 release after successful smoke test
+      - name: Publish official v2.0.55 release after successful smoke test
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.54
-          name: ZFLAG v2.0.54 for Windows
+          tag_name: v2.0.55
+          name: ZFLAG v2.0.55 for Windows
           draft: false
           prerelease: false
           body: |
-            Tab-specific scores no longer reuse results from other JSONs; interrupted batches store their per-tab reported writes, failures, and unattempted flags. A read-only, best-effort current place ID detector and a reversible graphics tuner create a new copy retaining every original key. No game optimizations are applied automatically. The header now uses amber for detected Roblox without memory access, and green when ready. Large preset injection no longer shows a blocking browser confirmation; it displays live progress and estimated time remaining. Only the extra inter-batch wait is shortened from 0.5s to 0.25s; native batch size and crash-stop checks are unchanged. Updated Roblox status distinguishes a detected process from process-access readiness, adds diagnostics for failures, fixes the confirmation message, and hides results from a different preset. Standalone Windows installer. Large JSON presets now offer an explicitly confirmed experimental Inject action using paced 32-flag Enhanced native batches, per-batch progress and Stop control. A separate Stage safe config action retains allowlist-only startup staging. Includes one-click updater.
+            Native injection now preserves verified per-flag failure details even if all flags fail, and accepts evidence-backed mixed legacy results instead of hiding them behind a generic error. This is a reporting/diagnostics fix, not a Roblox write bypass or guarantee. Tab-specific scores no longer reuse results from other JSONs; interrupted batches store their per-tab reported writes, failures, and unattempted flags. A read-only, best-effort current place ID detector and a reversible graphics tuner create a new copy retaining every original key. No game optimizations are applied automatically. The header now uses amber for detected Roblox without memory access, and green when ready. Large preset injection no longer shows a blocking browser confirmation; it displays live progress and estimated time remaining. Only the extra inter-batch wait is shortened from 0.5s to 0.25s; native batch size and crash-stop checks are unchanged. Updated Roblox status distinguishes a detected process from process-access readiness, adds diagnostics for failures, fixes the confirmation message, and hides results from a different preset. Standalone Windows installer. Large JSON presets now offer an explicitly confirmed experimental Inject action using paced 32-flag Enhanced native batches, per-batch progress and Stop control. A separate Stage safe config action retains allowlist-only startup staging. Includes one-click updater.
             Fixes the installer regression that left older ZFLAG backends running, locking fflag-backend.exe during upgrades. Includes a Windows smoke test that reinstalls with GUI/backend running. Live injection can still freeze or crash Roblox; this build does not guarantee 20k flags take effect. The live path is manually confirmed, stops if Roblox exits/restarts, and does not attempt a huge single memory-write batch.
             Automated offline regressions, Windows installer smoke test, backend startup, and update authorization tests passed. In-game Roblox injection is not covered by CI. Installer is unsigned.
           files: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
-      - name: Switch official website to verified v2.0.54 EXE
+      - name: Switch official website to verified v2.0.55 EXE
         shell: pwsh
         run: |
           $site='index.html'
           $raw=Get-Content -LiteralPath $site -Raw
-          if (-not $raw.Contains('v2.0.52')) { throw 'Expected v2.0.52 website fallback not found; site left untouched' }
-          $new=$raw.Replace('2.0.52','2.0.54')
+          if (-not $raw.Contains('v2.0.54')) { throw 'Expected v2.0.54 website fallback not found; site left untouched' }
+          $new=$raw.Replace('2.0.54','2.0.55')
           $new | Set-Content -LiteralPath $site -Encoding utf8
           $readme='README.md'
           $info=Get-Content -LiteralPath $readme -Raw
-          $info=$info.Replace('Download ZFLAG_Setup.exe — v2.0.52','Download ZFLAG_Setup.exe — v2.0.54').Replace('releases/download/v2.0.52/ZFLAG_Setup.exe','releases/download/v2.0.54/ZFLAG_Setup.exe')
+          $info=$info.Replace('Download ZFLAG_Setup.exe — v2.0.54','Download ZFLAG_Setup.exe — v2.0.55').Replace('releases/download/v2.0.54/ZFLAG_Setup.exe','releases/download/v2.0.55/ZFLAG_Setup.exe')
           $info | Set-Content -LiteralPath $readme -Encoding utf8
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html README.md
-          git commit -m 'Update ZFLAG website download to verified v2.0.54'
+          git commit -m 'Update ZFLAG website download to verified v2.0.55'
           if ($LASTEXITCODE -ne 0) { throw 'Could not commit website release update' }
           git push origin HEAD:main
           if ($LASTEXITCODE -ne 0) { throw 'Could not publish updated website' }
