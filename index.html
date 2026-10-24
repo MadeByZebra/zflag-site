@@ -167,6 +167,19 @@ body{font-family:"Geist","Segoe UI Variable Text","Segoe UI",sans-serif;}
 /* New native one-click updater feature — keep download controls compact and matte. */
 .zflag-updater-release-note { font-size:11px; margin:12px 0 0; color:var(--muted); line-height:1.55; }
 .zflag-updater-release-note strong { color:var(--text);font-weight:650; }
+
+    /* October 24 upstream injector notice — website information only; not a ZFLAG engine upgrade. */
+    .engine-notice { padding:0 0 66px; position:relative; }
+    .engine-notice-card { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(230px,.65fr); gap:30px; align-items:center; padding:26px 30px; border:1px solid var(--line-2); border-radius:12px; background:linear-gradient(125deg,var(--panel-2),var(--panel)); }
+    .engine-notice-kicker { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:12px; font:550 10px/1.5 "Geist Mono",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+    .engine-notice-status { border:1px solid var(--line-2); border-radius:5px; padding:4px 7px; color:var(--text); background:var(--raised); letter-spacing:.04em; }
+    .engine-notice h2 { margin:0 0 9px; font-size:clamp(23px,2.5vw,34px); line-height:1.12; letter-spacing:-.04em; font-weight:600; }
+    .engine-notice p { margin:0; max-width:760px; color:var(--muted); font-size:13px; line-height:1.7; }
+    .engine-notice p strong { color:var(--text); font-weight:600; }
+    .engine-notice-actions { display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+    .engine-notice-actions .btn { justify-content:center; white-space:normal; text-align:center; min-height:38px; height:auto; padding:11px 14px; }
+    .engine-notice-actions small { color:var(--soft); font:10px/1.55 "Geist Mono",monospace; text-align:center; }
+    @media(max-width:760px){ .engine-notice{padding-bottom:36px}.engine-notice-card{grid-template-columns:1fr;gap:20px;padding:20px}.engine-notice-actions{align-items:stretch} }
 </style>
 </head>
 <body>
@@ -210,6 +223,24 @@ body{font-family:"Geist","Segoe UI Variable Text","Segoe UI",sans-serif;}
         </div>
       </div>
     </div></section>
+
+
+    <section class="engine-notice" id="engine-status" aria-labelledby="engine-notice-title">
+      <div class="wrap">
+        <div class="engine-notice-card">
+          <div>
+            <div class="engine-notice-kicker"><span>ENGINE RESEARCH / OCT 24, 2026</span><span class="engine-notice-status">EXPERIMENTAL · NOT INTEGRATED</span></div>
+            <h2 id="engine-notice-title">New upstream injector build. Compatibility under review.</h2>
+            <p>A third-party <strong>“omg” injector release</strong> reports improved loading and reduced lag. A claimed <strong>~23× speed improvement has not been independently benchmarked</strong>. The published release provides a Windows executable, not updated C++ source code. <strong>ZFLAG v2.0.57 still uses its existing engine</strong>; this upstream build is not included in the ZFLAG installer.</p>
+          </div>
+          <div class="engine-notice-actions">
+            <a class="btn" href="https://github.com/davelovestars/oldinjector-version-working/releases/tag/omg" target="_blank" rel="noopener noreferrer">View third-party release ↗</a>
+            <button class="btn primary" data-download type="button">Download ZFLAG v2.0.57 ↓</button>
+            <small>Separate tools · Windows x64 · no verified live-injection speed results</small>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="section" id="features"><div class="wrap">
       <div class="section-head reveal"><div><div class="kicker" data-i18n="features.kicker">Built around the workflow</div><h2 data-i18n-html="features.title">Everything you need.<br>Nothing you don't.</h2></div><p data-i18n="features.body">ZFLAG keeps the website restrained and the product presentation focused on the workflow: find flags, change them, organize them, save profiles, and launch.</p></div>
