@@ -192,6 +192,17 @@ body .z2-window{--z2accent:#b9c6d8;--z2line:#292b31;--z2muted:#858b98;position:r
 @media(max-width:540px){.z2-top{padding:0 12px}.z2-preview-label{display:none}.z2-body{padding:15px 12px}.z2-page-head{align-items:start;flex-direction:column}.z2-metrics{grid-template-columns:1fr}.z2-metric{min-height:92px}.z2-metric>b{margin:5px 0}.z2-presets{grid-template-columns:1fr}.z2-tab-help{display:none}.z2-actions{flex-wrap:wrap}.z2-title-muted{display:none}.z2-flag{padding:10px 9px}.z2-flag-right{gap:4px}.z2-flag-pill{display:none}}
 @media(prefers-reduced-motion:reduce){.z2-panel.is-active{animation:none}.z2-toggle:after{transition:none}}
 
+
+/* The full interactive ZFLAG Studio replaces the older unrelated mini-demo. */
+.z2-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.z2-feature-link{display:flex;flex-direction:column;min-height:204px;background:var(--panel);border:1px solid var(--line-2);border-radius:11px;padding:24px;transition:border-color .2s,transform .2s,background .2s}
+.z2-feature-link:hover{transform:translateY(-2px);border-color:var(--text);background:var(--raised)}
+.z2-feature-link>span{font:10px "Geist Mono",monospace;letter-spacing:.1em;color:var(--soft)}
+.z2-feature-link>strong{font-size:19px;letter-spacing:-.04em;color:var(--text);margin:15px 0 8px;font-weight:600}
+.z2-feature-link>small{color:var(--muted);font-size:12px;line-height:1.65}
+.z2-feature-link>em{margin-top:auto;padding-top:15px;font-size:11px;font-style:normal;color:var(--text)}
+@media(max-width:720px){.z2-feature-grid{grid-template-columns:1fr}.z2-feature-link{min-height:auto}}
+
 </style>
 </head>
 <body>
@@ -323,13 +334,11 @@ body .z2-window{--z2accent:#b9c6d8;--z2line:#292b31;--z2muted:#858b98;position:r
     </div></section>
 
     <section class="section" id="preview"><div class="wrap">
-      <div class="section-head reveal"><div><div class="kicker" data-i18n="preview.kicker">Interactive preview</div><h2 data-i18n-html="preview.title">A workspace,<br>not a landing-page prop.</h2></div><p data-i18n="preview.body">This is a UI demonstration only. The controls react so you can preview the ZFLAG interaction style, but this website does not modify your local configuration.</p></div>
-      <div class="showcase reveal">
-        <div class="showcase-nav"><button class="active" data-demo="performance" data-i18n="preview.performance">Performance</button><button data-demo="visual" data-i18n="preview.visual">Visual</button><button data-demo="network" data-i18n="preview.network">Network</button><button data-demo="advanced" data-i18n="preview.advanced">Advanced</button></div>
-        <div class="showcase-card">
-          <div class="demo-bar"><div><div class="kicker" data-i18n="preview.demo">UI DEMONSTRATION</div><h3 style="margin:7px 0 0" data-i18n="preview.config">Configuration Preview</h3></div><div class="demo-tabs"><div class="demo-tab active">Flags</div><div class="demo-tab">JSON</div></div></div>
-          <div class="demo-search">⌕&nbsp;&nbsp; Rendering</div><div id="demoRows"></div>
-        </div>
+      <div class="section-head reveal"><div><div class="kicker" data-i18n="preview.kicker">Explore ZFLAG Studio</div><h2>More than a screenshot.<br>A working website preview.</h2></div><p>The full-size desktop interface above is interactive. Explore sample JSONs, switch presets, search flags, export a configuration, and customize its accent — all safely within the webpage.</p></div>
+      <div class="z2-feature-grid reveal">
+        <a class="z2-feature-link" href="#product"><span>01 / EDITOR</span><strong>Browse &amp; edit samples</strong><small>Open the Editor to search, filter, toggle, and export sample FastFlags. It won't affect Roblox.</small><em>Explore preview ↗</em></a>
+        <a class="z2-feature-link" href="#product"><span>02 / PRESETS</span><strong>Switch profiles</strong><small>See how different profile choices and configuration activity feel inside the ZFLAG interface.</small><em>Try presets ↗</em></a>
+        <a class="z2-feature-link" href="#product"><span>03 / SYSTEM</span><strong>Clear compatibility status</strong><small>Desktop v2.0.57 is the current stable installer. The October 24 upstream EXE is a separate experimental release.</small><em>View the app ↗</em></a>
       </div>
     </div></section>
 
@@ -444,16 +453,6 @@ body .z2-window{--z2accent:#b9c6d8;--z2line:#292b31;--z2muted:#858b98;position:r
     document.querySelectorAll('[data-accent]').forEach(x=>x.addEventListener('click',()=>applyAccent(x.dataset.accent,x)));
 
     document.querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.classList.toggle('on'));
-    const datasets={
-      performance:[['Frame scheduler','DFIntTaskSchedulerTargetFps','240',true],['Rendering optimization','DFFlagTextureQualityOverrideEnabled','true',true],['Frame pacing mode','FFlagTaskSchedulerLimitTargetFpsTo2402','false',false],['Performance profile','Preset / Competitive','active',true]],
-      visual:[['Texture quality','TextureQualityOverride','2',true],['Lighting technology','Future lighting preference','default',false],['Post processing','Visual profile override','false',false],['UI scale','Application interface scale','100%',true]],
-      network:[['Network profile','Connection configuration','default',true],['Telemetry display','Local diagnostics only','true',true],['Packet visualization','Preview overlay','false',false],['Connection preset','Preset / Standard','active',true]],
-      advanced:[['Raw JSON editing','Advanced editor access','enabled',true],['Merge behavior','Preserve unknown keys','true',true],['Validation','Check value types before save','true',true],['Backup on write','Create previous-config backup','true',true]]
-    };
-    function renderDemo(key){const box=document.getElementById('demoRows');box.innerHTML=datasets[key].map(([name,flag,val,on])=>`<div class="demo-row"><div><b>${name}</b><small>${flag} · ${val}</small></div><div class="toggle ${on?'on':''}" onclick="this.classList.toggle('on')"><i></i></div></div>`).join('')}
-    renderDemo('performance');
-    document.querySelectorAll('[data-demo]').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('[data-demo]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');renderDemo(btn.dataset.demo)});
-
     document.querySelectorAll('.faq-q').forEach(q=>q.onclick=()=>q.parentElement.classList.toggle('open'));
 
     const win=document.getElementById('tiltWindow');
