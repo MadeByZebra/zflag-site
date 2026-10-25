@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#080808" />
-  <link rel="icon" type="image/png" href="./zflag-logo.png" />
+  <link rel="icon" type="image/svg+xml" href="./zflag-favicon.svg" />
   <link rel="apple-touch-icon" href="./zflag-logo.png" />
   <meta name="application-name" content="ZFLAG" />
+  <meta name="theme-color" content="#090b0e" />
+  <meta property="og:image" content="./zflag-logo.png" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.58" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ZFLAG — The FastFlag workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
-  <title>ZFLAG — FFlag control, refined.</title>
+  <title>ZFLAG — FastFlags, without the noise.</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;550;600;650;700&family=Geist+Mono:wght@400;500&display=swap');
     :root{
@@ -266,6 +268,89 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
 @media(max-width:680px){.nav{padding:0 8px 0 12px}.docs-quick-link{padding:7px}.hero{padding-top:124px!important}.hero h1{font-size:clamp(48px,12vw,72px)!important}.hero-meta{gap:7px}.hero-meta span{font-size:9px}.hero-actions .btn{flex:1;justify-content:center;padding:0 12px}.hero-docs-button{flex-basis:100%!important}.quality-strip{grid-template-columns:1fr;margin-bottom:50px!important}.quality-cell,.quality-cell:nth-child(2){border-right:0;border-bottom:1px solid var(--line)}.quality-cell:nth-child(3){border-bottom:0}.quality-go{display:none}.z-docs-grid{grid-template-columns:1fr}.z-doc-card:last-child{grid-column:auto;min-height:370px}.z-docs-head h2{font-size:clamp(43px,11vw,62px)}.z-docs-bottom{align-items:flex-start;flex-wrap:wrap;gap:14px}.z-docs-bottom>div{flex-basis:100%}.section{padding-top:60px;padding-bottom:60px}}
 @media(prefers-reduced-motion:reduce){.z-doc-card:hover{transform:none}}
 
+
+/* ZFLAG Signature refinement: PRODUCT FIRST, no borrowed branding. */
+:root{--max:1320px}
+.zmark{background-image:url("./zflag-favicon.svg")!important;background-size:cover!important;background-color:#090d13!important;border-color:#54708d70!important;border-radius:9px!important}
+.z2-mark,.z-mini-mark{display:grid!important;place-items:center;background:#090d13 url("./zflag-favicon.svg") center/cover no-repeat!important;color:transparent!important;font-size:0!important;flex-shrink:0;border:1px solid rgba(118,148,187,.35)!important;border-radius:8px}
+.hero-grid{gap:27px!important}
+.hero .eyebrow{letter-spacing:.145em}
+.hero h1{max-width:1140px}
+.stage-overline{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:0 3px 14px;color:var(--soft);font:500 10px/1.4 "Geist Mono",monospace;letter-spacing:.07em}
+.stage-indicator{display:flex;align-items:center;gap:10px;color:var(--text);font-weight:600}.stage-spark{width:7px;height:7px;border-radius:50%;background:#bdcee3;box-shadow:0 0 0 4px #a5bdda1b,0 0 22px #9ac3f188}
+.stage-note{margin-left:auto}.stage-guide{border-bottom:1px solid var(--line-2);color:var(--muted);padding-bottom:2px;transition:color .2s,border-color .2s}.stage-guide:hover{color:var(--text);border-color:var(--text)}
+body .z2-window{border-radius:16px!important;background:#0b0e13!important;box-shadow:0 18px 28px #0003,0 60px 120px #0009,0 0 0 1px #b9cce512!important}
+.z2-titlebar{height:44px!important;background:linear-gradient(180deg,#171c24,#12161e)!important}.z2-titlebrand{font-weight:680!important;letter-spacing:.015em}
+.z2-title-drag{color:#acb7c5!important;font-size:10px!important}.studio-project-dot{display:inline-block;width:6px;height:6px;background:#c7d9ec;border-radius:50%;vertical-align:middle;margin-right:7px}
+.z2-titlebar,.z2-side,.z2-top,.z2-statusbar{border-color:#313944!important}
+.z2-workspace{background:linear-gradient(150deg,#121720,#0c1016 70%)!important}
+.z2-side{background:#11151c!important}
+.z2-top{background:linear-gradient(90deg,#171d26,#111720)!important}
+.z2-side .z2-nav.is-active{background:linear-gradient(95deg,rgba(165,191,222,.18),rgba(165,191,222,.065))!important;color:#f1f7ff!important;border-color:rgba(146,175,207,.21)!important}
+.z2-side .z2-nav:hover{background:#252e3a!important}
+.z2-breadcrumb strong{color:#f6f8fb!important}
+.z2-body{background:linear-gradient(145deg,#121721,#0e1219)!important;padding:clamp(19px,2.6vw,31px)!important}
+.z2-page-head{margin-bottom:22px!important}
+.z2-page-head h3{font-size:clamp(23px,3vw,34px)!important;letter-spacing:-.06em!important;font-weight:640!important}
+.z2-page-head p{color:#9aa7b6!important;font-size:12px!important}
+.z2-page-head>div>small{letter-spacing:.13em!important;color:#a7bfdc!important}
+.z2-button{border-radius:7px!important;transition:background .17s,border-color .17s,box-shadow .17s,transform .17s!important}
+.z2-button:hover{box-shadow:0 6px 16px #0005;transform:translateY(-1px)}
+.z2-button.z2-primary{background:#c6d6e8!important;border-color:#d9e8f5!important;color:#0e1822!important}
+.z2-tabbar{background:#151b24!important;border:1px solid #303b48!important;border-bottom:0!important;border-radius:9px 9px 0 0!important;padding:0 10px!important}
+.z2-open-tab{background:#242e3b!important;border-top:2px solid #b5cadf!important;color:#e7f1fd!important}
+.z2-file-symbol{color:#9db5d3!important}.z2-tab-divider{padding:0 7px;color:#4b617c}
+.z2-editor-tools{background:#151c26!important;border:1px solid #303b48!important;padding:12px!important;margin-bottom:0!important;border-radius:0!important}
+.z2-search{background:#0f141c!important;border:1px solid #384655!important;border-radius:7px!important}
+.z2-search:focus-within{border-color:#9cb9d9!important;box-shadow:0 0 0 3px #9cbbdb14}
+.z2-editor-list{background:#10151d!important;border-color:#303b48!important;border-radius:0 0 8px 8px!important;max-height:350px!important}
+.z2-flag{padding:13px 16px!important;border-color:#252e39!important;transition:background .2s}.z2-flag:hover{background:#1d2734!important}
+.z2-flag-copy b{color:#eef3f9!important;font-size:12px!important}.z2-flag-copy small{color:#91a2b6!important;max-width:95%}
+.z2-flag-pill{background:#222d3b!important;color:#becfe1!important;border-color:#3c4c60!important}
+.z2-toggle.is-on{background:#9cb8d8!important}.z2-editor-footer{color:#9aa9b9!important}
+.z2-statusbar{background:#10151c!important}.z2-online-dot{background:#c57d86!important;box-shadow:0 0 0 3px #c57d8618!important}
+.z2-feature-grid{gap:14px!important}
+.z2-feature-link{min-height:204px!important;border-color:var(--line-2)!important;background:linear-gradient(155deg,var(--panel-2),var(--panel))!important;border-radius:12px!important;position:relative;overflow:hidden}
+.z2-feature-link:before{content:"";position:absolute;inset:-120px auto auto -100px;width:200px;height:200px;opacity:0;transition:opacity .25s;background:radial-gradient(circle,rgba(166,196,231,.14),transparent 65%);pointer-events:none}.z2-feature-link:hover:before{opacity:1}.z2-feature-link>strong{font-size:19px!important;letter-spacing:-.045em!important}
+.z2-feature-link>em{font-weight:600}
+#appearance .personalize{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr)!important;gap:25px!important;align-items:center}
+#appearance .palette-panel{width:100%;max-width:430px}
+#appearance .palette-preview{width:100%;min-width:0}
+.z-preview-chrome{width:100%;min-width:0}
+.z-preview-above,.z-preview-under{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px;color:var(--soft);font:500 9px "Geist Mono",monospace;letter-spacing:.13em}
+.z-preview-above>span:first-child{display:flex;align-items:center;gap:9px;color:var(--text)}.z-preview-above i{display:inline-block;width:6px;height:6px;background:#a6c3e2;border-radius:50%;box-shadow:0 0 0 3px #a6c3e221}
+.z-preview-under{padding-top:13px}
+.z-mini{--maccent:#b8cde3;position:relative;width:100%;color:#eaf1fb;background:#10151c;border:1px solid #4e5b6a;border-radius:13px;overflow:hidden;box-shadow:0 40px 80px #0006,0 0 0 1px #9fc3e211;letter-spacing:0;font-family:"Geist",sans-serif}
+.z-mini *{box-sizing:border-box}.z-mini button{font:inherit;cursor:pointer}
+.z-mini-title{height:43px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,#1c232d,#141a22);border-bottom:1px solid #343e4b;padding:0 11px}
+.z-mini-identity{display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:-.02em}.z-mini-mark{width:25px;height:25px;border-radius:6px!important}.z-mini-sub{font:500 8px "Geist Mono",monospace;color:#798a9e;letter-spacing:.08em;margin-left:3px}
+.z-mini-center{display:flex;align-items:center;gap:9px;color:#77899d;font:9px "Geist Mono",monospace}.z-mini-demo-pill{border:1px solid #46596c;color:#b1c7de;border-radius:5px;padding:3px 7px;font-size:8px}
+.z-mini-controls{display:flex;gap:1px;color:#9aabbc}.z-mini-controls i{display:grid;place-items:center;width:23px;height:22px;border-radius:5px;font:normal 13px "Geist",sans-serif;transition:background .18s}.z-mini-controls i:hover{background:#3b4553;color:#fff}.z-mini-controls i:last-child:hover{background:#ad3b4d}
+.z-mini-layout{display:grid;grid-template-columns:137px minmax(0,1fr);min-height:363px}
+.z-mini-aside{position:relative;padding:17px 9px 69px;background:#11161e;border-right:1px solid #303946}
+.z-mini-aside-label{font:600 8px "Geist Mono",monospace;color:#69798e;letter-spacing:.11em;padding:0 7px 9px;margin-top:2px}.z-mini-aside-label:not(:first-child){margin-top:18px}
+.z-mini-nav{display:flex;align-items:center;gap:9px;width:100%;height:32px;border:1px solid transparent;background:none;color:#a1aebe;text-align:left;padding:0 8px;border-radius:6px;font-size:10.5px!important;transition:background .18s,color .18s,border-color .18s}
+.z-mini-nav:hover{background:#293340;color:#f0f5fc}.z-mini-nav.is-active{background:#9cbad524;border-color:#9cbad536;color:#edf6ff}.z-mini-nav-icon{font:11px "Geist Mono",monospace;width:16px;text-align:center;color:#9fbbd7}
+.z-mini-offline{position:absolute;bottom:12px;left:9px;right:9px;display:flex;align-items:center;gap:7px;padding:9px 6px;border-top:1px solid #303946}.z-mini-offline-dot{width:6px;height:6px;border-radius:50%;background:#db7e83}.z-mini-offline b{display:block;font-size:9px;font-weight:600;color:#dbe6f0}.z-mini-offline small{display:block;color:#7e8c9e;font-size:8px}
+.z-mini-main{display:flex;min-width:0;flex-direction:column;background:linear-gradient(155deg,#151c25,#0f141b)}.z-mini-breadcrumb{display:flex;align-items:center;gap:7px;height:40px;border-bottom:1px solid #303946;padding:0 13px;color:#8392a4;font:9px "Geist Mono",monospace}.z-mini-breadcrumb>b{color:#556579}.z-mini-breadcrumb strong{color:#dce8f4;font-weight:550}.z-mini-status{margin-left:auto;border:1px solid #385064;border-radius:5px;padding:4px 6px;color:#acc3df;font-size:8px}
+.z-mini-main-body{padding:18px 17px 14px;flex:1;min-height:0}.z-mini-view{display:none;animation:mini-fade .2s ease}.z-mini-view.is-active{display:block}@keyframes mini-fade{from{opacity:.65;transform:translateY(3px)}to{opacity:1;transform:none}}
+.z-mini-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 14px}.z-mini-heading>div>span{font:600 8px "Geist Mono",monospace;color:#8aabc9;letter-spacing:.105em}.z-mini-heading h3{font-size:20px;line-height:1.15;letter-spacing:-.048em;margin:5px 0}.z-mini-heading p{color:#93a2b2;font-size:10px;margin:0;line-height:1.4}.z-mini-action{flex:none;border:1px solid #afc7e2;background:#c2d6e9;color:#15202d;border-radius:6px;font-size:9px!important;font-weight:600!important;padding:8px 10px;transition:filter .2s}.z-mini-action:hover{filter:brightness(1.1)}
+.z-mini-tabs{display:flex;align-items:center;gap:0;border:1px solid #333e4a;border-bottom:0;background:#111720;min-height:28px;border-radius:7px 7px 0 0;color:#7e8b9a;font:9px "Geist Mono",monospace;overflow:hidden}.z-mini-tabs>span{padding:7px 9px}.z-mini-tabs .is-active{border-top:2px solid var(--maccent);background:#222c38;color:#dae5f1;padding-top:5px}.z-mini-tabs i{color:var(--maccent);font:normal 6px sans-serif}.z-mini-tabs-end{margin-left:auto;font-size:7px;letter-spacing:.08em}
+.z-mini-filter{display:flex;gap:7px;align-items:center;height:34px;background:#171f29;border:1px solid #333e4a;padding:0 10px;color:#8194a9;font:9px "Geist Mono",monospace}.z-mini-filter>span:first-child{font-size:17px;color:#b1c8e2}.z-mini-filter>span:last-child{margin-left:auto;font-size:8px;color:#71869c}
+.z-mini-flagrow{display:flex;justify-content:space-between;align-items:center;gap:9px;background:#111820;border:1px solid #283544;border-top:0;padding:9px 11px;min-height:48px}.z-mini-flagrow:nth-of-type(even){background:#141c25}.z-mini-flagrow>div{min-width:0;flex:1}.z-mini-flagrow b{display:block;color:#e6eef7;font-size:10px;font-weight:600}.z-mini-flagrow small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;color:#718396;font:8px/1.65 "Geist Mono",monospace}
+.z-mini-value{font:9px "Geist Mono",monospace;color:var(--maccent);background:#253243;border:1px solid #394a60;border-radius:5px;padding:3px 6px}
+.z-mini-toggle{flex:none;display:block;width:28px;height:15px;border:1px solid #405369;border-radius:100px;position:relative;background:#222c37;transition:background .2s}.z-mini-toggle:after{content:"";position:absolute;left:2px;top:2px;height:9px;width:9px;background:#8398ac;border-radius:50%;transition:transform .2s,background .2s}.z-mini-toggle.on{background:var(--maccent);border-color:var(--maccent)}.z-mini-toggle.on:after{background:#101922;transform:translateX(12px)}
+.z-mini-list-foot{display:flex;justify-content:space-between;gap:12px;color:#8294a8;font:8px "Geist Mono",monospace;background:#151f2a;border:1px solid #2b394a;border-top:0;padding:8px 10px;border-radius:0 0 7px 7px}.z-mini-list-foot i{display:inline-block;width:6px;height:6px;background:var(--maccent);border-radius:50%;margin-right:5px}
+.z-mini-bottom{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 12px;border-top:1px solid #303946;background:#141922;color:#8493a5;font:8px "Geist Mono",monospace}.z-mini-bottom>span:first-child{display:flex;align-items:center;gap:7px}.z-mini-bottom i{height:6px;width:6px;background:#d27b87;border-radius:50%}.z-mini-bottom b{color:#53657a;font-weight:500}
+.z-mini-preset-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.z-mini-preset{display:flex;flex-direction:column;gap:7px;text-align:left;border:1px solid #354354;border-radius:7px;background:#192330;color:#c9d8ea;padding:12px 9px;min-height:139px;transition:background .2s,border-color .2s}.z-mini-preset:hover{background:#243247}.z-mini-preset.chosen{border-color:var(--maccent);background:#9fbbda1a}.z-mini-preset>span{font-size:17px;color:var(--maccent)}.z-mini-preset>b{font-size:10px}.z-mini-preset>small{font-size:9px;color:#97a9bd}.z-mini-preset>em{font-style:normal;margin-top:auto;color:var(--maccent);font-size:9px}
+.z-mini-panel-hint{margin-top:15px;padding:11px;background:#1d2835;border:1px solid #34465a;border-radius:7px;font-size:10px;color:#9fb3c9;line-height:1.5}
+.z-mini-log{border:1px solid #344454;background:#10161e;border-radius:7px;overflow:hidden;min-height:167px}.z-mini-log>div{display:flex;gap:10px;padding:12px;border-bottom:1px solid #293645;color:#b7c9da;font:9px "Geist Mono",monospace}.z-mini-log>div>span{color:var(--maccent);font-weight:600}
+.z-mini-setting{border:1px solid #354454;border-radius:7px;background:#121b25;padding:15px}.z-mini-setting b{display:block;font-size:11px}.z-mini-setting>span{display:block;color:#8d9eaf;font-size:10px;margin:4px 0 14px}.z-mini-colors{display:flex;gap:10px}.z-mini-colors button{width:29px;height:29px;background:var(--pick);border:3px solid #151b24;border-radius:8px;box-shadow:0 0 0 1px #ffffff39}.z-mini-colors button.selected{box-shadow:0 0 0 2px #f8fbff}
+.z-mini-toast{display:none;position:absolute;right:15px;bottom:48px;background:#243447;color:#e5f1ff;border:1px solid #6184a8;border-radius:7px;padding:11px 13px;font-size:10px;box-shadow:0 15px 35px #000a}.z-mini-toast.visible{display:block}
+@media(max-width:1050px){#appearance .personalize{grid-template-columns:1fr!important}#appearance .palette-panel{max-width:none}#appearance .swatches{max-width:460px}.z-preview-chrome{max-width:800px;margin:auto}}
+@media(max-width:560px){.stage-note{display:none}.stage-overline{flex-wrap:wrap}.z-mini-layout{grid-template-columns:48px minmax(0,1fr)}.z-mini-aside{padding:11px 4px 45px}.z-mini-aside-label,.z-mini-nav>span:last-child,.z-mini-offline{display:none}.z-mini-nav{justify-content:center;padding:0}.z-mini-nav-icon{width:auto}.z-mini-main-body{padding:12px 9px}.z-mini-heading h3{font-size:17px}.z-mini-heading p{font-size:9px}.z-mini-title-light,.z-mini-sub{display:none}.z-mini-preset-grid{grid-template-columns:1fr}.z-mini-preset{min-height:88px;gap:4px}.z-mini-status{display:none}.z-mini-tabs>span:nth-child(2){display:none}.z-mini-flagrow{padding:8px 6px}.z-mini-flagrow small{font-size:7px}.z-mini-value{font-size:8px}.z-mini-action{padding:6px 7px;font-size:8px!important}.z-mini-center{margin-left:auto;margin-right:6px}}
+@media(prefers-reduced-motion:reduce){.z-mini-view{animation:none}}
+
 </style>
 </head>
 <body>
@@ -284,21 +369,21 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
         <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a><a class="btn hero-docs-button" href="./docs/"><span>Read documentation</span><span>↗</span></a></div><p class="release-bridge-status" id="releaseBridgeStatus" aria-live="polite">Latest: v2.0.58 · Windows x64 · one-click in-app updates · responsive toolbar · 13.6 MB</p>
         <div class="hero-meta"><span>Windows 10 / 11</span><span>x64</span><span data-i18n="hero.metaTheme">Website: Dark / Light</span><span data-i18n="hero.metaNoFake">No fake benchmarks</span></div>
       </div>
-      <div class="product-stage reveal" id="product">
+      <div class="product-stage reveal" id="product"><div class="stage-overline"><div class="stage-indicator"><span class="stage-spark"></span> ZFLAG / STUDIO 2.0</div><span class="stage-note">01 / THE WORKSPACE</span><a href="./docs/#first-run" class="stage-guide">Product walkthrough ↗</a></div>
 
         
 <div class="app-window studio-window z2-window" id="tiltWindow" aria-label="Interactive ZFLAG Studio preview">
   <div class="z2-titlebar">
     <div class="z2-titlebrand"><span class="z2-mark">Z</span><b>ZFLAG</b><span class="z2-title-muted">FFLAG STUDIO</span></div>
-    <div class="z2-title-drag">ZFLAG Studio <span>· Website preview</span></div>
+    <div class="z2-title-drag"><span class="studio-project-dot"></span> ZFLAG Studio <span>· Configuration Editor</span></div>
     <div class="z2-winbuttons" aria-hidden="true"><span>−</span><span>□</span><span>×</span></div>
   </div>
   <div class="z2-app">
     <aside class="z2-side" aria-label="Preview navigation">
       <div class="z2-sidebrand"><span class="z2-mark">Z</span><div><strong>ZFLAG</strong><small>BY ZEBRA · STUDIO</small></div></div>
       <div class="z2-menu-label">WORKSPACE</div>
-      <button type="button" class="z2-nav is-active" data-z2-tab="home"><span class="z2-ni">⌂</span> Overview</button>
-      <button type="button" class="z2-nav" data-z2-tab="editor"><span class="z2-ni">{ }</span> Editor</button>
+      <button type="button" class="z2-nav" data-z2-tab="home"><span class="z2-ni">⌂</span> Overview</button>
+      <button type="button" class="z2-nav is-active" data-z2-tab="editor"><span class="z2-ni">{ }</span> Editor</button>
       <button type="button" class="z2-nav" data-z2-tab="library"><span class="z2-ni">⌕</span> Flag Library</button>
       <button type="button" class="z2-nav" data-z2-tab="presets"><span class="z2-ni">▦</span> Presets</button>
       <div class="z2-menu-label">TOOLS</div>
@@ -311,11 +396,11 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
     </aside>
     <div class="z2-workspace">
       <header class="z2-top">
-        <div class="z2-breadcrumb"><span>WORKSPACE</span><span class="z2-slash">/</span><strong id="z2-breadcrumb">Overview</strong></div>
+        <div class="z2-breadcrumb"><span>WORKSPACE</span><span class="z2-slash">/</span><strong id="z2-breadcrumb">Editor</strong></div>
         <div class="z2-top-right"><span class="z2-preview-label">INTERACTIVE PREVIEW</span><span class="z2-state"><i></i> Not connected</span></div>
       </header>
       <div class="z2-body">
-        <section class="z2-panel is-active" data-z2-panel="home">
+        <section class="z2-panel" data-z2-panel="home">
           <div class="z2-page-head"><div><small>YOUR WORKSPACE</small><h3>Good to see you.</h3><p>A home for your FastFlag configs and tools.</p></div><button class="z2-button z2-primary" type="button" data-z2-tab="editor">Open editor <span>↗</span></button></div>
           <div class="z2-metrics">
             <div class="z2-metric"><span>FLAGS IN PREVIEW</span><b id="z2-total">6</b><small>Editable local sample</small></div>
@@ -324,9 +409,9 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
           </div>
           <div class="z2-double"><div class="z2-surface"><div class="z2-surface-title"><b>Recent configuration</b><span>LOCAL PREVIEW</span></div><div class="z2-file"><div class="z2-file-icon">{ }</div><div><strong>Competitive.json</strong><small>Sample workspace · click to explore</small></div><button type="button" data-z2-tab="editor" aria-label="Open sample configuration">↗</button></div><div class="z2-file"><div class="z2-file-icon">▣</div><div><strong>Default.json</strong><small>Example baseline config</small></div><button type="button" data-z2-tab="presets" aria-label="Open presets">↗</button></div></div><div class="z2-surface"><div class="z2-surface-title"><b>Session overview</b><span>DEMO MODE</span></div><div class="z2-activity"><span class="z2-activity-dot"></span><div><b>Preview is ready</b><small>Explore the editor, presets and library. No game memory is accessed by this webpage.</small></div></div><button type="button" class="z2-inline" data-z2-tab="activity">View activity <span>↗</span></button></div></div>
         </section>
-        <section class="z2-panel" data-z2-panel="editor">
-          <div class="z2-page-head"><div><small>CONFIGURATION EDITOR</small><h3>FastFlag Editor</h3><p>Find, edit and export a sample JSON configuration.</p></div><div class="z2-actions"><button type="button" class="z2-button" data-z2-export>Export JSON ↓</button><button type="button" class="z2-button z2-primary" data-z2-simulate>Validate preview ✓</button></div></div>
-          <div class="z2-tabbar"><span class="z2-open-tab"><span>{ }</span> Competitive.json <i>●</i></span><span class="z2-tab-help">LOCAL SAMPLE · DOES NOT INJECT</span></div>
+        <section class="z2-panel is-active" data-z2-panel="editor">
+          <div class="z2-page-head"><div><small>WORKSPACE / EDITOR</small><h3>Your config. Your call.</h3><p>Explore the sample flags, save a clean JSON, and see what changed.</p></div><div class="z2-actions"><button type="button" class="z2-button" data-z2-export>Export JSON ↓</button><button type="button" class="z2-button z2-primary" data-z2-simulate>Validate preview ✓</button></div></div>
+          <div class="z2-tabbar"><span class="z2-open-tab"><span class="z2-file-symbol">{ }</span> Competitive.json <i>●</i></span><span class="z2-tab-help">● EXAMPLE FILE <span class="z2-tab-divider">/</span> SAMPLE ONLY</span></div>
           <div class="z2-editor-tools"><div class="z2-search"><span>⌕</span><input aria-label="Search preview flags" data-z2-search placeholder="Search flag name or value..." autocomplete="off"></div><span id="z2-filter-count">6 flags</span></div>
           <div class="z2-editor-list" id="z2-editor-list"></div>
           <div class="z2-editor-footer"><span><i class="z2-green"></i> Sample JSON valid</span><span id="z2-changed">0 edited</span></div>
@@ -399,7 +484,7 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
     </div></section>
 
     <section class="section" id="preview"><div class="wrap">
-      <div class="section-head reveal"><div><div class="kicker" data-i18n="preview.kicker">Explore ZFLAG Studio</div><h2>More than a screenshot.<br>A working website preview.</h2></div><p>The full-size desktop interface above is interactive. Explore sample JSONs, switch presets, search flags, export a configuration, and customize its accent — all safely within the webpage.</p></div>
+      <div class="section-head reveal"><div><div class="kicker" data-i18n="preview.kicker">Explore ZFLAG Studio</div><h2>More than a screenshot.<br>A working website preview.</h2></div><p>This is the actual ZFLAG workflow, not a generic software mockup. Browse the editor, inspect example flag rows, test profiles and export sample JSON — entirely within your browser.</p></div>
       <div class="z2-feature-grid reveal">
         <a class="z2-feature-link" href="#product"><span>01 / EDITOR</span><strong>Browse &amp; edit samples</strong><small>Open the Editor to search, filter, toggle, and export sample FastFlags. It won't affect Roblox.</small><em>Explore preview ↗</em></a>
         <a class="z2-feature-link" href="#product"><span>02 / PRESETS</span><strong>Switch profiles</strong><small>See how different profile choices and configuration activity feel inside the ZFLAG interface.</small><em>Try presets ↗</em></a>
@@ -413,7 +498,60 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
         <div class="palette-panel"><div class="kicker" data-i18n="appearance.accents">Accent choices</div><h3 data-i18n="appearance.pick">Pick a color.</h3><p data-i18n="appearance.note">This section demonstrates the visual system only. Select a swatch to change the preview accent.</p><div class="swatches" id="swatches">
           <button class="swatch active" data-accent="#8a8a8a" style="--swatch:#8a8a8a"><span></span><small>Graphite</small></button><button class="swatch" data-accent="#4f8cff" style="--swatch:#4f8cff"><span></span><small>Blue</small></button><button class="swatch" data-accent="#8c6cff" style="--swatch:#8c6cff"><span></span><small>Violet</small></button><button class="swatch" data-accent="#ff5b64" style="--swatch:#ff5b64"><span></span><small>Red</small></button><button class="swatch" data-accent="#ff9f43" style="--swatch:#ff9f43"><span></span><small>Amber</small></button><button class="swatch" data-accent="#44c78b" style="--swatch:#44c78b"><span></span><small>Emerald</small></button><button class="swatch" data-accent="#ef6fae" style="--swatch:#ef6fae"><span></span><small>Rose</small></button><button class="swatch" data-accent="#58c8e8" style="--swatch:#58c8e8"><span></span><small>Ice</small></button>
         </div></div>
-        <div class="palette-preview"><div class="mini-app"><div class="mini-app-head"><b>ZFLAG</b><span>— □ ×</span></div><div class="mini-app-body"><div class="mini-side"><div class="mini-nav active">Overview</div><div class="mini-nav">FFlags</div><div class="mini-nav">Presets</div><div class="mini-nav">Settings</div></div><div class="mini-content"><div class="mini-card"><div class="mini-card-top"><b>Performance</b><span style="color:var(--accent)">READY</span></div><div class="accent-bar"></div></div><div class="mini-card"><div class="mini-card-top"><span>Rendering Override</span><span>ON</span></div><div class="mini-lines"><i style="width:78%"></i><i style="width:57%"></i><i style="width:68%"></i></div></div><div class="mini-card"><div class="mini-card-top"><span>Preset</span><span>Competitive</span></div><div class="mini-lines"><i style="width:64%"></i><i style="width:43%"></i></div></div></div></div></div></div>
+
+        <div class="palette-preview">
+          <div class="z-preview-chrome">
+            <div class="z-preview-above"><span><i></i> LIVE STYLE PREVIEW</span><span>02 / APPEARANCE</span></div>
+            <div class="z-mini" id="z-mini" aria-label="Interactive ZFLAG Studio compact preview">
+              <div class="z-mini-title"><div class="z-mini-identity"><span class="z-mini-mark">Z</span><strong>ZFLAG</strong><span class="z-mini-sub">STUDIO</span></div><div class="z-mini-center"><span class="z-mini-title-light">Preview configuration</span><span class="z-mini-demo-pill">DEMO</span></div><div class="z-mini-controls" aria-hidden="true"><i>−</i><i>□</i><i>×</i></div></div>
+              <div class="z-mini-layout">
+                <aside class="z-mini-aside" aria-label="Compact demo navigation">
+                  <div class="z-mini-aside-label">WORKSPACE</div>
+                  <button type="button" class="z-mini-nav is-active" data-mini-tab="editor"><span class="z-mini-nav-icon">{ }</span><span>Editor</span></button>
+                  <button type="button" class="z-mini-nav" data-mini-tab="presets"><span class="z-mini-nav-icon">▦</span><span>Presets</span></button>
+                  <button type="button" class="z-mini-nav" data-mini-tab="activity"><span class="z-mini-nav-icon">◷</span><span>Activity</span></button>
+                  <div class="z-mini-aside-label">SYSTEM</div>
+                  <button type="button" class="z-mini-nav" data-mini-tab="settings"><span class="z-mini-nav-icon">⚙</span><span>Settings</span></button>
+                  <div class="z-mini-offline"><span class="z-mini-offline-dot"></span><div><b>Not connected</b><small>Website preview</small></div></div>
+                </aside>
+                <div class="z-mini-main">
+                  <div class="z-mini-breadcrumb"><span>WORKSPACE</span><b>/</b><strong id="mini-crumb">Editor</strong><span class="z-mini-status">DEMO MODE</span></div>
+                  <div class="z-mini-main-body">
+                    <div class="z-mini-view is-active" data-mini-view="editor">
+                      <div class="z-mini-heading"><div><span>CONFIGURATION EDITOR</span><h3>FastFlags</h3><p>Everything you need. Nothing in the way.</p></div><button type="button" class="z-mini-action" data-mini-action="validate">Check JSON ✓</button></div>
+                      <div class="z-mini-tabs"><span class="is-active">{ }&nbsp; Competitive.json <i>●</i></span><span>Default.json</span><span class="z-mini-tabs-end">2 FILES</span></div>
+                      <div class="z-mini-filter"><span>⌕</span> Search your FastFlags… <span>6 ENTRIES</span></div>
+                      <div class="z-mini-flagrow"><div><b>Target FPS</b><small>DFIntTaskSchedulerTargetFps</small></div><span class="z-mini-value">240</span><button class="z-mini-toggle on" type="button" aria-label="Toggle sample target FPS" aria-pressed="true"></button></div>
+                      <div class="z-mini-flagrow"><div><b>Texture Quality Override</b><small>DFFlagTextureQualityOverrideEnabled</small></div><span class="z-mini-value">true</span><button class="z-mini-toggle on" type="button" aria-label="Toggle sample texture quality" aria-pressed="true"></button></div>
+                      <div class="z-mini-flagrow"><div><b>Rendering Preference</b><small>FFlagDebugGraphicsPreferD3D11</small></div><span class="z-mini-value">true</span><button class="z-mini-toggle on" type="button" aria-label="Toggle sample rendering preference" aria-pressed="true"></button></div>
+                      <div class="z-mini-list-foot"><span><i></i> Sample configuration</span><span id="mini-changes">0 changes</span></div>
+                    </div>
+                    <div class="z-mini-view" data-mini-view="presets">
+                      <div class="z-mini-heading"><div><span>MANAGE YOUR CONFIGS</span><h3>Presets</h3><p>Configurations you can switch between.</p></div></div>
+                      <div class="z-mini-preset-grid">
+                        <button class="z-mini-preset chosen" data-mini-preset="Competitive" type="button"><span>◈</span><b>Competitive</b><small>Performance sample</small><em>Selected ✓</em></button>
+                        <button class="z-mini-preset" data-mini-preset="Balanced" type="button"><span>◧</span><b>Balanced</b><small>Everyday baseline</small><em>Select ↗</em></button>
+                        <button class="z-mini-preset" data-mini-preset="Visual" type="button"><span>✧</span><b>Visual</b><small>Graphics sample</small><em>Select ↗</em></button>
+                      </div><div class="z-mini-panel-hint">Selection affects only this preview. No desktop files are changed.</div>
+                    </div>
+                    <div class="z-mini-view" data-mini-view="activity">
+                      <div class="z-mini-heading"><div><span>SESSION HISTORY</span><h3>Activity</h3><p>See the things you do in this sample.</p></div><button type="button" class="z-mini-action" data-mini-action="clear">Clear log</button></div>
+                      <div class="z-mini-log"><div><span>INFO</span> Sample UI initialized</div><div><span>STATUS</span> Desktop engine disconnected</div></div>
+                    </div>
+                    <div class="z-mini-view" data-mini-view="settings">
+                      <div class="z-mini-heading"><div><span>PERSONALIZE</span><h3>Appearance</h3><p>Pick a detail color to make it yours.</p></div></div>
+                      <div class="z-mini-setting"><b>Interface accent</b><span>Choose a color below to see it in the Studio preview.</span><div class="z-mini-colors"><button type="button" data-mini-color="#b8cde3" style="--pick:#b8cde3" class="selected" aria-label="Silver accent"></button><button type="button" data-mini-color="#7ca8ff" style="--pick:#7ca8ff" aria-label="Blue accent"></button><button type="button" data-mini-color="#b39bfa" style="--pick:#b39bfa" aria-label="Violet accent"></button><button type="button" data-mini-color="#f78d96" style="--pick:#f78d96" aria-label="Rose accent"></button></div></div>
+                      <div class="z-mini-panel-hint">This demo does not change the installed application.</div>
+                    </div>
+                  </div>
+                  <div class="z-mini-bottom"><span><i></i> ZFLAG Studio · Preview only</span><span>v2.0.58 <b>·</b> <span id="mini-status">Ready</span></span></div>
+                </div>
+              </div>
+              <div class="z-mini-toast" id="mini-toast" role="status" aria-live="polite"></div>
+            </div>
+            <div class="z-preview-under"><span>ACTUAL PRODUCT INSPIRED UI</span><span>NO ROBLOX CONNECTION</span></div>
+          </div>
+        </div>
       </div>
     </div></section>
 
@@ -584,9 +722,7 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
     document.querySelectorAll('[data-legal]').forEach(b=>b.onclick=()=>{const x=legal[b.dataset.legal];legalTitle.textContent=x.title;legalCopy.innerHTML=x.html;legalModal.classList.add('open')});
     document.querySelectorAll('[data-close="legal"]').forEach(b=>b.onclick=()=>legalModal.classList.remove('open'));legalModal.onclick=e=>{if(e.target===legalModal)legalModal.classList.remove('open')};
 
-    // Premium smooth scrolling — desktop only; nested modal lists retain native scrolling.
-    (()=>{const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches,desktop=matchMedia('(pointer:fine)').matches;if(reduceMotion||!desktop)return;document.documentElement.classList.add('smooth-engine');let current=scrollY,target=scrollY,running=false,syncing=false;const clamp=v=>Math.max(0,Math.min(v,document.documentElement.scrollHeight-innerHeight));const start=()=>{if(!running){running=true;requestAnimationFrame(tick)}};function tick(){target=clamp(target);current+=(target-current)*.115;if(Math.abs(target-current)<.35){current=target;syncing=true;scrollTo(0,current);syncing=false;running=false;return}syncing=true;scrollTo(0,current);syncing=false;requestAnimationFrame(tick)}addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey||document.querySelector('.modal.open')||e.target.closest?.('[data-native-scroll]'))return;e.preventDefault();const m=e.deltaMode===1?18:e.deltaMode===2?innerHeight:1;target=clamp(target+e.deltaY*m*.92);start()},{passive:false});addEventListener('scroll',()=>{if(!syncing&&!running)current=target=scrollY},{passive:true});document.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener('click',e=>{const id=link.getAttribute('href'),section=id&&id!=='#'?document.querySelector(id):null;if(!section)return;e.preventDefault();target=clamp(section.getBoundingClientRect().top+scrollY-90);current=scrollY;history.pushState(null,'',id);start()}))})();
-
+    // Browser-native scrolling preserves trackpad, touch, keyboard, and nested editor interactions.
     addEventListener('scroll',()=>{document.querySelector('.nav-shell').style.top=scrollY>30?'10px':'18px'});
     addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'))});
   
@@ -600,7 +736,7 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
       {key:'DFIntDebugFRMQualityLevelOverride',label:'Rendering quality setting',value:1,enabled:true,type:'Integer'},
       {key:'FFlagHandleAltEnterFullscreenManually',label:'Fullscreen handling',value:false,enabled:false,type:'Boolean'}
     ];
-    let tab='home',edited=0,preset='Competitive',query='', logRows=['Preview initialized — engine not connected'];
+    let tab='editor',edited=0,preset='Competitive',query='', logRows=['Preview initialized — engine not connected'];
     const q=s=>root.querySelector(s),qa=s=>[...root.querySelectorAll(s)];
     function toast(msg){const el=q('#z2-toast');el.textContent=msg;el.classList.add('is-visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('is-visible'),3200)}
     function activity(msg){logRows.unshift(msg);logRows=logRows.slice(0,16);q('#z2-log').replaceChildren(...logRows.map(x=>{let row=document.createElement('div');row.className='z2-log-row';let tag=document.createElement('span');tag.textContent='INFO';row.append(tag,document.createTextNode(x));return row}))}
@@ -615,6 +751,19 @@ html[data-theme="light"] .z-docs-head h2 span{color:#728094}
     q('[data-z2-clear]').onclick=()=>{logRows=[];q('#z2-log').replaceChildren();toast('Preview activity cleared')};
     renderFlags();
   })();
+
+
+    // The compact studio is a genuine, self-contained, responsive browser preview.
+    (()=>{const mini=document.getElementById('z-mini');if(!mini)return;
+      let count=0,logCount=2;const q=s=>mini.querySelector(s),qa=s=>[...mini.querySelectorAll(s)];
+      let toastTimer;function flash(message){q('#mini-status').textContent=message;q('#mini-toast').textContent=message;q('#mini-toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>q('#mini-toast').classList.remove('visible'),2400)}
+      function log(message){const row=document.createElement('div'),tag=document.createElement('span');tag.textContent='DEMO';row.append(tag,document.createTextNode(message));q('.z-mini-log').prepend(row);logCount++;if(logCount>8){q('.z-mini-log').lastElementChild?.remove();logCount--}}
+      qa('[data-mini-tab]').forEach(b=>b.addEventListener('click',()=>{let t=b.dataset.miniTab;qa('[data-mini-tab]').forEach(n=>n.classList.toggle('is-active',n===b));qa('[data-mini-view]').forEach(v=>v.classList.toggle('is-active',v.dataset.miniView===t));q('#mini-crumb').textContent=t[0].toUpperCase()+t.slice(1);q('#mini-status').textContent=t==='editor'?'Ready':'Viewing '+t;log('Opened '+t+' panel')}));
+      qa('.z-mini-toggle').forEach(b=>b.addEventListener('click',()=>{const on=b.classList.toggle('on');b.setAttribute('aria-pressed',String(on));count++;q('#mini-changes').textContent=count+' change'+(count===1?'':'s');log('Toggled sample setting');flash(on?'Sample flag enabled':'Sample flag disabled')}));
+      qa('[data-mini-preset]').forEach(b=>b.addEventListener('click',()=>{qa('[data-mini-preset]').forEach(x=>{let on=x===b;x.classList.toggle('chosen',on);x.querySelector('em').textContent=on?'Selected ✓':'Select ↗'});log('Selected '+b.dataset.miniPreset+' sample profile');flash('Selected '+b.dataset.miniPreset)}));
+      qa('[data-mini-color]').forEach(b=>b.addEventListener('click',()=>{mini.style.setProperty('--maccent',b.dataset.miniColor);qa('[data-mini-color]').forEach(x=>x.classList.toggle('selected',x===b));document.documentElement.style.setProperty('--app-accent',b.dataset.miniColor);log('Changed preview accent');flash('Preview color updated')}));
+      qa('[data-mini-action]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.miniAction==='validate'){log('Sample JSON is syntactically valid; no injection attempted');flash('Sample checked · browser only')}else{q('.z-mini-log').replaceChildren();logCount=0;flash('Preview log cleared')}}));
+    })();
 
 </script>
 </body>
