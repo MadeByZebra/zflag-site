@@ -10,6 +10,9 @@
   <meta name="application-name" content="ZFLAG" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.58" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ZFLAG — The FastFlag workspace." />
+  <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
   <title>ZFLAG — FFlag control, refined.</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;550;600;650;700&family=Geist+Mono:wght@400;500&display=swap');
@@ -203,13 +206,73 @@ body .z2-window{--z2accent:#b9c6d8;--z2line:#292b31;--z2muted:#858b98;position:r
 .z2-feature-link>em{margin-top:auto;padding-top:15px;font-size:11px;font-style:normal;color:var(--text)}
 @media(max-width:720px){.z2-feature-grid{grid-template-columns:1fr}.z2-feature-link{min-height:auto}}
 
+
+
+/* ZFLAG ATELIER / OCT 2026. A restrained graphite + cold-silver design system. */
+:root{--bg:#090b0e;--bg-2:#0e1116;--panel:#12161b;--panel-2:#171c22;--raised:#1d232b;--text:#f5f7fa;--muted:#98a2b0;--soft:#6e7b8a;--line:#272f3a;--line-2:#394553;--button:#dce5ef;--button-text:#10151c;--glass:rgba(11,14,19,.88);--grid:rgba(191,206,225,.027);--max:1320px;--shadow:0 35px 110px rgba(0,0,0,.38)}
+html[data-theme="light"]{--bg:#f3f5f7;--bg-2:#e9edf2;--panel:#fff;--panel-2:#f4f6f8;--raised:#e9edf2;--text:#15191f;--muted:#5f6874;--soft:#7b8692;--line:#d9e0e7;--line-2:#c2cbd6;--button:#121921;--button-text:#fff;--glass:rgba(251,252,254,.93);--grid:rgba(35,55,75,.025);--shadow:0 32px 90px rgba(22,33,46,.13)}
+body{background:var(--bg);font-feature-settings:"ss01" on;-webkit-font-smoothing:antialiased}
+body:before{opacity:1!important;background-image:radial-gradient(ellipse 90vw 650px at 84% 2%,rgba(91,124,164,.13),transparent 72%),radial-gradient(ellipse 720px 560px at -12% 12%,rgba(91,105,138,.1),transparent 72%),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)!important;background-size:auto,auto,82px 82px,82px 82px!important;mask-image:linear-gradient(to bottom,#000 0%,transparent 87%)!important}
+html[data-theme="light"] body:before{opacity:.58!important}
+body:after{opacity:.023!important}
+.nav-shell{top:15px}.nav{height:62px;border:1px solid color-mix(in srgb,var(--line-2) 80%,transparent);background:var(--glass);border-radius:13px;box-shadow:0 15px 44px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.055);padding:0 12px 0 17px}
+.brand{font-weight:750;letter-spacing:-.042em;font-size:15px}.navlinks{gap:0}.navlinks a{font-weight:520;font-size:12px;letter-spacing:0;padding:10px 11px;transition:background .18s,color .18s}.navlinks a:hover{background:var(--raised)}
+.navlinks a[href="./docs/"]{color:var(--text);font-weight:650}.navlinks a[href="./docs/"] span{font-size:12px;color:var(--muted)}
+.nav-actions .btn.primary{background:linear-gradient(135deg,var(--button),color-mix(in srgb,var(--button) 75%,#879bae));border-color:color-mix(in srgb,var(--button) 65%,transparent);font-weight:650}
+.docs-quick-link{display:none;font-size:12px;font-weight:650;padding:10px;color:var(--text)}
+.hero{padding-top:161px!important;padding-bottom:65px!important;position:relative}
+.hero-grid{gap:37px!important}.hero-grid>div:first-child{max-width:1050px!important}
+.hero .eyebrow{display:inline-flex;padding:9px 13px 9px 11px;border:1px solid var(--line-2);border-radius:100px;background:var(--panel);font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.hero .eyebrow:before{width:6px;height:6px;background:#b7cde3;box-shadow:0 0 0 4px rgba(135,169,210,.11)}
+.hero h1{font-size:clamp(61px,8.4vw,116px)!important;line-height:.99!important;letter-spacing:-.078em!important;font-weight:620!important;margin:24px 0 23px!important}
+.hero h1 span{background:linear-gradient(105deg,#9daabc 0%,#c7d3df 35%,#768496 92%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+html[data-theme="light"] .hero h1 span{background-image:linear-gradient(105deg,#596778,#8494a7,#657283)}
+.hero p{font-size:17px;line-height:1.75;max-width:730px;letter-spacing:-.018em}
+.hero-actions{gap:11px;margin-top:29px;flex-wrap:wrap}.hero-actions .btn{min-height:46px;padding:0 20px;border-radius:10px}.hero-actions .primary{box-shadow:0 8px 26px rgba(100,130,170,.13)}
+.hero-docs-button{background:transparent;border-color:transparent;color:var(--muted);padding-left:12px!important}.hero-docs-button:hover{color:var(--text);border-color:var(--line)}
+.release-bridge-status{margin:18px 0 0;font-size:11px!important;color:var(--soft)!important}
+.hero-meta{gap:12px;flex-wrap:wrap;margin-top:22px}.hero-meta span{font-size:10px;padding:7px 10px;border:1px solid var(--line);background:var(--panel);border-radius:6px}
+.product-stage{margin-top:6px;isolation:isolate}.product-stage:before{content:"";position:absolute;inset:-90px 0 -30px!important;filter:blur(65px);border-radius:50%;background:radial-gradient(ellipse at 50% 40%,rgba(147,171,202,.18),transparent 66%)!important;opacity:1!important;z-index:-1}
+body .z2-window{border:1px solid #485362!important;border-radius:15px!important;box-shadow:0 42px 100px rgba(0,0,0,.43),0 0 0 1px rgba(211,228,250,.035),inset 0 1px 0 rgba(255,255,255,.09)!important}
+.z2-titlebar{background:linear-gradient(180deg,#1e252e,#151a20)!important;border-bottom:1px solid #36404e!important}
+.z2-winbuttons{gap:2px!important}.z2-winbuttons>span{width:32px;min-height:26px;display:grid;place-items:center;border-radius:5px;transition:background .18s,color .18s;cursor:default}.z2-winbuttons>span:hover{background:#ffffff16;color:#fff}.z2-winbuttons>span:last-child:hover{background:#b94251;color:#fff}
+.quality-strip{display:grid;grid-template-columns:repeat(3,1fr) 52px;margin:-18px auto 90px!important;border:1px solid var(--line-2);border-radius:13px;background:linear-gradient(130deg,var(--panel-2),var(--panel) 55%);box-shadow:0 18px 48px rgba(0,0,0,.14);position:relative;overflow:hidden}
+.quality-strip:before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(199,217,240,.28),transparent)}
+.quality-cell{display:flex;flex-direction:column;gap:8px;padding:24px 28px;border-right:1px solid var(--line)}.quality-k{font:500 9px "Geist Mono",monospace;letter-spacing:.1em;color:var(--soft)}.quality-cell strong{font-size:15px;letter-spacing:-.025em;font-weight:650}.quality-v{font-size:12px;color:var(--muted)}
+.quality-go{display:grid;place-items:center;font-size:19px;color:var(--muted);transition:background .2s,color .2s}.quality-go:hover{background:var(--raised);color:var(--text)}
+.section-head h2,.z-docs-head h2{font-weight:630;line-height:1.04;letter-spacing:-.067em}
+.section{padding-top:85px;padding-bottom:85px}
+.features{gap:1px;background:var(--line);border:1px solid var(--line);border-radius:13px;overflow:hidden}.feature{border:0!important;background:var(--panel);min-height:236px;padding:28px}.feature:hover{background:var(--panel-2)}.feature h3{font-weight:620}
+.zflag-install-wrap{border-color:var(--line-2);background:linear-gradient(128deg,var(--panel-2),var(--panel));box-shadow:0 19px 70px rgba(0,0,0,.16)}
+.z-docs-section{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:radial-gradient(ellipse 700px 370px at 70% -30%,rgba(139,173,210,.12),transparent),var(--bg)}
+.z-docs-head{display:grid;grid-template-columns:1fr .65fr;gap:55px;align-items:end;margin-bottom:40px}
+.z-docs-head h2{font-size:clamp(43px,5.3vw,76px);margin-top:14px}.z-docs-head h2 span{color:#8494a7}
+html[data-theme="light"] .z-docs-head h2 span{color:#728094}
+.z-docs-head-side p{color:var(--muted);font-size:15px;line-height:1.75;max-width:430px;margin-bottom:22px}
+.z-docs-link{display:inline-flex;gap:23px;align-items:center;color:var(--text);font-size:13px;font-weight:630;border-bottom:1px solid var(--line-2);padding-bottom:9px}.z-docs-link:hover{border-color:var(--text)}.z-docs-link span{font-size:17px}
+.z-docs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.z-doc-card{display:flex;flex-direction:column;min-height:385px;border:1px solid var(--line-2);border-radius:13px;background:linear-gradient(165deg,var(--panel-2),var(--panel));padding:22px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s}
+.z-doc-card:hover{border-color:#728aa7;transform:translateY(-4px);box-shadow:0 28px 65px rgba(0,0,0,.15)}.z-doc-card:before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(125deg,rgba(255,255,255,.03),transparent 45%)}
+.z-doc-index{display:flex;align-items:center;justify-content:space-between;font:500 10px "Geist Mono",monospace;color:var(--soft);letter-spacing:.09em}.z-doc-arrow{color:var(--text);width:25px;height:25px;border:1px solid var(--line-2);border-radius:7px;display:grid;place-items:center;font-size:13px;transition:background .2s}.z-doc-card:hover .z-doc-arrow{background:var(--button);color:var(--button-text)}
+.z-doc-graphic{height:133px;display:flex;align-items:center;justify-content:center;gap:13px;margin:18px 0 10px;color:#a4b7cc;position:relative;background-image:linear-gradient(to right,rgba(186,207,233,.055) 1px,transparent 1px),linear-gradient(to bottom,rgba(186,207,233,.055) 1px,transparent 1px);background-size:23px 23px;mask-image:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
+.z-doc-graphic>span:first-child{font:500 48px "Geist Mono",monospace;text-shadow:0 0 30px rgba(193,212,239,.2)}.z-doc-graphic>div{display:flex;flex-direction:column;gap:10px}.z-doc-graphic i{display:block;height:5px;background:#5b7189;border-radius:3px;width:65px;opacity:.8}.z-doc-graphic i:nth-child(2){width:90px;background:#afc5dd}.z-doc-graphic i:nth-child(3){width:49px}
+.graphic-install>span:first-child{height:54px;width:54px;display:grid;place-items:center;border:1px solid #485b71;border-radius:12px;font-size:27px;background:#96b8db16}
+.graphic-code>span{font-size:35px!important}.graphic-code>span:last-child{font:500 35px "Geist Mono",monospace;color:#7f9ab8}
+.graphic-status .status-ring{width:59px;height:59px;border:6px solid #32465e;border-top-color:#b6c9e0;border-radius:50%;box-shadow:0 0 22px rgba(122,158,198,.18)}.graphic-status>div i:nth-child(2){background:#7299bf}
+.z-doc-card h3{font-size:21px;letter-spacing:-.05em;font-weight:630;margin:9px 0 9px}.z-doc-card p{color:var(--muted);font-size:13px;line-height:1.7;margin:0 0 25px;max-width:310px}.z-doc-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:15px;display:flex;justify-content:space-between;gap:10px;color:var(--text);font-size:11px;font-weight:600}.z-doc-foot span{color:var(--soft);font-weight:450}
+.z-docs-bottom{display:flex;align-items:center;gap:25px;margin-top:25px;color:var(--muted);font-size:12px}.z-docs-bottom>div{margin-right:auto;display:flex;align-items:center;gap:10px}.z-docs-bottom>a{border-bottom:1px solid var(--line-2);padding-bottom:3px;font-size:11px;color:var(--text)}.z-docs-live-dot{width:7px;height:7px;background:#9bb8d7;border-radius:50%;box-shadow:0 0 0 4px rgba(148,184,223,.11)}
+@media(max-width:1100px){.quality-strip{grid-template-columns:repeat(3,1fr) 42px}.quality-cell{padding:20px 17px}.z-docs-head{gap:30px}}
+@media(max-width:980px){.docs-quick-link{display:inline-flex}.z-docs-grid{grid-template-columns:1fr 1fr}.z-doc-card:last-child{grid-column:span 2;min-height:310px}.z-docs-head{grid-template-columns:1fr}.quality-strip{grid-template-columns:1fr 1fr}.quality-cell:nth-child(2){border-right:0}.quality-cell:nth-child(3){border-top:1px solid var(--line)}.quality-go{border-top:1px solid var(--line)}}
+@media(max-width:680px){.nav{padding:0 8px 0 12px}.docs-quick-link{padding:7px}.hero{padding-top:124px!important}.hero h1{font-size:clamp(48px,12vw,72px)!important}.hero-meta{gap:7px}.hero-meta span{font-size:9px}.hero-actions .btn{flex:1;justify-content:center;padding:0 12px}.hero-docs-button{flex-basis:100%!important}.quality-strip{grid-template-columns:1fr;margin-bottom:50px!important}.quality-cell,.quality-cell:nth-child(2){border-right:0;border-bottom:1px solid var(--line)}.quality-cell:nth-child(3){border-bottom:0}.quality-go{display:none}.z-docs-grid{grid-template-columns:1fr}.z-doc-card:last-child{grid-column:auto;min-height:370px}.z-docs-head h2{font-size:clamp(43px,11vw,62px)}.z-docs-bottom{align-items:flex-start;flex-wrap:wrap;gap:14px}.z-docs-bottom>div{flex-basis:100%}.section{padding-top:60px;padding-bottom:60px}}
+@media(prefers-reduced-motion:reduce){.z-doc-card:hover{transform:none}}
+
 </style>
 </head>
 <body>
   <header class="nav-shell"><div class="wrap nav">
     <a class="brand" href="#home"><span class="zmark">Z</span><span>ZFLAG</span></a>
-    <nav class="navlinks"><a href="#install-flow">Install</a><a href="#library-next">Next: Flag Library</a><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#why" data-i18n="nav.why">Why ZFLAG</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
-    <div class="nav-actions"><button class="iconbtn lang-top" id="languageTop" aria-label="Select language" data-tooltip="Language"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></button><button class="iconbtn" id="themeToggle" aria-label="Toggle website theme">◐</button><button class="btn primary" data-download data-i18n="nav.download">Download</button></div>
+    <nav class="navlinks" aria-label="Main navigation"><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="./docs/">Documentation <span aria-hidden="true">↗</span></a><a href="./docs/#releases">Changelog</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
+    <div class="nav-actions"><a class="docs-quick-link" href="./docs/">Docs ↗</a><button class="iconbtn lang-top" id="languageTop" aria-label="Select language" data-tooltip="Language"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></button><button class="iconbtn" id="themeToggle" aria-label="Toggle website theme">◐</button><button class="btn primary" data-download data-i18n="nav.download">Download</button></div>
   </div></header>
 
   <main id="home">
@@ -218,7 +281,7 @@ body .z2-window{--z2accent:#b9c6d8;--z2line:#292b31;--z2muted:#858b98;position:r
         <div class="eyebrow" data-i18n="hero.eyebrow">Windows configuration utility · v2.0.58</div>
         <h1 data-i18n-html="hero.title">FFlags,<br><span>without the noise.</span></h1>
         <p data-i18n="hero.body">ZFLAG is a focused workspace for finding, editing, organizing, importing, exporting, and launching with the configuration you actually want.</p>
-        <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a></div><p class="release-bridge-status" id="releaseBridgeStatus" aria-live="polite">Latest: v2.0.58 · Windows x64 · one-click in-app updates · responsive toolbar · 13.6 MB</p>
+        <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a><a class="btn hero-docs-button" href="./docs/"><span>Read documentation</span><span>↗</span></a></div><p class="release-bridge-status" id="releaseBridgeStatus" aria-live="polite">Latest: v2.0.58 · Windows x64 · one-click in-app updates · responsive toolbar · 13.6 MB</p>
         <div class="hero-meta"><span>Windows 10 / 11</span><span>x64</span><span data-i18n="hero.metaTheme">Website: Dark / Light</span><span data-i18n="hero.metaNoFake">No fake benchmarks</span></div>
       </div>
       <div class="product-stage reveal" id="product">
@@ -293,6 +356,8 @@ body .z2-window{--z2accent:#b9c6d8;--z2line:#292b31;--z2muted:#858b98;position:r
     </div></section>
 
 
+    <div class="quality-strip wrap" aria-label="ZFLAG essentials"><div class="quality-cell"><span class="quality-k">01 / THE APP</span><strong>Built for Windows</strong><span class="quality-v">Desktop utility · Windows 10 / 11</span></div><div class="quality-cell"><span class="quality-k">02 / GET STARTED</span><strong>One setup file</strong><span class="quality-v">Official GitHub release · v2.0.58</span></div><div class="quality-cell"><span class="quality-k">03 / MADE CLEAR</span><strong>Real status, not hype</strong><span class="quality-v">Preview is a demo · logs stay explicit</span></div><a href="./docs/#overview" class="quality-go" aria-label="Open ZFLAG documentation">↗</a></div>
+
     <section class="engine-notice" id="engine-status" aria-labelledby="engine-notice-title">
       <div class="wrap">
         <div class="engine-notice-card">
@@ -352,6 +417,21 @@ body .z2-window{--z2accent:#b9c6d8;--z2line:#292b31;--z2muted:#858b98;position:r
       </div>
     </div></section>
 
+
+    <section class="z-docs-section section" id="documentation">
+      <div class="wrap">
+        <div class="z-docs-head reveal">
+          <div><div class="kicker">BUILT FOR CLARITY / THE HANDBOOK</div><h2>Every detail.<br><span>Nothing buried.</span></h2></div>
+          <div class="z-docs-head-side"><p>From your first install to the meaning behind an injection result. A real, searchable documentation hub—not a single FAQ pretending to be a manual.</p><a class="z-docs-link" href="./docs/">Explore all 15 guides <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <div class="z-docs-grid reveal">
+          <a class="z-doc-card" href="./docs/#installation"><div class="z-doc-index"><span>GUIDE / 01</span><span class="z-doc-arrow">↗</span></div><div class="z-doc-graphic graphic-install"><span>↓</span><div><i></i><i></i><i></i></div></div><h3>Get up and running.</h3><p>Verified download path, Windows setup, and what to check on first launch.</p><div class="z-doc-foot">Installation <span>4 min read</span></div></a>
+          <a class="z-doc-card" href="./docs/#editor"><div class="z-doc-index"><span>GUIDE / 02</span><span class="z-doc-arrow">↗</span></div><div class="z-doc-graphic graphic-code"><span>{</span><div><i></i><i></i><i></i></div><span>}</span></div><h3>Know your flags.</h3><p>Editor, JSON import/export, reusable profiles, and config validation.</p><div class="z-doc-foot">FastFlag editor <span>4 min read</span></div></a>
+          <a class="z-doc-card" href="./docs/#troubleshoot"><div class="z-doc-index"><span>GUIDE / 03</span><span class="z-doc-arrow">↗</span></div><div class="z-doc-graphic graphic-status"><span class="status-ring"></span><div><i></i><i></i><i></i></div></div><h3>Understand every result.</h3><p>Detection, activity logs, ignored flags, and practical troubleshooting.</p><div class="z-doc-foot">Troubleshooting <span>6 min read</span></div></a>
+        </div>
+        <div class="z-docs-bottom reveal"><div><span class="z-docs-live-dot"></span><span>Documentation covers ZFLAG v2.0.58</span></div><a href="./docs/#releases">Release history ↗</a><a href="./docs/#safety">Security & compatibility ↗</a></div>
+      </div>
+    </section>
     <section class="section" id="faq"><div class="wrap">
       <div class="section-head reveal"><div><div class="kicker" data-i18n="faq.kicker">FAQ</div><h2 data-i18n-html="faq.title">Straight answers.<br>No filler.</h2></div><p data-i18n="faq.body">A few things worth knowing before you download.</p></div>
       <div class="faq reveal">
@@ -407,7 +487,7 @@ body .z2-window{--z2accent:#b9c6d8;--z2line:#292b31;--z2muted:#858b98;position:r
     <div class="footer-main">
       <div class="footer-brand"><div class="brand"><span class="zmark">Z</span><span>ZFLAG</span></div><p data-i18n="footer.desc">A focused Windows configuration utility for FFlag browsing, profiles, editing, import/export, and launch control.</p><small>© 2026 ZFLAG · By Zebra</small></div>
       <div class="footer-col"><h4 data-i18n="footer.product">Product</h4><a href="#product" data-i18n="footer.overview">Overview</a><a href="#features" data-i18n="nav.features">Features</a><a href="#why" data-i18n="nav.why">Why ZFLAG</a><button data-download data-i18n="nav.download">Download</button></div>
-      <div class="footer-col"><h4 data-i18n="footer.explore">Explore</h4><a href="#preview" data-i18n="nav.preview">Preview</a><a href="#appearance" data-i18n="footer.appearance">Appearance</a><a href="#faq" data-i18n="nav.faq">FAQ</a><button id="footerTheme" data-i18n="footer.theme">Toggle website theme</button></div>
+      <div class="footer-col"><h4 data-i18n="footer.explore">Explore</h4><a href="#preview" data-i18n="nav.preview">Preview</a><a href="#appearance" data-i18n="footer.appearance">Appearance</a><a href="#faq" data-i18n="nav.faq">FAQ</a><a href="./docs/">Documentation ↗</a><button id="footerTheme" data-i18n="footer.theme">Toggle website theme</button></div>
       <div class="footer-col"><h4 data-i18n="footer.legal">Legal</h4><button data-legal="terms" data-i18n="footer.terms">Terms</button><button data-legal="privacy" data-i18n="footer.privacy">Privacy</button><button id="footerLanguage" data-i18n="footer.language">Language</button></div>
     </div>
     <div class="footer-bottom"><div class="footer-bottom-left"><button class="language-pill" id="languagePill"><span class="language-pill-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></span><span><b id="languageLabel">English</b><br><small id="languageRegion">United States</small></span></button></div><div class="footer-bottom-mid"><button class="footer-link" style="all:unset;cursor:pointer" data-legal="terms" data-i18n="footer.terms">Terms</button><button class="footer-link" style="all:unset;cursor:pointer" data-legal="privacy" data-i18n="footer.privacy">Privacy</button></div><div class="footer-bottom-right">ZFLAG v2.0.58 · WINDOWS X64</div></div>
