@@ -4,11 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="theme-color" content="#080808" />
+  <meta name="theme-color" content="#090b0e" />
   <link rel="icon" type="image/svg+xml" href="./zflag-favicon.svg" />
   <link rel="apple-touch-icon" href="./zflag-logo.png" />
   <meta name="application-name" content="ZFLAG" />
-  <meta name="theme-color" content="#090b0e" />
   <meta property="og:image" content="./zflag-logo.png" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.58" />
@@ -320,7 +319,7 @@ body .z2-window{border-radius:16px!important;background:#0b0e13!important;box-sh
 .z-preview-above,.z-preview-under{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px;color:var(--soft);font:500 9px "Geist Mono",monospace;letter-spacing:.13em}
 .z-preview-above>span:first-child{display:flex;align-items:center;gap:9px;color:var(--text)}.z-preview-above i{display:inline-block;width:6px;height:6px;background:#a6c3e2;border-radius:50%;box-shadow:0 0 0 3px #a6c3e221}
 .z-preview-under{padding-top:13px}
-.z-mini{--maccent:#b8cde3;position:relative;width:100%;color:#eaf1fb;background:#10151c;border:1px solid #4e5b6a;border-radius:13px;overflow:hidden;box-shadow:0 40px 80px #0006,0 0 0 1px #9fc3e211;letter-spacing:0;font-family:"Geist",sans-serif}
+.z-mini{--maccent:var(--app-accent);position:relative;width:100%;color:#eaf1fb;background:#10151c;border:1px solid #4e5b6a;border-radius:13px;overflow:hidden;box-shadow:0 40px 80px #0006,0 0 0 1px #9fc3e211;letter-spacing:0;font-family:"Geist",sans-serif}
 .z-mini *{box-sizing:border-box}.z-mini button{font:inherit;cursor:pointer}
 .z-mini-title{height:43px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,#1c232d,#141a22);border-bottom:1px solid #343e4b;padding:0 11px}
 .z-mini-identity{display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:-.02em}.z-mini-mark{width:25px;height:25px;border-radius:6px!important}.z-mini-sub{font:500 8px "Geist Mono",monospace;color:#798a9e;letter-spacing:.08em;margin-left:3px}
@@ -496,7 +495,7 @@ body .z2-window{border-radius:16px!important;background:#0b0e13!important;box-sh
       <div class="section-head reveal"><div><div class="kicker" data-i18n="appearance.kicker">Injector appearance</div><h2 data-i18n-html="appearance.title">Keep the site simple.<br>Color the app your way.</h2></div><p data-i18n="appearance.body">Dark and light are website themes. Inside the ZFLAG product presentation, accents can vary so the injector can match your setup without turning the website into a neon showcase.</p></div>
       <div class="personalize reveal">
         <div class="palette-panel"><div class="kicker" data-i18n="appearance.accents">Accent choices</div><h3 data-i18n="appearance.pick">Pick a color.</h3><p data-i18n="appearance.note">This section demonstrates the visual system only. Select a swatch to change the preview accent.</p><div class="swatches" id="swatches">
-          <button class="swatch active" data-accent="#8a8a8a" style="--swatch:#8a8a8a"><span></span><small>Graphite</small></button><button class="swatch" data-accent="#4f8cff" style="--swatch:#4f8cff"><span></span><small>Blue</small></button><button class="swatch" data-accent="#8c6cff" style="--swatch:#8c6cff"><span></span><small>Violet</small></button><button class="swatch" data-accent="#ff5b64" style="--swatch:#ff5b64"><span></span><small>Red</small></button><button class="swatch" data-accent="#ff9f43" style="--swatch:#ff9f43"><span></span><small>Amber</small></button><button class="swatch" data-accent="#44c78b" style="--swatch:#44c78b"><span></span><small>Emerald</small></button><button class="swatch" data-accent="#ef6fae" style="--swatch:#ef6fae"><span></span><small>Rose</small></button><button class="swatch" data-accent="#58c8e8" style="--swatch:#58c8e8"><span></span><small>Ice</small></button>
+          <button class="swatch active" data-accent="#b8cde3" style="--swatch:#b8cde3"><span></span><small>Silver</small></button><button class="swatch" data-accent="#4f8cff" style="--swatch:#4f8cff"><span></span><small>Blue</small></button><button class="swatch" data-accent="#8c6cff" style="--swatch:#8c6cff"><span></span><small>Violet</small></button><button class="swatch" data-accent="#ff5b64" style="--swatch:#ff5b64"><span></span><small>Red</small></button><button class="swatch" data-accent="#ff9f43" style="--swatch:#ff9f43"><span></span><small>Amber</small></button><button class="swatch" data-accent="#44c78b" style="--swatch:#44c78b"><span></span><small>Emerald</small></button><button class="swatch" data-accent="#ef6fae" style="--swatch:#ef6fae"><span></span><small>Rose</small></button><button class="swatch" data-accent="#58c8e8" style="--swatch:#58c8e8"><span></span><small>Ice</small></button>
         </div></div>
 
         <div class="palette-preview">
@@ -642,7 +641,7 @@ body .z2-window{border-radius:16px!important;background:#0b0e13!important;box-sh
     const systemLight=matchMedia('(prefers-color-scheme: light)').matches;
     const savedTheme=localStorage.getItem('zflag-site-theme');
     root.dataset.theme=savedTheme || (systemLight?'light':'dark');
-    const setTheme=theme=>{root.dataset.theme=theme;localStorage.setItem('zflag-site-theme',theme);document.querySelector('meta[name=theme-color]').content=theme==='dark'?'#080808':'#f6f6f4'};
+    const setTheme=theme=>{root.dataset.theme=theme;localStorage.setItem('zflag-site-theme',theme);document.querySelector('meta[name=theme-color]').content=theme==='dark'?'#090b0e':'#f3f5f7'};
     document.getElementById('themeToggle').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
     document.getElementById('footerTheme').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
 
@@ -667,7 +666,7 @@ body .z2-window{border-radius:16px!important;background:#0b0e13!important;box-sh
       document.querySelectorAll('.accent-dot,.swatch').forEach(x=>x.classList.toggle('active',x.dataset.accent===color));
       localStorage.setItem('zflag-demo-accent',color);
     };
-    const savedAccent=localStorage.getItem('zflag-demo-accent')||'#8a8a8a';applyAccent(savedAccent);
+    const savedAccent=localStorage.getItem('zflag-demo-accent')||'#b8cde3';applyAccent(savedAccent);
     document.querySelectorAll('[data-accent]').forEach(x=>x.addEventListener('click',()=>applyAccent(x.dataset.accent,x)));
 
     document.querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.classList.toggle('on'));
@@ -761,7 +760,7 @@ body .z2-window{border-radius:16px!important;background:#0b0e13!important;box-sh
       qa('[data-mini-tab]').forEach(b=>b.addEventListener('click',()=>{let t=b.dataset.miniTab;qa('[data-mini-tab]').forEach(n=>n.classList.toggle('is-active',n===b));qa('[data-mini-view]').forEach(v=>v.classList.toggle('is-active',v.dataset.miniView===t));q('#mini-crumb').textContent=t[0].toUpperCase()+t.slice(1);q('#mini-status').textContent=t==='editor'?'Ready':'Viewing '+t;log('Opened '+t+' panel')}));
       qa('.z-mini-toggle').forEach(b=>b.addEventListener('click',()=>{const on=b.classList.toggle('on');b.setAttribute('aria-pressed',String(on));count++;q('#mini-changes').textContent=count+' change'+(count===1?'':'s');log('Toggled sample setting');flash(on?'Sample flag enabled':'Sample flag disabled')}));
       qa('[data-mini-preset]').forEach(b=>b.addEventListener('click',()=>{qa('[data-mini-preset]').forEach(x=>{let on=x===b;x.classList.toggle('chosen',on);x.querySelector('em').textContent=on?'Selected ✓':'Select ↗'});log('Selected '+b.dataset.miniPreset+' sample profile');flash('Selected '+b.dataset.miniPreset)}));
-      qa('[data-mini-color]').forEach(b=>b.addEventListener('click',()=>{mini.style.setProperty('--maccent',b.dataset.miniColor);qa('[data-mini-color]').forEach(x=>x.classList.toggle('selected',x===b));document.documentElement.style.setProperty('--app-accent',b.dataset.miniColor);log('Changed preview accent');flash('Preview color updated')}));
+      qa('[data-mini-color]').forEach(b=>b.addEventListener('click',()=>{document.documentElement.style.setProperty('--app-accent',b.dataset.miniColor);localStorage.setItem('zflag-demo-accent',b.dataset.miniColor);qa('[data-mini-color]').forEach(x=>x.classList.toggle('selected',x===b));document.querySelectorAll('[data-accent]').forEach(x=>x.classList.toggle('active',x.dataset.accent===b.dataset.miniColor));log('Changed preview accent');flash('Preview color updated')}));
       qa('[data-mini-action]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.miniAction==='validate'){log('Sample JSON is syntactically valid; no injection attempted');flash('Sample checked · browser only')}else{q('.z-mini-log').replaceChildren();logCount=0;flash('Preview log cleared')}}));
     })();
 
