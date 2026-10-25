@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="ZFLAG emblem">
+<defs>
+  <linearGradient id="tile" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#1d2633"/><stop offset=".52" stop-color="#090e15"/><stop offset="1" stop-color="#03070c"/></linearGradient>
+  <linearGradient id="metal" x1="0" x2=".9" y1="0" y2="1"><stop stop-color="#fff"/><stop offset=".27" stop-color="#d4e0ef"/><stop offset=".58" stop-color="#8a9bad"/><stop offset=".83" stop-color="#e6eff9"/><stop offset="1" stop-color="#64778c"/></linearGradient>
+  <linearGradient id="trim" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#91bce7"/><stop offset=".5" stop-color="#48617b"/><stop offset="1" stop-color="#91b7d5"/></linearGradient>
+  <filter id="shadow"><feGaussianBlur stdDeviation="2.5"/></filter>
+</defs>
+<rect x="2" y="2" width="92" height="92" rx="23" fill="url(#tile)" stroke="url(#trim)" stroke-width="1.8"/>
+<rect x="6.2" y="6.2" width="83.6" height="83.6" rx="18.5" fill="none" stroke="#a5c5e8" opacity=".22"/>
+<path d="M24 29 H74 L65 40 H43 L30 56 H21 L39 40 H24 Z M66 46 H76 L56 67 H22 L32 56 H52 Z" fill="#457ab4" opacity=".62" filter="url(#shadow)" transform="translate(0 2)"/>
+<path d="M22 27 H76 L68.5 39 H45 L24 67 H20 L41.5 39 H29 Z" fill="url(#metal)"/>
+<path d="M71 39 H77 L56 69 H19 L29 56 H50 Z" fill="url(#metal)"/>
+<path d="M22 27 H76 L73.5 31 H25 Z" fill="#fff" opacity=".82"/>
+<path d="M20 67 L50 39 H45 L20 66 Z" fill="#a2c8ef" opacity=".6"/>
+<path d="M19 69 L56 69 L59 65 L23 65 Z" fill="#55708e" opacity=".75"/>
+<path d="M25 27H75 M19 68 H56" stroke="#d6eeff" stroke-linecap="round" stroke-width=".8" opacity=".58"/>
+</svg>
