@@ -2,13 +2,30 @@ services:
   - type: web
     name: zflag
     runtime: static
-    buildCommand: echo "ZFLAG static site - no build required"
+    branch: main
+    autoDeployTrigger: commit
+    buildCommand: test -s index.html && test -s docs/index.html && test -s zflag-favicon.svg && grep -q 'id="z-mini"' index.html && echo "ZFLAG static site verification passed"
     staticPublishPath: .
     routes:
       - type: redirect
         source: /ZFLAG-Setup-v2.0.22.exe
         destination: /ZFLAG-Setup-v2.0.25.exe
     headers:
+      - path: /
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+      - path: /docs/*
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+      - path: /zflag-favicon.svg
+        name: Cache-Control
+        value: no-cache, must-revalidate
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
       - path: /ZFLAG-Setup-v2.0.25.exe
         name: Content-Disposition
         value: 'attachment; filename="ZFLAG-Setup-v2.0.25.exe"'
