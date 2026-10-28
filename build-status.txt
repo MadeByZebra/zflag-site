@@ -1,8 +1,8 @@
-ZFLAG website build: trueblack-v6
-Published source: MadeByZebra/zflag-site / main
-Visual style: Pure black #000000, white and silver
-Logo: original zflag-logo.png on both homepage and documentation
-Website pages: / and /docs/
-Website build marker: 2026-10-27-trueblack-v6
-Desktop release: v2.0.58 unchanged
-This file verifies a published site build, not a Windows program update.
+ZFLAG website build: trueblack-v7
+Visual identity: Pure black #000000, silver Z and black icon backgrounds
+Live accent picker: synchronized across homepage swatches, full Studio and compact Studio
+Production pages: / and /docs/
+Source: MadeByZebra/zflag-site main
+Website build marker: 2026-10-27-trueblack-v7
+Docs page icon: original silver Z PNG
+Desktop installer: v2.0.58 unchanged
