@@ -1,8 +1,8 @@
-ZFLAG website: graphite-v5
-Design date: 2026-10-27
-Source repo: MadeByZebra/zflag-site
-Branch: main
-Visible marker: REIMAGINED ZFLAG / GRAPHITE EDITION
-Desktop download: v2.0.58 (unchanged)
-Visual style: restored original matte black and silver Z logo; redesigned layout retained.
-This file verifies deployed site assets, not the Windows injector.
+ZFLAG website build: trueblack-v6
+Published source: MadeByZebra/zflag-site / main
+Visual style: Pure black #000000, white and silver
+Logo: original zflag-logo.png on both homepage and documentation
+Website pages: / and /docs/
+Website build marker: 2026-10-27-trueblack-v6
+Desktop release: v2.0.58 unchanged
+This file verifies a published site build, not a Windows program update.
