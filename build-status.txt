@@ -1,4 +1,4 @@
-ZFLAG website build: real-smooth-scroll-v3
+ZFLAG website build: real-smooth-scroll-v4
 Latest official Windows installer: v2.0.61
 Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.61
 Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.61/ZFLAG_Setup.exe
@@ -8,6 +8,7 @@ Flag Library: 15,875 valid-format historical identifiers (NOT 15,965 actual flag
 Source archives retained: 81 metadata notes and 9 invalid-format source records
 Library entry check: true/false validated and exported as JSON booleans
 Visual checks: pure black, original Z logo, white default, all accent pickers synchronized
-Scrolling V3: real mouse-wheel and precision-trackpad easing with faster settling and stale-scroll cancellation
+Scrolling V4: real mouse-wheel and precision-trackpad easing with faster settling and stale-scroll cancellation
 Scrolling safety: native touch / keyboard / form controls / nested scroll panes / reduced motion
 Caveat: Cannot verify how an existing installed ZFLAG version appears without launching that local app
+Wheel animation now settles on the target (no infinite subpixel animation)
