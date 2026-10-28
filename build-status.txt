@@ -1,0 +1,7 @@
+ZFLAG website: atelier-v4
+Design date: 2026-10-27
+Source repo: MadeByZebra/zflag-site
+Branch: main
+Visible marker: REIMAGINED ZFLAG / DESIGN 04
+Desktop download: v2.0.58 (unchanged)
+This file verifies deployed site assets, not the Windows injector.
