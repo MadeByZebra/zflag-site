@@ -1,0 +1,38 @@
+name: Inspect ZFLAG library UI integration points
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-library-ui.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print desktop library component interface and navigation anchors
+        run: |
+          python3 - <<'PY'
+          import base64, io, zipfile, pathlib, re
+          archive=base64.b64decode(pathlib.Path("zflag-desktop-source.b64").read_text().strip())
+          with zipfile.ZipFile(io.BytesIO(archive)) as z:
+            files=z.namelist()
+            print("FLAG_LIBRARY_FILES",*[n for n in files if n.endswith("FlagLibrary.tsx") or n.endswith("App.tsx")],sep="\n")
+            lib=[n for n in files if n.endswith("FlagLibrary.tsx")]
+            if not lib: raise RuntimeError("No FlagLibrary.tsx found")
+            content=z.read(lib[0]).decode()
+            print("=== FLAG LIBRARY TOP ===")
+            print("\n".join(content.splitlines()[:280])[:18000])
+            app=[n for n in files if n.endswith("src/App.tsx")]
+            if not app: raise RuntimeError("No src/App.tsx found")
+            text=z.read(app[0]).decode()
+            print("=== APP REFERENCES ===")
+            lines=text.splitlines()
+            found=0
+            for i,line in enumerate(lines):
+              if any(term in line for term in ("FlagLibrary", "library", "setActiveView", 'useState<"')):
+                print(f"APP {i+1}: "+line[:300])
+                found+=1
+                if found>70:break
+          PY
