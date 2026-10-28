@@ -88,7 +88,7 @@ def patch(a,b):
 patch('import entries from "./data/flag-library.json"','import entries from "./data/flag-library.json"\nimport premades from "./data/flag-premades.json"\nimport "./FlagLibraryEnhanced.css"')
 patch('type Flag = {name:string; value:string; category:string; description:string; evidence:string; type:string; source:string}', 'type Flag = {name:string; value:string; category:string; description:string; evidence:string; type:string; source:string; values?:string[]; raw_names?:string[]}')
 patch('  if(flag.type === "integer") return Number(flag.value)','  if(flag.type === "integer" || flag.type === "number") return Number(flag.value)')
-patch('const FLAGS = entries as Flag[]','const FLAGS = entries as Flag[]\nconst PREMADES = premades as Array<{name:string;category:string;status:"allowlisted"|"historical";description:string;source:string;flags:Record<string,string|number|boolean>}>')
+patch('const FLAGS = entries as Flag[]','const FLAGS = entries as Flag[]\nconst PREMADES = premades as unknown as Array<{name:string;category:string;status:"allowlisted"|"historical";description:string;source:string;flags:Record<string,string|number|boolean>}>')
 patch('  const [goal,setGoal]=useState("FPS / display")','''  const [goal,setGoal]=useState("FPS / display")
   const [page,setPage]=useState(0)
   const [showPremades,setShowPremades]=useState(false)
