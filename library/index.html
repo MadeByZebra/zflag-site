@@ -60,6 +60,7 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 @media(max-width:1000px){.layout{grid-template-columns:1fr}.sidebar{position:static;display:flex;flex-wrap:wrap;padding:10px}.side-title,.side-note{width:100%}.cat{width:auto;flex:0 0 auto}}
 @media(max-width:750px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.container{padding-top:28px}header nav{gap:11px}.brand small{display:none}.toolbar{gap:7px}.search{flex-basis:100%}}
 @media(max-width:450px){header nav a:nth-child(2){display:none}.stats{gap:6px}.stat{padding:11px}.stat b{font-size:20px}}
+.val{min-width:0}.val label{flex:0 0 100%!important}.value-warning{flex:0 0 100%;color:#b9b9b9;font-size:10px;line-height:1.4}.btn:disabled{opacity:.4;cursor:not-allowed!important}.source{overflow-wrap:anywhere}
 </style><script src="../smooth-scroll.js" defer></script>
 </head>
 <body><header>
@@ -69,9 +70,9 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 <div class="container">
 <div class="topline">ZFLAG / <b>CONFIGURATION REFERENCE</b> / ARCHIVE + PRESETS</div>
 <h1>Every flag.<br><span>One workspace.</span></h1>
-<p class="sub">Browse your merged JSON archives, examine individual flags and values, build your own configuration, and export JSON. Separate premade configurations are grouped by purpose and compatibility evidence.</p>
+<p class="sub">Browse your merged JSON archives, examine individual flags and their archived values, build your own configuration, and export JSON. Archive notes are shown as explanations, not fake FastFlags; malformed names are retained in the source files.</p>
 <div class="notice"><strong>Compatibility matters.</strong> This library is a reference and editor, not a guarantee that any override will work. Roblox introduced a Player FastFlag allowlist in September 2025. Only listed flags are expected to be recognized by <code>ClientAppSettings.json</code>; <strong>not even an allowlisted name proves an effect on your hardware</strong>. Archived values are not endorsed. <a href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569/" target="_blank" rel="noopener">Roblox's announcement</a>.</div>
-<div class="stats"><div class="stat"><b id="countFlags">…</b><small>DISTINCT ARCHIVED FLAGS</small></div><div class="stat"><b id="countAllowed">18</b><small>PUBLISHED ALLOWLIST ENTRIES</small></div><div class="stat"><b id="countPresets">12</b><small>PREMADE CONFIGS</small></div><div class="stat"><b id="countDraft">0</b><small>FLAGS IN YOUR DRAFT</small></div></div>
+<div class="stats"><div class="stat"><b id="countFlags">…</b><small>VALID-FORMAT ARCHIVED NAMES</small></div><div class="stat"><b id="countAllowed">18</b><small>PUBLISHED ALLOWLIST ENTRIES</small></div><div class="stat"><b id="countPresets">12</b><small>PREMADE CONFIGS</small></div><div class="stat"><b id="countDraft">0</b><small>FLAGS IN YOUR DRAFT</small></div></div>
 <div class="toolbar">
 <button type="button" class="tab active" data-tab="flags">Individual flags</button><button type="button" class="tab" data-tab="presets">Premade configs</button><button type="button" class="tab" data-tab="draft">My config <span id="draftButtonCount"></span></button>
 <input id="search" class="search" type="search" placeholder="Search flags, functions, categories, values…" aria-label="Search flags and presets">
@@ -83,7 +84,7 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 <section id="presetsPanel" class="hidden"><div class="sectiontop"><h2>Premade configurations</h2><small>Reviewed against Roblox's published allowlist, not live-game tested</small></div><div id="presetGrid" class="grid"></div></section>
 <section id="draftPanel" class="hidden"><div class="sectiontop"><h2>My configuration</h2><small>Local to this browser until exported</small></div><div class="draft"><p>Build a JSON file by adding individual flags or presets. Duplicate keys are replaced by your latest choice. Download or copy your config; no Roblox process is modified by this webpage.</p><div class="actions"><button class="btn primary" id="downloadDraft">Download JSON</button><button class="btn" id="copyDraft">Copy JSON</button><button class="btn" id="importDraft">Import JSON</button><button class="btn" id="clearDraft">Clear draft</button><input id="importFile" type="file" accept=".json,application/json" class="hidden"></div><pre id="draftContent">{}</pre><div id="draftList" class="grid"></div></div></section>
 </main></div>
-<div class="footer">ZFLAG FastFlag Library · Research and historical reference · No third-party “shop” validation claims · <a href="../docs/">Docs</a> · <a href="https://github.com/MadeByZebra/zflag-site" target="_blank" rel="noopener">GitHub source</a><p>Archive sources: original 8,440-entry combined JSON and 10,518-entry merged JSON. Premade profiles: adapted from public allowlist and Fishstrap guides. Some uploaded archive names contain malformed quoting; those are normalized only when unambiguous.</p></div>
+<div class="footer">ZFLAG FastFlag Library · Research and historical reference · No third-party “shop” validation claims · <a href="../docs/">Docs</a> · <a href="https://github.com/MadeByZebra/zflag-site" target="_blank" rel="noopener">GitHub source</a><p>Archive sources: original 8,440-entry combined JSON and 10,518-entry merged JSON. After merging, 15,875 entries have valid-format identifiers; 81 metadata notes and 9 invalid names are retained in the original downloadable source JSONs, not displayed as usable flags. A valid-format name does not mean the current Roblox client supports it.</p></div>
 </div><div id="toast" role="status" aria-live="polite"></div>
 <script>
 (function(){
@@ -153,10 +154,14 @@ let flags=[],filtered=[],page=0,tab="flags",cat="All Flags",statusFilter="all",s
 function byId(s){return document.getElementById(s)}
 function toast(msg){const e=byId("toast");e.textContent=msg;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2400)}
 function normalizeKey(k){k=String(k).trim();if(k.charAt(0)==='"'){k=k.replace(/"/g,"").split(":")[0].trim()}return k}
+function isArchiveNote(k){return /^_(?:comment|note|description)$|^_?[A-Za-z0-9_]+_(?:note|comment|description)$/i.test(k)}
+function validIdentifier(k){return /^[A-Za-z][A-Za-z0-9_]+$/.test(k)}
+function expectedType(key){if(/^(?:D?FFlag|SFFlag)/.test(key))return "boolean";if(/^(?:DFInt|FInt|DInt|SInt|FLog|DFLog)/.test(key))return "integer";if(/^(?:DFString|FString|SString)/.test(key))return "string";if(/^(?:D?FFloat|D?FDouble)/.test(key))return "number";return "unverified"}
+function parseTyped(key,raw){const type=expectedType(key),value=String(raw??"").trim();if(type==="boolean"){if(!/^(?:true|false)$/i.test(value))throw new Error("Expected true or false");return value.toLowerCase()==="true"}if(type==="integer"){if(!/^[+-]?\d+$/.test(value))throw new Error("Expected an integer");const n=Number(value);if(!Number.isSafeInteger(n))throw new Error("Integer exceeds safe precision");return n}if(type==="number"){if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(value)||!Number.isFinite(Number(value)))throw new Error("Expected a finite number");return Number(value)}if(type==="string")return String(raw);if(!value)throw new Error("Value required");return typed(raw)}
 function typed(raw){if(typeof raw!=="string")return raw;const v=raw.trim();if(v==="True"||v==="true")return true;if(v==="False"||v==="false")return false;if(/^-?\d+(?:\.\d+)?$/.test(v)&&v.length<16)return Number(v);return raw}
 function inferCategory(k){for(const [c,re] of CATEGORY_WORDS)if(re.test(k))return c;return "Other & Experimental"}
 function titleCase(k){return k.replace(/^(?:DFFlag|FFlag|DFInt|FInt|FString|DString|FLog|DFLog|SFFlag|SInt|SString)/,"").replace(/([a-z0-9])([A-Z])/g,"$1 $2").replace(/([A-Z])([A-Z][a-z])/g,"$1 $2").trim()||k}
-function describe(x){if(labels[x.key])return labels[x.key];const phrase=titleCase(x.key);const scope={
+function describe(x){if(labels[x.key])return labels[x.key]+(x.archiveNote?" Archive caution: "+x.archiveNote:"");if(x.archiveNote)return "ARCHIVED NOTE (unverified): "+x.archiveNote+". No supported value range is verified.";const phrase=titleCase(x.key);const scope={
 "FPS & Scheduling":"frame timing or scheduler behavior","Rendering & Graphics":"graphics/rendering behavior","Textures & Lighting":"visual materials, lighting or texture processing",
 "Networking & Ping":"network transport, communication or replication","Caching & Memory":"memory, cache or buffer management","Physics & Movement":"simulation, collision or motion behavior",
 "UI & Accessibility":"interface or input behavior","Audio & Voice":"audio, voice or spatial sound behavior","Security & Telemetry":"diagnostics, reporting or telemetry",
@@ -164,10 +169,17 @@ function describe(x){if(labels[x.key])return labels[x.key];const phrase=titleCas
 }[x.category];return "Name suggests “"+phrase+"” controls "+scope+". This interpretation is inferred; its real purpose, supported values and effect have not been independently documented."}
 function statusOf(key,category){if(allowed.has(key))return "allowlisted";if(category==="Physics & Movement"||category==="Networking & Ping")return "high-risk";return "archive"}
 function makeCatalog(merged,old){
-const out=new Map();
+const out=new Map(), notes=new Map(),excluded=[];
 for(const [origin,obj] of [["Merged JSON",merged],["Earlier combined JSON",old]]){
  for(const [raw,value] of Object.entries(obj)){
-  const key=normalizeKey(raw);if(!key)continue;
+  const key=normalizeKey(raw);
+  if(!key)continue;
+  if(isArchiveNote(key)){
+    const base=key.replace(/^_/,"").replace(/_(?:note|comment|description)$/i,"");
+    if(!notes.has(base))notes.set(base,String(value));
+    continue;
+  }
+  if(!validIdentifier(key)){excluded.push({raw,key,source:origin,value});continue}
   let item=out.get(key);
   if(!item){item={key:key,rawKeys:[],sources:[],values:[],category:inferCategory(key),value:typed(value)};out.set(key,item)}
   if(!item.sources.includes(origin))item.sources.push(origin);
@@ -176,7 +188,9 @@ for(const [origin,obj] of [["Merged JSON",merged],["Earlier combined JSON",old]]
   if(!item.values.some(v=>JSON.stringify(v)===JSON.stringify(converted)))item.values.push(converted);
  }
 }
-return Array.from(out.values()).map(o=>{o.status=statusOf(o.key,o.category);return o}).sort((a,b)=>a.key.localeCompare(b.key))}
+const catalog=Array.from(out.values()).map(o=>{o.status=statusOf(o.key,o.category);o.archiveNote=notes.get(o.key)||"";return o}).sort((a,b)=>a.key.localeCompare(b.key));
+window.zflagArchiveAudit={validNames:catalog.length,notes:notes.size,malformed:excluded};
+return catalog}
 function saveDraft(){try{localStorage.setItem("zflag-library-draft",JSON.stringify(draft))}catch(e){}renderDraftBadge()}
 function addFlag(key,value){draft[key]=value;saveDraft();toast("Added "+key+" to configuration")}
 function addPreset(p){let overwritten=Object.keys(p.flags).filter(k=>Object.prototype.hasOwnProperty.call(draft,k)).length;Object.assign(draft,p.flags);saveDraft();toast("Added "+Object.keys(p.flags).length+" flags"+(overwritten?" · replaced "+overwritten+" existing values":""))}
@@ -189,12 +203,16 @@ function renderFlagCard(f){
 const card=document.createElement("article");card.className="card";
 const meta=document.createElement("div");meta.className="cardmeta";const cat=document.createElement("span");cat.className="chip";cat.textContent=f.category;const badge=document.createElement("span");badge.className="chip "+(f.status==="allowlisted"?"allow":f.status==="high-risk"?"risk":"legacy");badge.textContent=f.status==="allowlisted"?"Published allowlist":f.status==="high-risk"?"Advanced · not allowlisted":"Archive / unverified";meta.append(cat,badge);
 const name=document.createElement("div");name.className="flagname";name.textContent=f.key;const desc=document.createElement("p");desc.className="description";desc.textContent=describe(f);
-const value=document.createElement("div");value.className="val";const label=document.createElement("label");label.textContent="VALUE";const input=document.createElement("input");input.type="text";input.value=String(f.value??"");input.setAttribute("aria-label","Value for "+f.key);value.append(label,input);
+const value=document.createElement("div");value.className="val";const label=document.createElement("label");label.textContent="ACTUAL JSON VALUE ("+expectedType(f.key)+")";const input=document.createElement("input");input.type="text";input.value=String(f.value??"");input.setAttribute("aria-label","Actual value for "+f.key);input.autocomplete="off";input.spellcheck=false;const warning=document.createElement("small");warning.className="value-warning";value.append(label,input,warning);
 const buttons=document.createElement("div");buttons.className="actions";
-const add=document.createElement("button");add.className="btn primary";add.textContent="+ Add to config";add.onclick=()=>addFlag(f.key,typed(input.value));
-const cp=document.createElement("button");cp.className="btn";cp.textContent="Copy flag";cp.onclick=()=>clip(JSON.stringify({[f.key]:typed(input.value)},null,2));
+const add=document.createElement("button");add.className="btn primary";add.textContent="+ Add to config";
+const cp=document.createElement("button");cp.className="btn";cp.textContent="Copy flag";
+function checked(){try{const parsed=parseTyped(f.key,input.value);warning.textContent=expectedType(f.key)==="unverified"?"Type unverified; confirm the JSON value before use.":"";add.disabled=false;cp.disabled=false;return parsed}catch(error){warning.textContent="Invalid archived value: "+error.message;add.disabled=true;cp.disabled=true;return null}}
+input.addEventListener("input",checked);checked();
+add.onclick=()=>{const parsed=checked();if(!add.disabled)addFlag(f.key,parsed)};
+cp.onclick=()=>{const parsed=checked();if(!cp.disabled)clip(JSON.stringify({[f.key]:parsed},null,2))};
 buttons.append(add,cp);
-if(f.values.length>1){const alt=document.createElement("button");alt.className="btn";alt.textContent=f.values.length+" archived values";alt.title="Choose among archived source values";alt.onclick=()=>{const next=(f.values.findIndex(x=>String(x)===input.value)+1)%f.values.length;input.value=String(f.values[next]);toast("Selected archived alternative "+(next+1)+"/"+f.values.length)};buttons.appendChild(alt)}
+if(f.values.length>1){const alt=document.createElement("button");alt.className="btn";alt.textContent=f.values.length+" archived values";alt.title="Choose among archived source values";alt.onclick=()=>{const next=(f.values.findIndex(x=>String(x)===input.value)+1)%f.values.length;input.value=String(f.values[next]);checked();toast("Selected archived alternative "+(next+1)+"/"+f.values.length)};buttons.appendChild(alt)}
 const origin=document.createElement("div");origin.className="source";origin.textContent="SOURCE: "+f.sources.join(" + ")+(f.rawKeys.length?" · cleaned malformed import name":"");card.append(meta,name,desc,value,buttons,origin);return card
 }
 function filterItems(){const q=search.toLowerCase();filtered=flags.filter(f=>(cat==="All Flags"||f.category===cat)&&(statusFilter==="all"||f.status===statusFilter)&&(!q||(f.key+" "+f.category+" "+describe(f)+" "+f.value).toLowerCase().includes(q)))}
