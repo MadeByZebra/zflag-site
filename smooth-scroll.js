@@ -1,57 +1,65 @@
 /**
- * ZFLAG Smooth Scroll · Website only
- * Keeps native trackpad/touch/keyboard behavior and preserves nested scrolling.
- * Coarse mouse-wheel easing is intentionally modest and runs only while needed.
+ * ZFLAG Smooth Scroll v2 — desktop wheel and precision trackpad easing.
+ * All vertical wheel deltas animate, including small trackpad deltas.
+ * Mouse-wheel scrolling must NOT depend on pointer/hover device detection.
+ * Touch, keyboard, nested scroll panes, reduced motion, and zoom stay native.
  */
 (() => {
   "use strict";
 
-  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const finePointer = window.matchMedia("(pointer: fine)");
-  const hover = window.matchMedia("(hover: hover)");
-  if (!("requestAnimationFrame" in window)) return;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const root = document.scrollingElement || document.documentElement;
+  if (typeof window.requestAnimationFrame !== "function") return;
 
-  let destination = window.scrollY;
-  let frame = 0;
+  let goal = window.scrollY;
+  let frame = null;
+  let lastTime = 0;
+  let easingMs = 115;
 
-  function stop() {
-    if (frame) window.cancelAnimationFrame(frame);
-    frame = 0;
-    destination = window.scrollY;
+  const scrollLimit = () => Math.max(0, root.scrollHeight - window.innerHeight);
+  const limitToPage = y => Math.max(0, Math.min(scrollLimit(), y));
+
+  function cancel() {
+    if (frame !== null) cancelAnimationFrame(frame);
+    frame = null;
+    lastTime = 0;
+    goal = window.scrollY;
   }
 
-  function frameStep() {
-    frame = 0;
-    const position = window.scrollY;
-    const gap = destination - position;
-
-    if (Math.abs(gap) < 0.7) {
-      window.scrollTo({ top: destination, behavior: "instant" });
-      destination = window.scrollY;
+  function tick(now) {
+    // Time-corrected easing: consistent on 60/120/144Hz monitors.
+    const dt = lastTime ? Math.min(64, Math.max(1, now - lastTime)) : 16.67;
+    lastTime = now;
+    goal = limitToPage(goal);
+    const current = window.scrollY;
+    const difference = goal - current;
+    if (Math.abs(difference) < 0.6) {
+      window.scrollTo({ top: goal, behavior: "instant" });
+      frame = null;
+      lastTime = 0;
       return;
     }
-
-    window.scrollTo({ top: position + gap * 0.22, behavior: "instant" });
-    frame = window.requestAnimationFrame(frameStep);
+    const progress = 1 - Math.exp(-dt / easingMs);
+    window.scrollTo({ top: current + difference * progress, behavior: "instant" });
+    frame = requestAnimationFrame(tick);
   }
 
-  function shouldUseNativeScroll(target) {
+  function nestedScrollTarget(target) {
     if (!(target instanceof Element)) return false;
-
-    // Legal dialogs, the language dropdown, UI mockups, and custom overflow
-    // containers must keep their own scrolling and never move the whole page.
-    if (document.querySelector(".modal.open, [aria-modal='true'].open")) return true;
+    // Complex controls retain their expected native interactions.
     if (target.closest(
       "[data-native-scroll], [contenteditable], textarea, select, " +
       "input[type='number'], input[type='range'], [role='dialog']"
     )) return true;
+    if (document.querySelector(".modal.open, [aria-modal='true'].open")) return true;
 
     let node = target;
     while (node && node !== document.documentElement && node !== document.body) {
       if (node instanceof HTMLElement) {
-        const css = window.getComputedStyle(node);
+        const style = getComputedStyle(node);
+        const vertical = style.overflowY;
         if (
-          /^(auto|scroll|overlay)$/.test(css.overflowY) &&
+          /^(auto|scroll|overlay)$/.test(vertical) &&
           node.scrollHeight > node.clientHeight + 2
         ) return true;
       }
@@ -60,63 +68,56 @@
     return false;
   }
 
-  window.addEventListener("wheel", (event) => {
+  window.addEventListener("wheel", event => {
     if (
+      reducedMotion.matches ||
       event.defaultPrevented ||
       !event.cancelable ||
-      motion.matches ||
-      !finePointer.matches ||
-      !hover.matches ||
-      event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
-      Math.abs(event.deltaX) > Math.abs(event.deltaY)
+      event.ctrlKey || event.metaKey || event.shiftKey || event.altKey ||
+      Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+      nestedScrollTarget(event.target)
     ) {
-      stop();
+      cancel();
       return;
     }
 
-    // Precision trackpads provide small pixel deltas and already feel fluid.
-    // Let the browser handle these naturally to preserve native gestures.
-    if (event.deltaMode === 0 && Math.abs(event.deltaY) < 48) {
-      stop();
-      return;
-    }
-    if (shouldUseNativeScroll(event.target)) {
-      stop();
-      return;
-    }
+    let delta = event.deltaY;
+    if (event.deltaMode === 1) delta *= 20;
+    else if (event.deltaMode === 2) delta *= window.innerHeight * 0.9;
+    if (!Number.isFinite(delta) || delta === 0 || !scrollLimit()) return;
 
-    const delta = event.deltaMode === 1
-      ? event.deltaY * 18
-      : event.deltaMode === 2
-        ? event.deltaY * window.innerHeight
-        : event.deltaY;
-
-    const limit = Math.max(0,
-      document.documentElement.scrollHeight - window.innerHeight
-    );
-
-    if (!limit) return;
-    if (!frame) destination = window.scrollY;
-    destination = Math.max(0, Math.min(limit,
-      destination + Math.max(-420, Math.min(420, delta))
-    ));
-
+    // No first-frame jump; inputs accumulate toward a target rather than
+    // rendering an entire wheel notch instantly.
+    if (frame === null) goal = window.scrollY;
+    const precision = event.deltaMode === 0 && Math.abs(event.deltaY) < 48;
+    easingMs = precision ? 75 : 150;
+    goal = limitToPage(goal + Math.max(-680, Math.min(680, delta)));
     event.preventDefault();
-    if (!frame) frame = window.requestAnimationFrame(frameStep);
+    if (frame === null) frame = requestAnimationFrame(tick);
   }, { passive: false });
 
-  // A nav click, pager click, touch, or keyboard action immediately returns
-  // control to the browser. Hash links use native CSS smooth scrolling.
-  document.addEventListener("click", (event) => {
+  // Release control immediately for native gestures, links, keyboard,
+  // manual dragging of the scrollbar, navigation, and reduced motion.
+  document.addEventListener("pointerdown", event => {
     if (event.target instanceof Element &&
-        event.target.closest("a[href*='#'], button, [role='button']")) stop();
+        event.target.closest("a, button, input, [role='button']")) cancel();
   }, { capture: true });
-  window.addEventListener("keydown", stop, { capture: true });
-  window.addEventListener("touchstart", stop, { passive: true });
-  window.addEventListener("popstate", stop);
-  window.addEventListener("hashchange", stop);
+  window.addEventListener("keydown", cancel, { capture: true });
+  window.addEventListener("touchstart", cancel, { passive: true });
+  window.addEventListener("popstate", cancel);
+  window.addEventListener("hashchange", cancel);
   window.addEventListener("scroll", () => {
-    if (!frame) destination = window.scrollY;
+    if (frame === null) goal = window.scrollY;
   }, { passive: true });
-  motion.addEventListener?.("change", stop);
+  reducedMotion.addEventListener?.("change", cancel);
+
+  // Exposes diagnostics to real-browser regression tests (read-only).
+  Object.defineProperty(window, "__zflagScrollV2", {
+    configurable: false,
+    value: Object.freeze({
+      version: "2.0",
+      isReducedMotion: () => reducedMotion.matches,
+      isAnimating: () => frame !== null
+    })
+  });
 })();
