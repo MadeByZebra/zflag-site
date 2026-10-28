@@ -4,7 +4,7 @@ services:
     runtime: static
     branch: main
     autoDeployTrigger: commit
-    buildCommand: test -s index.html && test -s docs/index.html && test -s zflag-favicon.svg && grep -q 'id="z-mini"' index.html && echo "ZFLAG static site verification passed"
+    buildCommand: test -s index.html && test -s docs/index.html && test -s zflag-favicon.svg && grep -q 'id="z-mini"' index.html && grep -q '2026-10-27-atelier-v4' index.html && grep -q 'atelier-editorial-grid' index.html && test -s build-status.txt && echo "ZFLAG Design 04 static site verified"
     staticPublishPath: .
     routes:
       - type: redirect
