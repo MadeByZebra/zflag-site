@@ -135,36 +135,23 @@ for directory in (ROOT/'tests',ROOT/'scripts'):
   except UnicodeError:continue
   if '2.0.58' in raw:p.write_text(raw.replace('2.0.58','2.0.59'),encoding='utf-8')
 app=ROOT/'src/App.tsx';raw=app.read_text(encoding='utf-8');app.write_text(raw.replace('2.0.58','2.0.59'),encoding='utf-8')
-# Keep every raw archive entry while verifying that invalid names are read-only.
+# Preserve invalid identifier records while preventing editor insertion.
 integrity=ROOT/'tests/test_release_integrity.py'
 content=integrity.read_text(encoding='utf-8')
-check="self.assertRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+
-assert len(ordered)==15965 and len(premades)>=12
-assert 'const shown=filtered.slice(page*80' in s
-assert '15,965 imported flag names' in s
-assert 'src-tauri' in str(cargo)
-print('ZFLAG v2.0.59 library:',len(ordered),'flags,',len(premades),'premade configs; frontend only, native engine unchanged'))"
+check="self.assertRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+$')"
 assert content.count(check)==1,'Integrity assertion changed'
-content=content.replace(check,"""if entry.get('type') == 'unknown' and entry.get('description','').startswith('Nonstandard archive key'):
-                self.assertNotRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+
-assert len(ordered)==15965 and len(premades)>=12
-assert 'const shown=filtered.slice(page*80' in s
-assert '15,965 imported flag names' in s
-assert 'src-tauri' in str(cargo)
-print('ZFLAG v2.0.59 library:',len(ordered),'flags,',len(premades),'premade configs; frontend only, native engine unchanged'))
-            else:
-                self.assertRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+
-assert len(ordered)==15965 and len(premades)>=12
-assert 'const shown=filtered.slice(page*80' in s
-assert '15,965 imported flag names' in s
-assert 'src-tauri' in str(cargo)
-print('ZFLAG v2.0.59 library:',len(ordered),'flags,',len(premades),'premade configs; frontend only, native engine unchanged'))""")
-integrity.write_text(content,encoding='utf-8')
-# Make the local file fixture deterministic on Windows where mtime can round forward.
+replacement=(
+"if entry.get('type') == 'unknown' and entry.get('description','').startswith('Nonstandard archive key'):\n"
+"                self.assertNotRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+$')\n"
+"            else:\n"
+"                self.assertRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+$')"
+)
+integrity.write_text(content.replace(check,replacement),encoding='utf-8')
+# Use deterministic fixture timestamp to avoid Windows file-time rounding issues.
 game_test=ROOT/'tests/test_tab_game_profiles_254.py'
 fixture=game_test.read_text(encoding='utf-8')
 old_fixture='detect_game_from_logs(log_dir=Path(td))'
-assert fixture.count(old_fixture)==1,'Fixture anchor changed'
+assert fixture.count(old_fixture)==1,'Game fixture changed'
 game_test.write_text(fixture.replace(old_fixture,'detect_game_from_logs(log_dir=Path(td), now=f.stat().st_mtime+1)'),encoding='utf-8')
 # App v259 smoke assertions
 assert len(ordered)==15965 and len(premades)>=12
