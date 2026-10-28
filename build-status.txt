@@ -1,4 +1,4 @@
-ZFLAG website build: desktop-ux-v260
+ZFLAG website build: smoothscroll-v1
 Latest official Windows installer: v2.0.60
 Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.60
 Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.60/ZFLAG_Setup.exe
@@ -7,3 +7,7 @@ Windows app library: 15,965 FastFlag names plus premade configs
 v2.0.60: strict editable JSON types, separate descriptions, centered stable top navigation, visible page transitions
 Roblox Player flag support must be separately verified
 Website remains pure black with white default accent
+Website update: mouse-wheel easing on desktop for homepage, docs, and flag library
+Navigation: consistent smooth section links and library pagination, header-aware scrolling
+Input safety: native precision trackpad, touchscreen, keyboard, nested panels, and reduced motion
+Shared asset: /smooth-scroll.js
