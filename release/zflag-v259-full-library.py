@@ -40,6 +40,10 @@ for k,item in items.items():
  cat=category(k);v=item['values'][0]
  human=re.sub(r'(?<=[a-z0-9])(?=[A-Z])',' ',re.sub(r'^(?:DFFlag|FFlag|DFInt|FInt|FString|DString|FLog|DFLog)','',k)).strip() or k
  entry={'name':k,'value':v,'category':cat,'description':KNOWN.get(k,f'Name suggests internal {cat.lower()} behavior related to "{human}". Meaning, supported values and effect are not documented; description is inferred.'),'evidence':'documented' if k in ALLOW else ('advanced' if cat in ('Networking & Ping','Physics & Movement') else 'archived'),'type':type_str(v),'source':' + '.join(item['sources']),'values':item['values'],'raw_names':item['raw_names']}
+ if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]+',k):
+  entry['type']='unknown'
+  entry['evidence']='archived'
+  entry['description']='Nonstandard archive key. Preserved for reference only; excluded from configuration editing. '+entry['description']
  items[k]=entry
 ordered=sorted(items.values(),key=lambda d:d['name'].lower())
 assert len(ordered)==15965, f'Expected 15,965 distinct flags, got {len(ordered)}'
