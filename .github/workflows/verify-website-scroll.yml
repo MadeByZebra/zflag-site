@@ -1,0 +1,52 @@
+name: Verify ZFLAG website smooth scrolling
+on:
+  push:
+    paths:
+      - 'smooth-scroll.js'
+      - 'index.html'
+      - 'docs/index.html'
+      - 'library/index.html'
+      - '.github/workflows/verify-website-scroll.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate smooth-scroll JavaScript syntax
+        run: node --check smooth-scroll.js
+      - name: Validate all three website pages and accessibility fallbacks
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          class Scan(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.ids=[]; self.links=[]; self.scripts=[]
+              def handle_starttag(self,tag,attrs):
+                  d=dict(attrs)
+                  if "id" in d:self.ids.append(d["id"])
+                  if tag=="a" and "href" in d:self.links.append(d["href"])
+                  if tag=="script" and "src" in d:self.scripts.append(d["src"])
+          for name,expected in (("index.html","./smooth-scroll.js"),("docs/index.html","../smooth-scroll.js"),("library/index.html","../smooth-scroll.js")):
+              html=Path(name).read_text(encoding="utf-8")
+              scan=Scan(); scan.feed(html)
+              assert scan.scripts.count(expected)==1,(name,"missing shared script")
+              assert len(scan.ids)==len(set(scan.ids)),(name,"duplicate IDs")
+              unresolved=[link for link in scan.links if link.startswith("#") and link[1:] not in scan.ids]
+              assert not unresolved,(name,"missing anchors",unresolved)
+              assert "scroll-behavior:smooth" in html,(name,"missing native anchor scrolling")
+              assert expected.endswith("smooth-scroll.js")
+              print(name, "PASS:", len(scan.ids),"ids,",len(scan.links),"links")
+          js=Path("smooth-scroll.js").read_text(encoding="utf-8")
+          for text in ("prefers-reduced-motion","pointer: fine","deltaMode","data-native-scroll","requestAnimationFrame","passive: false"):
+              assert text in js,("missing scroll safety feature",text)
+          library=Path("library/index.html").read_text(encoding="utf-8")
+          assert "flagsPanel" in library and "scrollIntoView" in library
+          assert "top:360" not in library
+          home=Path("index.html").read_text(encoding="utf-8")
+          assert "scroll-padding-top:94px" in home
+          print("Shared smooth scrolling and accessibility checks PASS")
+          PY
