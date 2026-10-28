@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="theme-color" content="#05080e" />
+  <meta name="theme-color" content="#0b0c0e" />
   <link rel="icon" type="image/svg+xml" href="./zflag-favicon.svg" />
   <link rel="apple-touch-icon" href="./zflag-logo.png" />
   <meta name="application-name" content="ZFLAG" />
   <meta property="og:image" content="./zflag-logo.png" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.58" />
-  <meta name="zflag-site-build" content="2026-10-27-atelier-v4" />
+  <meta name="zflag-site-build" content="2026-10-27-graphite-v5" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ZFLAG — Your flags. Your workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
@@ -439,6 +439,73 @@ html[data-theme=light] .atelier-pill b{color:#153d71}
 html[data-theme=light] .hero .eyebrow,html[data-theme=light] .atelier-scroll{color:#567294}
 html[data-theme=light] .quality-strip{box-shadow:0 16px 48px #153a6619}
 @media(max-width:540px){.atelier-pill span{font-size:7px}.atelier-pill b{font-size:8px}}
+
+/* GRAPHITE V5: restore old black/silver visual identity; preserve new layout. */
+html[data-theme=dark]{
+--bg:#0b0c0e;--bg-2:#101113;--panel:#121416;--panel-2:#16181b;--raised:#1e2024;
+--text:#f3f4f6;--muted:#93969e;--soft:#70747d;--line:#272a30;--line-2:#393e46;
+--button:#c6cbd6;--button-text:#17191e;--glass:rgba(15,17,19,.96);
+--grid:rgba(255,255,255,.022);--app-accent:#b8c0d0
+}
+html[data-theme=light]{
+--bg:#f5f6f7;--bg-2:#e9ebef;--panel:#fff;--panel-2:#f3f4f5;--raised:#e9ebee;
+--text:#101216;--muted:#666a72;--soft:#898d95;--line:#dcdee3;--line-2:#aeb4bf;
+--button:#272d37;--button-text:#fff;--glass:rgba(248,249,251,.96);--app-accent:#535b68
+}
+body:before{background-image:radial-gradient(ellipse at 50% 4%,rgba(255,255,255,.032),transparent 57%),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)!important;background-size:auto,88px 88px,88px 88px}
+.nav{background:var(--glass)!important;border-color:var(--line)!important;box-shadow:0 15px 42px #0006,inset 0 1px #ffffff08!important}
+.navlinks a:hover,.navlinks a.active{background:var(--raised)!important;color:var(--text)!important}
+.btn.primary,html[data-theme=dark] .btn.primary{background:var(--button)!important;color:var(--button-text)!important;border-color:var(--button)!important;box-shadow:none!important}
+.btn.primary:hover{filter:brightness(1.08);box-shadow:none!important}
+.btn,.iconbtn{border-color:var(--line)!important}.btn:hover,.iconbtn:hover{border-color:var(--line-2)!important}
+.brand{color:var(--text)!important}
+.zmark,.brand .zmark,.z2-mark,.z-mini-mark,.z2-titlebrand .z2-mark,.z2-sidebrand .z2-mark,.z-mini-identity .z-mini-mark{
+background:#0b0c0e url("./zflag-logo.png") center/cover no-repeat!important;
+border:1px solid #34363b!important;border-radius:8px!important;box-shadow:none!important;
+color:transparent!important;font-size:0!important
+}
+.zmark:before,.zmark:after{content:none!important;display:none!important}
+.hero:before{background:radial-gradient(ellipse at 50% 28%,rgba(255,255,255,.045),transparent 61%)!important}
+.atelier-pill{background:rgba(255,255,255,.045)!important;border-color:#4a4e57!important;color:#aeb3bd!important}
+.atelier-pill b{color:#e6e8eb!important}.atelier-pill i{background:#d1d5dc!important;box-shadow:0 0 0 3px #ffffff0e!important}
+.hero .eyebrow{color:var(--muted)!important}.hero h1{color:var(--text)!important}
+.hero h1 span{background:linear-gradient(110deg,#f0f1f3,#9da2ab,#d2d6dd)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important}
+.hero-copy>p:not(.release-bridge-status),.release-bridge-status{color:var(--muted)!important}
+.hero-meta,.atelier-scroll{color:var(--soft)!important}
+.atelier-scroll i{background:linear-gradient(90deg,transparent,#555a62,transparent)!important}
+.product-stage{border-color:#32353a!important;background:linear-gradient(180deg,#1b1d21a8,#101113d4 27%,#0b0c0ebf)!important;box-shadow:0 36px 94px #0008,inset 0 1px #ffffff0b!important}
+.product-stage:before{background:radial-gradient(ellipse at 50% 42%,rgba(224,224,224,.09),transparent 65%)!important;opacity:1!important}
+.stage-indicator,.stage-note{color:var(--muted)!important}
+.stage-spark{background:#d8d9db!important;box-shadow:0 0 0 4px #ffffff12!important}
+.stage-revision{color:#e0e2e5!important;background:#ffffff0b!important;border-color:#565960!important}
+body .z2-window{border-color:#44474e!important;background:#0b0c0e!important;box-shadow:0 36px 90px #0009,0 0 0 1px #ffffff0b!important}
+.z2-titlebar{background:linear-gradient(180deg,#1c1e22,#121315)!important;border-bottom-color:#33363c!important}
+.z2-side{background:linear-gradient(#121315,#0e0f11)!important}
+.z2-workspace{background:#111214!important}
+.z2-nav.is-active{background:#c6cbd617!important;box-shadow:inset 2px 0 #babfc8!important}
+.quality-strip{background:linear-gradient(125deg,#1a1b1e,#101113)!important;border-color:#34363c!important;box-shadow:0 16px 48px #0005!important}
+.quality-k{color:#979aa1!important}.quality-cell strong{color:#f0f1f3!important}.quality-v{color:#8e929a!important}
+.atelier-overline{color:#b9bdc4!important}.atelier-editorial h2 em{color:#b8bac0!important}
+.atelier-editorial-card{border-color:#35383e!important;background:linear-gradient(145deg,#222327,#121316 73%)!important;box-shadow:none!important}
+.atelier-editorial-card:hover{border-color:#858a93!important;box-shadow:0 22px 45px #0007!important}
+.atelier-card-index,.atelier-card-foot span{color:#a8adb6!important}
+.atelier-card-foot{border-top-color:#ffffff15!important}.atelier-card-foot h3{color:#f2f3f5!important}
+.atelier-code-art{background:#0e0f11!important;border-color:#393b41!important}
+.atelier-code-top{border-bottom-color:#303238!important}
+.atelier-code-top i:first-child{background:#d4d8de!important}
+.atelier-code-top small,.atelier-code-art code{color:#b2b5bb!important}
+.atelier-code-art code b{color:#f3f3f3!important}.atelier-code-art>small{color:#b4b8be!important}
+.atelier-color-art i{filter:grayscale(1)!important}
+.atelier-status-art strong,.atelier-status-art small,.atelier-status-art p{color:#b9bbc0!important}
+.atelier-status-art strong i{background:#b9bdc3!important;box-shadow:0 0 9px #fff2!important}
+.feature:hover,.why-card:hover{border-color:#727781!important}
+.feature,.why-card{background:var(--panel)!important}
+html[data-theme=light] .hero h1 span{background:linear-gradient(110deg,#16181b,#61656b,#2d3035)!important;-webkit-background-clip:text!important;background-clip:text!important}
+html[data-theme=light] .atelier-pill{border-color:#c7c9cc!important;background:#e7e8eb!important}
+html[data-theme=light] .atelier-pill b{color:#2b2e32!important}
+html[data-theme=light] .nav{background:var(--glass)!important;box-shadow:0 9px 24px #0001!important}
+html[data-theme=light] .product-stage{background:linear-gradient(180deg,#d6d8db,#fafafa)!important;border-color:#c3c6ca!important}
+
 </style>
 </head>
 <body>
@@ -450,14 +517,14 @@ html[data-theme=light] .quality-strip{box-shadow:0 16px 48px #153a6619}
 
   <main id="home">
     <section class="hero"><div class="wrap hero-grid">
-      <div class="hero-copy"><div class="atelier-pill"><i></i><b>REIMAGINED ZFLAG</b><span>DESIGN 04 · OCT 27</span></div>
+      <div class="hero-copy"><div class="atelier-pill"><i></i><b>REIMAGINED ZFLAG</b><span>GRAPHITE EDITION · OCT 27</span></div>
         <div class="eyebrow" data-i18n="hero.eyebrow">Windows configuration utility · v2.0.58</div>
         <h1 data-i18n-html="hero.title">Your flags.<br><span>Your workspace.</span></h1>
         <p data-i18n="hero.body">A purpose-built Windows studio for editing configurations, managing presets, and understanding every result.</p>
         <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a><a class="btn hero-docs-button" href="./docs/"><span>Read documentation</span><span>↗</span></a></div><p class="release-bridge-status" id="releaseBridgeStatus" aria-live="polite">Latest: v2.0.58 · Windows x64 · one-click in-app updates · responsive toolbar · 13.6 MB</p>
         <div class="hero-meta"><span>Windows 10 / 11</span><span>x64</span><span data-i18n="hero.metaTheme">Website: Dark / Light</span><span data-i18n="hero.metaNoFake">No fake benchmarks</span></div><div class="atelier-scroll"><span>CRAFTED FOR THE DETAILS</span><i></i><span>SCROLL TO EXPLORE ↓</span></div>
       </div>
-      <div class="product-stage reveal" id="product"><div class="stage-overline"><div class="stage-indicator"><span class="stage-spark"></span> ZFLAG / STUDIO 2.0 <span class="stage-revision">DESIGN 04 · OCT 27</span></div><span class="stage-note">01 / THE WORKSPACE</span><a href="./docs/#first-run" class="stage-guide">Product walkthrough ↗</a></div>
+      <div class="product-stage reveal" id="product"><div class="stage-overline"><div class="stage-indicator"><span class="stage-spark"></span> ZFLAG / STUDIO 2.0 <span class="stage-revision">GRAPHITE EDITION · OCT 27</span></div><span class="stage-note">01 / THE WORKSPACE</span><a href="./docs/#first-run" class="stage-guide">Product walkthrough ↗</a></div>
 
         
 <div class="app-window studio-window z2-window" id="tiltWindow" aria-label="Interactive ZFLAG Studio preview">
