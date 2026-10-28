@@ -11,7 +11,7 @@
   <meta property="og:image" content="./zflag-logo.png" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.60" />
-  <meta name="zflag-site-build" content="2026-10-28-desktop-ux-v260" />
+  <meta name="zflag-site-build" content="2026-10-28-smoothscroll-v1" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ZFLAG — Your flags. Your workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
@@ -31,7 +31,7 @@
       --shadow:0 28px 90px rgba(0,0,0,.13);
     }
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}html.smooth-engine{scroll-behavior:auto}
+    html{scroll-behavior:smooth;scroll-padding-top:94px}html.smooth-engine{scroll-behavior:auto}
     body{margin:0;background:var(--bg);color:var(--text);font-family:"Geist","Segoe UI Variable","Segoe UI",sans-serif;letter-spacing:-.015em;overflow-x:hidden;transition:background .25s,color .25s}
     body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.42;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:76px 76px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.58),transparent 62%);z-index:-2}
     body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:100;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E")}
@@ -641,6 +641,7 @@ body .z2-window{--z2accent:var(--app-accent)!important}
 @media(max-width:600px){.palette-preview{padding-top:64px!important}}
 
 </style>
+<script src="./smooth-scroll.js" defer></script>
 </head>
 <body>
   <header class="nav-shell"><div class="wrap nav">
