@@ -4,17 +4,17 @@ This repository contains the [ZFLAG desktop website](index.html), its Render sta
 
 ## Download the latest ZFLAG for Windows 10/11 (x64)
 
-**[Download ZFLAG_Setup.exe — v2.0.60](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.60/ZFLAG_Setup.exe)**
+**[Download ZFLAG_Setup.exe — v2.0.61](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.61/ZFLAG_Setup.exe)**
 
 - **FastFlag Library is IN the installed Windows app**, not just the browser: click **Flag Library** in the sidebar.
-- **v2.0.60** corrects value-vs-description presentation, validates typed JSON values, keeps top navigation centered, and restores smooth page transitions (with reduced-motion support).
-- Contains **15,965** merged distinct flag names, archived values, inferred descriptions, category filters, pagination (80 rows/page), editable values, and categorized premade configurations.
+- **v2.0.61** also corrects a proven data import error: 81 archive notes and 9 invalid-format names had been mistakenly presented as flags. It keeps separate value/description fields, typed JSON validation, centered top navigation and smoother transitions.
+- Contains **15,875 valid-format identifiers** from the merged historical JSONs, archived values, inferred descriptions, category filters, pagination (80 rows/page), editable values, and categorized premade configurations.
 - Add a selected flag or premade configuration to the editor. Nothing is automatically injected by browsing.
 - The installer is a standalone Windows EXE and keeps the existing native engine, configuration workflows, and update behavior.
 - Automated offline tests, frontend/native builds, NSIS installation, and Windows smoke tests passed. In-game effectiveness of individual FastFlags was **not** verified.
-- The executable is unsigned; Windows SmartScreen may warn. Check the checksum on the [v2.0.60 release page](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.60).
+- The executable is unsigned; Windows SmartScreen may warn. Check the checksum on the [v2.0.61 release page](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.61).
 
-**[Successful Windows build and integration tests](https://github.com/MadeByZebra/zflag-site/actions/runs/40772406111).**
+**[Successful Windows build and integration tests](https://github.com/MadeByZebra/zflag-site/actions/runs/40782936802).**
 
 ## True Black website refresh — October 27, 2026
 
