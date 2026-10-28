@@ -135,6 +135,31 @@ for directory in (ROOT/'tests',ROOT/'scripts'):
   except UnicodeError:continue
   if '2.0.58' in raw:p.write_text(raw.replace('2.0.58','2.0.59'),encoding='utf-8')
 app=ROOT/'src/App.tsx';raw=app.read_text(encoding='utf-8');app.write_text(raw.replace('2.0.58','2.0.59'),encoding='utf-8')
+# Keep every raw archive entry while verifying that invalid names are read-only.
+integrity=ROOT/'tests/test_release_integrity.py'
+content=integrity.read_text(encoding='utf-8')
+check="self.assertRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+
+assert len(ordered)==15965 and len(premades)>=12
+assert 'const shown=filtered.slice(page*80' in s
+assert '15,965 imported flag names' in s
+assert 'src-tauri' in str(cargo)
+print('ZFLAG v2.0.59 library:',len(ordered),'flags,',len(premades),'premade configs; frontend only, native engine unchanged'))"
+assert content.count(check)==1,'Integrity assertion changed'
+content=content.replace(check,"""if entry.get('type') == 'unknown' and entry.get('description','').startswith('Nonstandard archive key'):
+                self.assertNotRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+
+assert len(ordered)==15965 and len(premades)>=12
+assert 'const shown=filtered.slice(page*80' in s
+assert '15,965 imported flag names' in s
+assert 'src-tauri' in str(cargo)
+print('ZFLAG v2.0.59 library:',len(ordered),'flags,',len(premades),'premade configs; frontend only, native engine unchanged'))
+            else:
+                self.assertRegex(entry['name'],r'^[A-Za-z][A-Za-z0-9_]+
+assert len(ordered)==15965 and len(premades)>=12
+assert 'const shown=filtered.slice(page*80' in s
+assert '15,965 imported flag names' in s
+assert 'src-tauri' in str(cargo)
+print('ZFLAG v2.0.59 library:',len(ordered),'flags,',len(premades),'premade configs; frontend only, native engine unchanged'))""")
+integrity.write_text(content,encoding='utf-8')
 # App v259 smoke assertions
 assert len(ordered)==15965 and len(premades)>=12
 assert 'const shown=filtered.slice(page*80' in s
