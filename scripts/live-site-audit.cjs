@@ -12,7 +12,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
   for(const route of ['/', '/docs/', '/library/', '/smooth-scroll.js','/zflag-logo.png','/build-status.txt']) {
     const resp=await context.request.get(base+route+'?audit=20261028', {timeout:25000});
     check('HTTP '+route,resp.status()===200,{status:resp.status(),type:resp.headers()['content-type'],bytes:(await resp.body()).length});
-    if(route==='/build-status.txt')console.log('LIVE BUILD MARKER '+(await resp.text()).slice(0,200));
+    if(route==='/build-status.txt'){const marker=await resp.text();console.log('LIVE BUILD MARKER '+marker.slice(0,200));check('Live build status cites v2.0.61',marker.includes('Latest official Windows installer: v2.0.61'),marker.slice(0,120));}
   }
   const page=await context.newPage();
   const errors=[];
@@ -33,6 +33,9 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     jsLoaded:performance.getEntriesByType('resource').some(x=>x.name.includes('smooth-scroll.js'))
   }));
   check('Homepage black',home.rootBg==='rgb(0, 0, 0)',home);
+  check('Latest homepage deployed',home.build==='2026-10-28-live-audited-v261',home.build);
+  const homepageDownload=await page.locator('a[href*="/releases/download/v2.0.61/ZFLAG_Setup.exe"]').count();
+  check('Homepage v2.0.61 downloads',homepageDownload>=1,{found:homepageDownload});
   check('Homepage original Z',home.logo.includes('zflag-logo.png'),home.logo);
   check('White default chosen',home.pickerDefault==='#ffffff' && home.accent==='#ffffff',{pickerDefault:home.pickerDefault,accent:home.accent});
   check('Shared scroll JS loaded',home.jsLoaded,home.jsLoaded);
@@ -73,6 +76,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     scrollBehavior:getComputedStyle(document.documentElement).scrollBehavior
   }));
   check('Docs Z logo',docInfo.icon?.includes('zflag-logo.png')&&docInfo.logo.includes('zflag-logo.png'),docInfo);
+  check('Docs v2.0.61 download',await docs.locator('a[href*="/releases/download/v2.0.61/ZFLAG_Setup.exe"]').count()>=1);
   check('Docs black and guides',docInfo.bg==='rgb(0, 0, 0)' && docInfo.docSections===15,docInfo);
   await docs.locator('a.side-link[href="#installation"]').first().click();
   await docs.waitForTimeout(700);
