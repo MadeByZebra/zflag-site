@@ -1,8 +1,10 @@
-ZFLAG website: flag-library-v1
-Website style: pure black and white-accent default
-FastFlag Library: /library/
-Archive source files: 8440 + 10518 entries = 15965 distinct names after deduplication
-Library: categories, descriptions, per-flag values, 12 presets, JSON builder
-Roblox allowlist baseline: 18 published keys, no in-game verification
+ZFLAG website build: desktop-library-v259
+Latest Windows installer: v2.0.59
+Installed application contains the full offline FastFlag Library (15,965 distinct names)
+Desktop library: editable values, categories, search, 80-row pagination, allowlisted-name and historical premades
+Direct download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.59/ZFLAG_Setup.exe
+GitHub Actions Windows build: https://github.com/MadeByZebra/zflag-site/actions/runs/40636119147
+Site theme: true black and white default accent
+Browser library: /library/
 Documentation: /docs/
-Desktop installer v2.0.58 unchanged
+Archive entries do not guarantee current Roblox Player support
