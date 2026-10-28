@@ -18,6 +18,12 @@ SHA-256: `c7aa4fb334f77a297f368f32e6bad555fc18f85d93c8f86cb7c8543cb1059224`.
 
 Build run: [Windows CI #38970541650](https://github.com/MadeByZebra/zflag-site/actions/runs/38970541650). Release: [v2.0.47](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.47).
 
+## Website redesign and live deployment verification — October 27, 2026
+
+The root homepage uses **Atelier Design 04**: a redesigned centered hero, large product preview, metallic-blue theme, and product feature cards. The interactive desktop preview, documentation and v2.0.58 installer link remain intact. The Windows injector engine has not been modified by this website redesign.
+
+The Render configuration publishes the repository **root** from the **main** branch. Open `/build-status.txt` on the actual site hostname to verify the deployment. The website HTML also includes `zflag-site-build=2026-10-27-atelier-v4`. If these are missing from the live hostname, verify the Render service's connected repo, branch and deployment status. A GitHub push by itself does not prove a live Render update.
+
 ## Website and hosting
 
 The website source is `index.html`. Its **Download** controls use the explicit verified GitHub release asset above. `render.yaml` configures Render hosting. Existing older .exe files in the repo are retained for rollback and are no longer referenced by current Download buttons.
