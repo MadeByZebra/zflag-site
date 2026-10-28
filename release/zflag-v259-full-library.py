@@ -160,6 +160,12 @@ assert '15,965 imported flag names' in s
 assert 'src-tauri' in str(cargo)
 print('ZFLAG v2.0.59 library:',len(ordered),'flags,',len(premades),'premade configs; frontend only, native engine unchanged'))""")
 integrity.write_text(content,encoding='utf-8')
+# Make the local file fixture deterministic on Windows where mtime can round forward.
+game_test=ROOT/'tests/test_tab_game_profiles_254.py'
+fixture=game_test.read_text(encoding='utf-8')
+old_fixture='detect_game_from_logs(log_dir=Path(td))'
+assert fixture.count(old_fixture)==1,'Fixture anchor changed'
+game_test.write_text(fixture.replace(old_fixture,'detect_game_from_logs(log_dir=Path(td), now=f.stat().st_mtime+1)'),encoding='utf-8')
 # App v259 smoke assertions
 assert len(ordered)==15965 and len(premades)>=12
 assert 'const shown=filtered.slice(page*80' in s
