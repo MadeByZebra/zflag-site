@@ -11,7 +11,7 @@
   <meta property="og:image" content="./zflag-logo.png" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.58" />
-  <meta name="zflag-site-build" content="2026-10-27-trueblack-v7" />
+  <meta name="zflag-site-build" content="2026-10-27-trueblack-v8" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ZFLAG — Your flags. Your workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
@@ -599,7 +599,7 @@ html[data-theme=light] .brand .zmark,html[data-theme=light] .zmark{background:#0
 }
 
 /* TRUE BLACK V7: make accents actually appear in both previews, keep icon tiles black. */
-html[data-theme=dark]{--bg:#000000;--app-accent:#b8cde3}
+html[data-theme=dark]{--bg:#000000;--app-accent:#ffffff}
 body .z2-window{--z2accent:var(--app-accent)!important}
 .z-mini{--maccent:var(--app-accent)!important}
 .z2-titlebar,.z-mini-title{position:relative}
@@ -719,7 +719,7 @@ body .z2-window{--z2accent:var(--app-accent)!important}
           <div class="z2-surface"><div class="z2-surface-title"><b>Activity log</b><span>PREVIEW ONLY</span></div><div class="z2-log" id="z2-log"><div class="z2-log-row"><span>INFO</span> Preview initialized — engine not connected</div></div></div>
         </section>
         <section class="z2-panel" data-z2-panel="agent"><div class="z2-page-head"><div><small>ASSISTANT WORKSPACE</small><h3>AI Agent</h3><p>This demo shows the layout. AI services run only in the installed app when configured.</p></div></div><div class="z2-agent"><div class="z2-agent-icon">✧</div><h4>Understand your configuration.</h4><p>Analyze supported keys, inspect editor changes and manage local presets through ZFLAG Studio.</p><span>WEBSITE PREVIEW · NO LIVE AI CONNECTION</span></div></section>
-        <section class="z2-panel" data-z2-panel="settings"><div class="z2-page-head"><div><small>PERSONALIZATION</small><h3>Settings</h3><p>Try interface colors. This setting affects only the website preview.</p></div></div><div class="z2-surface"><div class="z2-surface-title"><b>Accent color</b><span>LIVE PREVIEW</span></div><div class="z2-swatch-list"><button type="button" class="z2-swatch is-selected" data-z2-color="#b8cde3" style="--swatch:#b8cde3" aria-label="Silver">Silver</button><button type="button" class="z2-swatch" data-z2-color="#4f8cff" style="--swatch:#4f8cff" aria-label="Blue">Blue</button><button type="button" class="z2-swatch" data-z2-color="#8c6cff" style="--swatch:#8c6cff" aria-label="Violet">Violet</button><button type="button" class="z2-swatch" data-z2-color="#ef6fae" style="--swatch:#ef6fae" aria-label="Rose">Rose</button></div></div><div class="z2-note">Website demo v2.0.58 · appearance changes are not installed on your PC.</div></section>
+        <section class="z2-panel" data-z2-panel="settings"><div class="z2-page-head"><div><small>PERSONALIZATION</small><h3>Settings</h3><p>Try interface colors. This setting affects only the website preview.</p></div></div><div class="z2-surface"><div class="z2-surface-title"><b>Accent color</b><span>LIVE PREVIEW</span></div><div class="z2-swatch-list"><button type="button" class="z2-swatch is-selected" data-z2-color="#ffffff" style="--swatch:#ffffff" aria-label="White accent" aria-pressed="true">White</button><button type="button" class="z2-swatch" data-z2-color="#b8cde3" style="--swatch:#b8cde3" aria-label="Silver accent" aria-pressed="false">Silver</button><button type="button" class="z2-swatch" data-z2-color="#4f8cff" style="--swatch:#4f8cff" aria-label="Blue">Blue</button><button type="button" class="z2-swatch" data-z2-color="#8c6cff" style="--swatch:#8c6cff" aria-label="Violet">Violet</button><button type="button" class="z2-swatch" data-z2-color="#ef6fae" style="--swatch:#ef6fae" aria-label="Rose">Rose</button></div></div><div class="z2-note">Website demo v2.0.58 · appearance changes are not installed on your PC.</div></section>
       </div>
       <footer class="z2-statusbar"><div><span class="z2-online-dot"></span> ZFLAG preview <span class="z2-status-split">/</span> Windows x64</div><div>v2.0.58 <span class="z2-status-split">·</span> <span id="z2-status-text">Ready</span></div></footer>
     </div>
@@ -793,10 +793,10 @@ body .z2-window{--z2accent:var(--app-accent)!important}
       <div class="section-head reveal"><div><div class="kicker" data-i18n="appearance.kicker">Injector appearance</div><h2 data-i18n-html="appearance.title">Keep the site simple.<br>Color the app your way.</h2></div><p data-i18n="appearance.body">Dark and light are website themes. Inside the ZFLAG product presentation, accents can vary so the injector can match your setup without turning the website into a neon showcase.</p></div>
       <div class="personalize reveal">
         <div class="palette-panel"><div class="kicker" data-i18n="appearance.accents">Accent choices</div><h3 data-i18n="appearance.pick">Pick a color.</h3><p data-i18n="appearance.note">Click any color to update both ZFLAG previews. Your browser remembers your selection; the website background stays black.</p><div class="swatches" id="swatches">
-          <button class="swatch active" data-accent="#b8cde3" style="--swatch:#b8cde3"><span></span><small>Silver</small></button><button class="swatch" data-accent="#4f8cff" style="--swatch:#4f8cff"><span></span><small>Blue</small></button><button class="swatch" data-accent="#8c6cff" style="--swatch:#8c6cff"><span></span><small>Violet</small></button><button class="swatch" data-accent="#ff5b64" style="--swatch:#ff5b64"><span></span><small>Red</small></button><button class="swatch" data-accent="#ff9f43" style="--swatch:#ff9f43"><span></span><small>Amber</small></button><button class="swatch" data-accent="#44c78b" style="--swatch:#44c78b"><span></span><small>Emerald</small></button><button class="swatch" data-accent="#ef6fae" style="--swatch:#ef6fae"><span></span><small>Rose</small></button><button class="swatch" data-accent="#58c8e8" style="--swatch:#58c8e8"><span></span><small>Ice</small></button>
+          <button type="button" class="swatch active" data-accent="#ffffff" style="--swatch:#ffffff" aria-label="White accent" aria-pressed="true"><span></span><small>White</small></button><button type="button" class="swatch" data-accent="#b8cde3" style="--swatch:#b8cde3" aria-label="Silver accent" aria-pressed="false"><span></span><small>Silver</small></button><button class="swatch" data-accent="#4f8cff" style="--swatch:#4f8cff"><span></span><small>Blue</small></button><button class="swatch" data-accent="#8c6cff" style="--swatch:#8c6cff"><span></span><small>Violet</small></button><button class="swatch" data-accent="#ff5b64" style="--swatch:#ff5b64"><span></span><small>Red</small></button><button class="swatch" data-accent="#ff9f43" style="--swatch:#ff9f43"><span></span><small>Amber</small></button><button class="swatch" data-accent="#44c78b" style="--swatch:#44c78b"><span></span><small>Emerald</small></button><button class="swatch" data-accent="#ef6fae" style="--swatch:#ef6fae"><span></span><small>Rose</small></button><button class="swatch" data-accent="#58c8e8" style="--swatch:#58c8e8"><span></span><small>Ice</small></button>
         </div></div>
 
-        <div class="palette-preview"><div class="accent-live-indicator" aria-live="polite" role="status"><i id="accentIndicator"></i><span>Live accent: <strong id="accentStatus">Silver</strong></span></div>
+        <div class="palette-preview"><div class="accent-live-indicator" aria-live="polite" role="status"><i id="accentIndicator"></i><span>Live accent: <strong id="accentStatus">White</strong></span></div>
           <div class="z-preview-chrome">
             <div class="z-preview-above"><span><i></i> LIVE STYLE PREVIEW</span><span>02 / APPEARANCE</span></div>
             <div class="z-mini" id="z-mini" aria-label="Interactive ZFLAG Studio compact preview">
@@ -837,7 +837,7 @@ body .z2-window{--z2accent:var(--app-accent)!important}
                     </div>
                     <div class="z-mini-view" data-mini-view="settings">
                       <div class="z-mini-heading"><div><span>PERSONALIZE</span><h3>Appearance</h3><p>Pick a detail color to make it yours.</p></div></div>
-                      <div class="z-mini-setting"><b>Interface accent</b><span>Choose a color below to see it in the Studio preview.</span><div class="z-mini-colors"><button type="button" data-mini-color="#b8cde3" style="--pick:#b8cde3" class="selected" aria-label="Silver accent"></button><button type="button" data-mini-color="#4f8cff" style="--pick:#4f8cff" aria-label="Blue accent"></button><button type="button" data-mini-color="#8c6cff" style="--pick:#8c6cff" aria-label="Violet accent"></button><button type="button" data-mini-color="#ef6fae" style="--pick:#ef6fae" aria-label="Rose accent"></button></div></div>
+                      <div class="z-mini-setting"><b>Interface accent</b><span>Choose a color below to see it in the Studio preview.</span><div class="z-mini-colors"><button type="button" data-mini-color="#ffffff" style="--pick:#ffffff" class="selected" aria-label="White accent" aria-pressed="true"></button><button type="button" data-mini-color="#b8cde3" style="--pick:#b8cde3" aria-label="Silver accent" aria-pressed="false"></button><button type="button" data-mini-color="#4f8cff" style="--pick:#4f8cff" aria-label="Blue accent"></button><button type="button" data-mini-color="#8c6cff" style="--pick:#8c6cff" aria-label="Violet accent"></button><button type="button" data-mini-color="#ef6fae" style="--pick:#ef6fae" aria-label="Rose accent"></button></div></div>
                       <div class="z-mini-panel-hint">This demo does not change the installed application.</div>
                     </div>
                   </div>
@@ -960,10 +960,10 @@ body .z2-window{--z2accent:var(--app-accent)!important}
     downloadModal.onclick=e=>{if(e.target===downloadModal)downloadModal.classList.remove('open')};
 
     // Shared accent setting. Updates both interactive previews, every picker, and saves selection.
-    const accentNames={'#b8cde3':'Silver','#4f8cff':'Blue','#8c6cff':'Violet','#ff5b64':'Red','#ff9f43':'Amber','#44c78b':'Emerald','#ef6fae':'Rose','#58c8e8':'Ice'};
+    const accentNames={'#ffffff':'White','#b8cde3':'Silver','#4f8cff':'Blue','#8c6cff':'Violet','#ff5b64':'Red','#ff9f43':'Amber','#44c78b':'Emerald','#ef6fae':'Rose','#58c8e8':'Ice'};
     function applyAccent(requested){
       const value=String(requested||'').toLowerCase();
-      const color=Object.prototype.hasOwnProperty.call(accentNames,value)?value:'#b8cde3';
+      const color=Object.prototype.hasOwnProperty.call(accentNames,value)?value:'#ffffff';
       document.documentElement.style.setProperty('--app-accent',color,'important');
       document.querySelectorAll('.z2-window,.z-mini').forEach(preview=>{
         preview.style.setProperty('--z2accent',color,'important');
@@ -981,10 +981,10 @@ body .z2-window{--z2accent:var(--app-accent)!important}
       if(status)status.textContent=accentNames[color];
       const indicator=document.getElementById('accentIndicator');
       if(indicator)indicator.style.backgroundColor=color;
-      try{localStorage.setItem('zflag-demo-accent',color)}catch(error){}
+      try{localStorage.setItem('zflag-demo-accent-v8',color)}catch(error){}
     }
-    let savedAccent='#b8cde3';
-    try{savedAccent=localStorage.getItem('zflag-demo-accent')||savedAccent}catch(error){}
+    let savedAccent='#ffffff';
+    try{savedAccent=localStorage.getItem('zflag-demo-accent-v8')||savedAccent}catch(error){}
     applyAccent(savedAccent);
     document.querySelectorAll('[data-accent],[data-z2-color],[data-mini-color]').forEach(button=>button.addEventListener('click',()=>applyAccent(button.dataset.accent||button.dataset.z2Color||button.dataset.miniColor)));
 
