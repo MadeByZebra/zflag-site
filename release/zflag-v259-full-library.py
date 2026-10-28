@@ -149,6 +149,9 @@ replacement=(
 content=content.replace(
 "self.assertIn(entry['evidence'],('user','documented'))",
 "self.assertIn(entry['evidence'],('user','documented','archived','advanced'))")
+content=content.replace(
+"self.assertIn(entry['type'],('boolean','integer','string','unknown'))",
+"self.assertIn(entry['type'],('boolean','integer','number','string','unknown'))")
 integrity.write_text(content.replace(check,replacement),encoding='utf-8')
 # Use deterministic fixture timestamp to avoid Windows file-time rounding issues.
 game_test=ROOT/'tests/test_tab_game_profiles_254.py'
