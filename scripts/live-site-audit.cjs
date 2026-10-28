@@ -33,7 +33,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     jsLoaded:performance.getEntriesByType('resource').some(x=>x.name.includes('smooth-scroll.js'))
   }));
   check('Homepage black',home.rootBg==='rgb(0, 0, 0)',home);
-  check('Latest homepage deployed',home.build==='2026-10-28-live-audited-v261',home.build);
+  check('Latest homepage deployed',home.build==='2026-10-28-real-smooth-scroll-v2',home.build);
   const homepageDownload=await page.locator('a[href*="/releases/download/v2.0.61/ZFLAG_Setup.exe"]').count();
   check('Homepage v2.0.61 downloads',homepageDownload>=1,{found:homepageDownload});
   check('Homepage original Z',home.logo.includes('zflag-logo.png'),home.logo);
@@ -53,12 +53,51 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
   await page.waitForTimeout(350);
   let persisted=await page.evaluate(()=>document.querySelector('[data-accent].active')?.dataset.accent);
   check('Picker persists after reload',persisted==='#4f8cff',persisted);
-  let initial=await page.evaluate(()=>window.scrollY);
-  await page.mouse.move(860,490);
-  await page.mouse.wheel(0,760);
+  check('Smooth scroll V2 loaded',await page.evaluate(()=>window.__zflagScrollV2?.version==='2.0'));
+  await page.evaluate(()=>window.scrollTo({top:800,behavior:"instant"}));
+  await page.waitForTimeout(100);
+  await page.evaluate(()=>{
+    window.__zflagScrollSamples=[];
+    const t0=performance.now();
+    const sample=(t)=>{
+      window.__zflagScrollSamples.push({t:Math.round(t-t0),y:Math.round(window.scrollY)});
+      if(t-t0<800)requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+  await page.mouse.move(22,390);
+  await page.mouse.wheel(0,450);
+  await page.waitForTimeout(900);
+  const wheel=await page.evaluate(()=>{
+    const samples=window.__zflagScrollSamples||[];
+    const first=samples[0]?.y??0,final=samples[samples.length-1]?.y??0;
+    const changed=[...new Set(samples.map(x=>x.y))];
+    const moves=samples.filter(x=>x.t<500 && x.y>first+1);
+    return {start:first,finish:final,distinctPositions:changed.length,
+      firstFrame:moves[0]||null,intermediate:samples.find(x=>x.t>90&&x.t<160)||null,
+      durationMs:samples[samples.length-1]?.t,
+      sampleCount:samples.length,active:window.__zflagScrollV2?.isAnimating()};
+  });
+  check('Mouse wheel actually eases over many frames',
+    wheel.finish>wheel.start+300&&wheel.distinctPositions>=8&&
+    wheel.intermediate.y>wheel.start&&wheel.intermediate.y<wheel.finish-25&&!wheel.active,wheel);
+  // Precision trackpad values must NOT be bypassed as they were in V1.
+  await page.evaluate(()=>window.scrollTo({top:800,behavior:"instant"}));
+  await page.waitForTimeout(70);
+  await page.evaluate(()=>{
+    window.__zflagPrecisionSamples=[];
+    const start=performance.now();
+    const next=(t)=>{window.__zflagPrecisionSamples.push({t:Math.round(t-start),y:Math.round(scrollY)});if(t-start<500)requestAnimationFrame(next)};
+    requestAnimationFrame(next);
+  });
+  await page.mouse.wheel(0,22);
   await page.waitForTimeout(600);
-  let wheelPos=await page.evaluate(()=>window.scrollY);
-  check('Mouse wheel scroll changes position',wheelPos>initial+20,{initial,wheelPos});
+  const precise=await page.evaluate(()=>{
+    const samples=window.__zflagPrecisionSamples||[];
+    return {start:samples[0]?.y,finish:samples[samples.length-1]?.y,
+      distinct:[...new Set(samples.map(x=>x.y))].length};
+  });
+  check('Small precision trackpad wheel event is smoothed',precise.finish>precise.start+12&&precise.distinct>=4,precise);
   await page.locator('a[href="#features"]').first().click({timeout:7000});
   await page.waitForTimeout(900);
   let featurePos=await page.evaluate(()=>({hash:location.hash,y:window.scrollY,header:document.querySelector('#features')?.getBoundingClientRect().top}));
@@ -76,6 +115,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     scrollBehavior:getComputedStyle(document.documentElement).scrollBehavior
   }));
   check('Docs Z logo',docInfo.icon?.includes('zflag-logo.png')&&docInfo.logo.includes('zflag-logo.png'),docInfo);
+  check('Docs have smooth wheel v2',await docs.evaluate(()=>window.__zflagScrollV2?.version==='2.0'));
   check('Docs v2.0.61 download',await docs.locator('a[href*="/releases/download/v2.0.61/ZFLAG_Setup.exe"]').count()>=1);
   check('Docs black and guides',docInfo.bg==='rgb(0, 0, 0)' && docInfo.docSections===15,docInfo);
   await docs.locator('a.side-link[href="#installation"]').first().click();
@@ -95,6 +135,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     script:performance.getEntriesByType('resource').some(x=>x.name.includes('smooth-scroll.js'))
   }));
   check('Library catalog loads',/\d/.test(libInfo.count)&&libInfo.cards>=10,libInfo);
+  check('Library has smooth wheel v2',await lib.evaluate(()=>window.__zflagScrollV2?.version==='2.0'));
   await lib.locator('#search').fill('_note');
   await lib.waitForTimeout(250);
   let noteCards=await lib.locator('#flagsGrid .card').count();
@@ -118,6 +159,11 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
   check('Flag added as real JSON boolean',draftValue===true,{actualType:typeof draftValue,value:draftValue});
   check('No library exceptions',libErrors.length===0,libErrors);
   await lib.screenshot({path:'audit-library.png',fullPage:false});
+  const reducedContext=await browser.newContext({viewport:{width:900,height:650},reducedMotion:'reduce'});
+  const reducedPage=await reducedContext.newPage();
+  await reducedPage.goto(base+'/?audit=reduce',{waitUntil:'domcontentloaded'});
+  check('Reduced-motion users retain native wheel scrolling',await reducedPage.evaluate(()=>window.__zflagScrollV2?.isReducedMotion()===true));
+  await reducedContext.close();
   await browser.close();
   const failed=results.filter(x=>!x.ok);
   console.log('\nSUMMARY '+JSON.stringify({passed:results.length-failed.length,total:results.length,failed:failed.map(x=>x.label)}));
