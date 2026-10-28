@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/live-site-audit.yml'
+      - 'scripts/live-site-audit.cjs'
   workflow_dispatch:
 permissions:
   contents: read
