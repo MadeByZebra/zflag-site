@@ -18,6 +18,12 @@ SHA-256: `c7aa4fb334f77a297f368f32e6bad555fc18f85d93c8f86cb7c8543cb1059224`.
 
 Build run: [Windows CI #38970541650](https://github.com/MadeByZebra/zflag-site/actions/runs/38970541650). Release: [v2.0.47](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.47).
 
+## True Black website refresh — October 27, 2026
+
+The homepage and documentation are the two published HTML pages. Both use the original `zflag-logo.png` for page branding and favicon. The homepage's default dark theme is true black (`#000000`) with subtle dark cards, white/silver controls, and no blue-gray page gradients. Documentation uses the same visual system. Mobile documentation navigation closes on outside tap and guide search no longer rewrites the current URL. The redesigned interactive app preview and v2.0.58 installer download are preserved. **This is a website-only release, not an update to the Windows executable.**
+
+Check `/build-status.txt` on the production hostname for `trueblack-v6` and `/docs/` for its original Z logo.
+
 ## Website redesign and live deployment verification — October 27, 2026
 
 The root homepage uses **Atelier Design 04**: a redesigned centered hero, large product preview, metallic-blue theme, and product feature cards. The interactive desktop preview, documentation and v2.0.58 installer link remain intact. The Windows injector engine has not been modified by this website redesign.
