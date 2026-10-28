@@ -2,27 +2,24 @@
 
 This repository contains the [ZFLAG desktop website](index.html), its Render static-site configuration, and its **published Windows installer**.
 
-## Download for Windows 10/11 (x64)
+## Download the latest ZFLAG for Windows 10/11 (x64)
 
-**[Download ZFLAG_Setup.exe — v2.0.58](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.58/ZFLAG_Setup.exe)**
+**[Download ZFLAG_Setup.exe — v2.0.59](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.59/ZFLAG_Setup.exe)**
 
-- One standalone **.exe installer** for end users: download → install → open.
-- No BAT, CMD, PowerShell, ZIP extraction, Python, Rust, Node.js, or Visual Studio required for people installing it.
-- Setup replaces old ZFLAG-named desktop/Start Menu shortcuts in the installing Windows user's profile.
-- Saved FastFlag configuration files are not intentionally removed by the shortcut cleanup.
-- NSIS installation, local backend startup, and reinstall over a RUNNING ZFLAG GUI/backend passed automated Windows smoke tests.
-- Windows SmartScreen may warn because the installer is **unsigned**.
-- Actual in-game Roblox FastFlag injection **was not tested in CI**. Roblox updates may change what flags are supported.
+- **FastFlag Library is IN the installed Windows app**, not just the browser: click **Flag Library** in the sidebar.
+- Contains **15,965** merged distinct flag names, archived values, inferred descriptions, category filters, pagination (80 rows/page), editable values, and categorized premade configurations.
+- Add a selected flag or premade configuration to the editor. Nothing is automatically injected by browsing.
+- The installer is a standalone Windows EXE and keeps the existing native engine, configuration workflows, and update behavior.
+- Automated offline tests, frontend/native builds, NSIS installation, and Windows smoke tests passed. In-game effectiveness of individual FastFlags was **not** verified.
+- The executable is unsigned; Windows SmartScreen may warn. Check the checksum on the [v2.0.59 release page](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.59).
 
-SHA-256: `c7aa4fb334f77a297f368f32e6bad555fc18f85d93c8f86cb7c8543cb1059224`.
-
-Build run: [Windows CI #38970541650](https://github.com/MadeByZebra/zflag-site/actions/runs/38970541650). Release: [v2.0.47](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.47).
+**[Successful Windows build and integration tests](https://github.com/MadeByZebra/zflag-site/actions/runs/40636119147).**
 
 ## True Black website refresh — October 27, 2026
 
 The homepage and documentation are the two published HTML pages. Both use the original `zflag-logo.png` for page branding and favicon. The homepage's default dark theme is true black (`#000000`) with subtle dark cards, white/silver controls, and no blue-gray page gradients. Documentation uses the same visual system. Mobile documentation navigation closes on outside tap and guide search no longer rewrites the current URL. The redesigned interactive app preview and v2.0.58 installer download are preserved. **This is a website-only release, not an update to the Windows executable.**
 
-Check `/build-status.txt` on the production hostname for `trueblack-v6` and `/docs/` for its original Z logo.
+Check `/build-status.txt` on the production hostname for the current `desktop-library-v259` and `/docs/` for its original Z logo.
 
 ## Website redesign and live deployment verification — October 27, 2026
 
