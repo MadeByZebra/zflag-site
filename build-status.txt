@@ -1,13 +1,12 @@
-ZFLAG website build: smoothscroll-v1
-Latest official Windows installer: v2.0.60
-Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.60
-Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.60/ZFLAG_Setup.exe
-Windows build and smoke tests: https://github.com/MadeByZebra/zflag-site/actions/runs/40772406111
-Windows app library: 15,965 FastFlag names plus premade configs
-v2.0.60: strict editable JSON types, separate descriptions, centered stable top navigation, visible page transitions
-Roblox Player flag support must be separately verified
-Website remains pure black with white default accent
-Website update: mouse-wheel easing on desktop for homepage, docs, and flag library
-Navigation: consistent smooth section links and library pagination, header-aware scrolling
-Input safety: native precision trackpad, touchscreen, keyboard, nested panels, and reduced motion
-Shared asset: /smooth-scroll.js
+ZFLAG website build: live-audited-v261
+Latest official Windows installer: v2.0.61
+Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.61
+Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.61/ZFLAG_Setup.exe
+Successful Windows build & install tests: https://github.com/MadeByZebra/zflag-site/actions/runs/40782936802
+Live Chromium checks: 26/26 passed: https://github.com/MadeByZebra/zflag-site/actions/runs/40783581248
+Flag Library: 15,875 valid-format historical identifiers (NOT 15,965 actual flags)
+Source archives retained: 81 metadata notes and 9 invalid-format source records
+Library entry check: true/false validated and exported as JSON booleans
+Visual checks: pure black, original Z logo, white default, all accent pickers synchronized
+Scrolling: mouse wheel, navigation anchors, docs, library paging
+Caveat: Cannot verify how an existing installed ZFLAG version appears without launching that local app
