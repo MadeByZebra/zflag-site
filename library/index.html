@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000"><meta name="description" content="ZFLAG searchable FastFlag library, archived values, allowlisted profiles and JSON config builder.">
+<link rel="icon" type="image/png" href="../zflag-logo.png">
+<title>FastFlag Library — ZFLAG</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{color-scheme:dark;--bg:#000;--panel:#080808;--panel2:#101010;--line:#252525;--line2:#383838;--text:#f5f5f5;--muted:#a0a0a0;--silver:#fff}
+*{box-sizing:border-box}body{margin:0;background:#000;color:var(--text);font:13px/1.6 Inter,Segoe UI,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
+header{display:flex;align-items:center;gap:25px;padding:16px clamp(16px,3.5vw,55px);border-bottom:1px solid var(--line);position:sticky;top:0;background:#000e;backdrop-filter:blur(16px);z-index:10}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;white-space:nowrap;font-size:18px;font-weight:800;letter-spacing:-.065em}.brand img{width:34px;height:34px;border:1px solid #333;border-radius:8px;background:#000}.brand small{color:#888;font-size:9px;letter-spacing:.15em;margin-left:9px}
+header nav{display:flex;gap:23px;margin-left:auto}header nav a{font-size:12px;text-decoration:none;color:#aaa}header nav a:hover,header nav a.active{color:#fff}
+.container{max-width:1560px;margin:auto;padding:42px clamp(16px,3.5vw,55px) 90px}
+.topline{font:600 10px JetBrains Mono,monospace;letter-spacing:.15em;color:#a9a9a9}.topline b{color:#fff}
+h1{font-size:clamp(43px,6vw,88px);line-height:1;letter-spacing:-.075em;margin:15px 0 18px;font-weight:700}h1 span{color:#999}
+.sub{font-size:14px;line-height:1.8;color:#aaa;max-width:860px;margin:0 0 24px}
+.notice{border:1px solid #393939;border-left:2px solid #fff;background:#090909;color:#bbb;padding:16px 19px;border-radius:7px;margin:20px 0 28px}.notice strong{color:#fff}.notice a{text-decoration:underline}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:22px 0 32px}
+.stat{background:#080808;border:1px solid var(--line);padding:17px 19px;border-radius:10px}.stat b{display:block;font-size:24px;letter-spacing:-.05em;color:#fff}.stat small{color:#8d8d8d;font:10px JetBrains Mono,monospace}
+.toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;border:1px solid var(--line);background:#080808;padding:12px;border-radius:12px;margin-bottom:22px}
+.search{flex:1;min-width:240px;background:#000;border:1px solid #343434;border-radius:7px;padding:11px 13px;color:#fff;outline:none}.search:focus{border-color:#bbb}
+.select{background:#080808;border:1px solid #353535;border-radius:7px;color:#eee;padding:11px;max-width:230px}
+.tab{border:1px solid #2f2f2f;background:#101010;color:#ccc;padding:10px 14px;border-radius:7px;font-weight:600}
+.tab.active{color:#000;background:#f5f5f5;border-color:#fff}
+.layout{display:grid;grid-template-columns:205px minmax(0,1fr);gap:24px;align-items:start}
+.sidebar{position:sticky;top:104px;border:1px solid var(--line);border-radius:10px;background:#080808;padding:15px 10px}
+.side-title{color:#858585;font:600 10px JetBrains Mono,monospace;letter-spacing:.12em;padding:6px 12px 14px}
+.cat{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;border-radius:7px;text-align:left;padding:10px 11px;background:none;color:#aaa;font-size:12px;gap:9px}
+.cat:hover{color:#fff;background:#131313}.cat.active{color:#fff;background:#1c1c1c;border-left:2px solid #ddd}.cat small{color:#8b8b8b;font:10px JetBrains Mono,monospace}
+.side-note{font:10px/1.7 JetBrains Mono,monospace;color:#808080;border-top:1px solid #222;margin-top:13px;padding:18px 11px 7px}
+.sectiontop{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:16px}.sectiontop h2{font-size:24px;letter-spacing:-.055em;margin:0}.sectiontop small{color:#949494;font:10px JetBrains Mono,monospace}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.card{display:flex;flex-direction:column;border:1px solid #292929;border-radius:11px;padding:17px;background:#090909;min-width:0;transition:border-color .16s}.card:hover{border-color:#525252}
+.cardmeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.chip{font:9px JetBrains Mono,monospace;padding:4px 6px;border:1px solid #383838;border-radius:4px;color:#c9c9c9}
+.chip.allow{color:#f4f4f4;border-color:#686868;background:#ffffff0d}.chip.legacy{color:#a8a8a8}.chip.risk{color:#eea7a7;border-color:#744747}
+.flagname{font:600 12px/1.5 JetBrains Mono,Consolas,monospace;overflow-wrap:anywhere;color:#f2f2f2;margin:13px 0 6px}
+.description{color:#a1a1a1;font-size:12px;line-height:1.65;min-height:48px;margin:0 0 13px}
+.val{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:auto}.val label{font:9px JetBrains Mono,monospace;color:#777}
+.val code,.val input{font:11px JetBrains Mono,monospace;border:1px solid #292929;border-radius:5px;background:#030303;color:#dedede;padding:7px 9px;min-width:0;max-width:100%;overflow-wrap:anywhere}
+.val input{flex:1;min-width:100px;outline:none}.val input:focus{border-color:#999}
+.actions{display:flex;gap:8px;align-items:center;margin-top:15px;flex-wrap:wrap}
+.btn{padding:8px 12px;border-radius:6px;border:1px solid #363636;background:#101010;color:#ddd;font-weight:600;font-size:11px}
+.btn:hover{background:#202020;border-color:#777}.btn.primary{background:#f4f4f4;color:#050505;border-color:#fff}.btn.primary:hover{background:#ccc}
+.source{font:10px JetBrains Mono,monospace;color:#747474;margin-top:13px;overflow-wrap:anywhere}
+.pagination{display:flex;justify-content:center;align-items:center;gap:9px;margin:23px 0 5px}
+.preset{border:1px solid #292929;border-radius:11px;padding:21px;background:#090909;min-width:0}
+.preset h3{font-size:18px;margin:13px 0 5px}.preset p{color:#aaa;margin:0 0 13px;font-size:12px;line-height:1.7}
+.preset pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#020202;color:#cfcfcf;border:1px solid #272727;padding:11px 12px;border-radius:6px;font:11px/1.6 JetBrains Mono,monospace;max-height:190px;overflow:auto}
+.draft{border:1px solid #303030;border-radius:12px;padding:21px;background:#090909}
+.draft pre{min-height:250px;max-height:520px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#030303;padding:20px;color:#d3d3d3;font:12px/1.65 JetBrains Mono,monospace;border:1px solid #2c2c2c;border-radius:8px}
+.draft p{color:#aaa}.status{color:#a9a9a9;font:11px JetBrains Mono,monospace}
+.empty{text-align:center;padding:55px 15px;border:1px solid #333;color:#999;border-radius:10px}.hidden{display:none!important}
+.footer{border-top:1px solid #222;margin-top:70px;padding-top:20px;color:#777;font-size:11px;line-height:1.8}
+#toast{position:fixed;right:20px;bottom:18px;max-width:320px;background:#eaeaea;color:#111;padding:12px 17px;border-radius:7px;box-shadow:0 8px 35px #000b;z-index:11;display:none}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.sidebar{position:static;display:flex;flex-wrap:wrap;padding:10px}.side-title,.side-note{width:100%}.cat{width:auto;flex:0 0 auto}}
+@media(max-width:750px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.container{padding-top:28px}header nav{gap:11px}.brand small{display:none}.toolbar{gap:7px}.search{flex-basis:100%}}
+@media(max-width:450px){header nav a:nth-child(2){display:none}.stats{gap:6px}.stat{padding:11px}.stat b{font-size:20px}}
+</style></head>
+<body><header>
+<a class="brand" href="../"><img src="../zflag-logo.png" alt=""><span>ZFLAG <small>LIBRARY</small></span></a>
+<nav><a href="../">Home</a><a href="../docs/">Documentation</a><a class="active" href="./">Flag Library</a></nav>
+</header>
+<div class="container">
+<div class="topline">ZFLAG / <b>CONFIGURATION REFERENCE</b> / ARCHIVE + PRESETS</div>
+<h1>Every flag.<br><span>One workspace.</span></h1>
+<p class="sub">Browse your merged JSON archives, examine individual flags and values, build your own configuration, and export JSON. Separate premade configurations are grouped by purpose and compatibility evidence.</p>
+<div class="notice"><strong>Compatibility matters.</strong> This library is a reference and editor, not a guarantee that any override will work. Roblox introduced a Player FastFlag allowlist in September 2025. Only listed flags are expected to be recognized by <code>ClientAppSettings.json</code>; <strong>not even an allowlisted name proves an effect on your hardware</strong>. Archived values are not endorsed. <a href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569/" target="_blank" rel="noopener">Roblox's announcement</a>.</div>
+<div class="stats"><div class="stat"><b id="countFlags">…</b><small>DISTINCT ARCHIVED FLAGS</small></div><div class="stat"><b id="countAllowed">18</b><small>PUBLISHED ALLOWLIST ENTRIES</small></div><div class="stat"><b id="countPresets">12</b><small>PREMADE CONFIGS</small></div><div class="stat"><b id="countDraft">0</b><small>FLAGS IN YOUR DRAFT</small></div></div>
+<div class="toolbar">
+<button type="button" class="tab active" data-tab="flags">Individual flags</button><button type="button" class="tab" data-tab="presets">Premade configs</button><button type="button" class="tab" data-tab="draft">My config <span id="draftButtonCount"></span></button>
+<input id="search" class="search" type="search" placeholder="Search flags, functions, categories, values…" aria-label="Search flags and presets">
+<select id="statusFilter" class="select" aria-label="Compatibility status"><option value="all">All compatibility statuses</option><option value="allowlisted">Published allowlist</option><option value="archive">Unverified / archived</option><option value="high-risk">Disruptive / advanced</option></select>
+</div>
+<div class="layout"><aside class="sidebar"><div class="side-title">CATEGORIES</div><div id="categories"></div><div class="side-note">Values are archived examples. Descriptions are name-derived unless explicitly sourced. Do not blindly import giant flag lists into Roblox.</div></aside>
+<main>
+<section id="flagsPanel"><div class="sectiontop"><h2>Individual flags</h2><small id="resultsCount">Loading…</small></div><div class="grid" id="flagsGrid"></div><div class="pagination" id="pagination"></div></section>
+<section id="presetsPanel" class="hidden"><div class="sectiontop"><h2>Premade configurations</h2><small>Reviewed against Roblox's published allowlist, not live-game tested</small></div><div id="presetGrid" class="grid"></div></section>
+<section id="draftPanel" class="hidden"><div class="sectiontop"><h2>My configuration</h2><small>Local to this browser until exported</small></div><div class="draft"><p>Build a JSON file by adding individual flags or presets. Duplicate keys are replaced by your latest choice. Download or copy your config; no Roblox process is modified by this webpage.</p><div class="actions"><button class="btn primary" id="downloadDraft">Download JSON</button><button class="btn" id="copyDraft">Copy JSON</button><button class="btn" id="importDraft">Import JSON</button><button class="btn" id="clearDraft">Clear draft</button><input id="importFile" type="file" accept=".json,application/json" class="hidden"></div><pre id="draftContent">{}</pre><div id="draftList" class="grid"></div></div></section>
+</main></div>
+<div class="footer">ZFLAG FastFlag Library · Research and historical reference · No third-party “shop” validation claims · <a href="../docs/">Docs</a> · <a href="https://github.com/MadeByZebra/zflag-site" target="_blank" rel="noopener">GitHub source</a><p>Archive sources: original 8,440-entry combined JSON and 10,518-entry merged JSON. Premade profiles: adapted from public allowlist and Fishstrap guides. Some uploaded archive names contain malformed quoting; those are normalized only when unambiguous.</p></div>
+</div><div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+"use strict";
+const ALL_ALLOW=[
+"DFIntCSGLevelOfDetailSwitchingDistance","DFIntCSGLevelOfDetailSwitchingDistanceL12","DFIntCSGLevelOfDetailSwitchingDistanceL23","DFIntCSGLevelOfDetailSwitchingDistanceL34",
+"FFlagHandleAltEnterFullscreenManually","DFFlagTextureQualityOverrideEnabled","DFIntTextureQualityOverride","FIntDebugForceMSAASamples","DFFlagDisableDPIScale",
+"FFlagDebugGraphicsPreferD3D11","FFlagDebugSkyGray","DFFlagDebugPauseVoxelizer","DFIntDebugFRMQualityLevelOverride","FIntFRMMaxGrassDistance","FIntFRMMinGrassDistance",
+"FFlagDebugGraphicsPreferVulkan","FFlagDebugGraphicsPreferOpenGL","FIntGrassMovementReducedMotionFactor"
+];
+const allowed=new Set(ALL_ALLOW);
+const CATS=["All Flags","FPS & Scheduling","Rendering & Graphics","Textures & Lighting","Networking & Ping","Caching & Memory","Physics & Movement","UI & Accessibility","Audio & Voice","Security & Telemetry","Assets & Loading","Other & Experimental"];
+const labels={
+"DFIntCSGLevelOfDetailSwitchingDistance":"CSG mesh level-of-detail distance threshold. Lower values switch to simplified meshes sooner.",
+"DFIntCSGLevelOfDetailSwitchingDistanceL12":"Mesh LOD transition threshold for first-to-second detail levels.",
+"DFIntCSGLevelOfDetailSwitchingDistanceL23":"Mesh LOD transition threshold between second and third detail levels.",
+"DFIntCSGLevelOfDetailSwitchingDistanceL34":"Mesh LOD transition threshold between third and fourth detail levels.",
+"FFlagHandleAltEnterFullscreenManually":"Controls handling of Alt+Enter exclusive fullscreen on supported Windows renderers. May affect window switching.",
+"DFFlagTextureQualityOverrideEnabled":"Enables the texture-quality override defined by DFIntTextureQualityOverride.",
+"DFIntTextureQualityOverride":"Texture-quality level: commonly 0–3. Higher detail may use more VRAM.",
+"FIntDebugForceMSAASamples":"Controls multisample anti-aliasing sample count. Higher settings can increase GPU load; test 2x or 4x.",
+"DFFlagDisableDPIScale":"Disables Roblox's DPI-based render-resolution scaling. Can sharpen rendering at Windows scaling above 100% while using more GPU.",
+"FFlagDebugGraphicsPreferD3D11":"Requests the Direct3D 11 graphics backend. Renderer preferences should be used one at a time.",
+"FFlagDebugGraphicsPreferVulkan":"Requests the Vulkan backend. Device/driver support and performance vary.",
+"FFlagDebugGraphicsPreferOpenGL":"Requests OpenGL rendering. Device/driver support varies.",
+"FFlagDebugSkyGray":"Requests a gray-sky debug rendering mode. Visual effects vary by client build.",
+"DFFlagDebugPauseVoxelizer":"Requests a pause of the voxelization system, potentially affecting lighting and shadows.",
+"DFIntDebugFRMQualityLevelOverride":"Overrides the renderer's graphics quality level; may affect fidelity and rendering cost.",
+"FIntFRMMaxGrassDistance":"Upper bound for rendering grass. Lower numbers generally reduce vegetation distance.",
+"FIntFRMMinGrassDistance":"Lower bound for rendering grass distance.",
+"FIntGrassMovementReducedMotionFactor":"Reduces animated grass motion; published in Roblox's user-interface allowlist.",
+"DFIntTaskSchedulerTargetFps":"Historical target frame scheduling/FPS flag. Not on the published Roblox Player allowlist; use official in-game frame-rate options.",
+"DFIntS2PhysicsSenderRate":"Historical physics sender-rate tuning key. Not published as allowlisted; modifying network timing can destabilize gameplay and may not work.",
+"DFIntConnectionMTUSize":"Historical network MTU-size override key. Not published as allowlisted; incorrect values can hurt connectivity.",
+"FFlagDisablePostFx":"Historical post-processing-effects switch. No longer in the published Player allowlist.",
+"FIntRenderShadowIntensity":"Historical shadow intensity override. Not on the published Player allowlist.",
+"FLogNetwork":"Network logging detail setting. Not allowlisted for local Player overrides.",
+"FStringDebugGraphicsPreferredGPUName":"Historical GPU preference key. Not allowlisted; choose preferred graphics GPU in operating-system settings."
+};
+const presets=[
+{name:"Low-End / Integrated GPU",category:"FPS & Graphics",status:"allowlisted",source:"Fishstrap allowlist guide, adapted",desc:"Lower texture quality, earlier mesh simplification, reduced grass movement. Useful starting point for modest GPUs; actual performance is hardware-dependent.",flags:{"DFFlagTextureQualityOverrideEnabled":true,"DFIntTextureQualityOverride":1,"DFIntCSGLevelOfDetailSwitchingDistance":100,"DFIntCSGLevelOfDetailSwitchingDistanceL12":75,"DFIntCSGLevelOfDetailSwitchingDistanceL23":100,"DFIntCSGLevelOfDetailSwitchingDistanceL34":150,"FIntGrassMovementReducedMotionFactor":0}},
+{name:"Balanced / Mid-Range",category:"FPS & Graphics",status:"allowlisted",source:"Fishstrap allowlist guide, adapted",desc:"Moderate texture quality, balanced mesh distances, 2x anti-aliasing and reduced grass animation.",flags:{"DFFlagTextureQualityOverrideEnabled":true,"DFIntTextureQualityOverride":2,"DFIntCSGLevelOfDetailSwitchingDistance":2000,"DFIntCSGLevelOfDetailSwitchingDistanceL12":1000,"DFIntCSGLevelOfDetailSwitchingDistanceL23":1500,"DFIntCSGLevelOfDetailSwitchingDistanceL34":2500,"FIntDebugForceMSAASamples":2,"FIntGrassMovementReducedMotionFactor":50}},
+{name:"High Fidelity",category:"Graphics Quality",status:"allowlisted",source:"Fishstrap allowlist guide, adapted with 4x instead of 8x MSAA",desc:"High texture fidelity, long mesh LOD distances, 4x anti-aliasing. Can be demanding on VRAM and GPU.",flags:{"DFFlagTextureQualityOverrideEnabled":true,"DFIntTextureQualityOverride":3,"DFIntCSGLevelOfDetailSwitchingDistance":10000,"DFIntCSGLevelOfDetailSwitchingDistanceL34":10000,"FIntDebugForceMSAASamples":4}},
+{name:"Low Grass / Reduced Motion",category:"Visuals & Accessibility",status:"allowlisted",source:"Roblox published allowlist",desc:"Reduce grass visibility and animation. Some experiences may not visibly change.",flags:{"FIntFRMMaxGrassDistance":0,"FIntFRMMinGrassDistance":0,"FIntGrassMovementReducedMotionFactor":0}},
+{name:"High DPI Clarity",category:"Display Quality",status:"allowlisted",source:"Bloxstrap documentation",desc:"Disables DPI-based internal render scaling on displays that use >100% Windows scaling; may cost performance.",flags:{"DFFlagDisableDPIScale":true}},
+{name:"MSAA 2×",category:"Anti-Aliasing",status:"allowlisted",source:"Roblox published allowlist",desc:"Request 2x multisample antialiasing; effect depends on the game and renderer.",flags:{"FIntDebugForceMSAASamples":2}},
+{name:"MSAA 4×",category:"Anti-Aliasing",status:"allowlisted",source:"Roblox published allowlist",desc:"Request 4x antialiasing, potentially with greater graphics load.",flags:{"FIntDebugForceMSAASamples":4}},
+{name:"Direct3D 11",category:"Renderer",status:"allowlisted",source:"Roblox published allowlist",desc:"Choose a single renderer preference instead of combining multiple backend flags.",flags:{"FFlagDebugGraphicsPreferD3D11":true}},
+{name:"Vulkan Rendering",category:"Renderer",status:"allowlisted",source:"Roblox published allowlist",desc:"Opt into Vulkan; can behave differently across hardware and driver versions.",flags:{"FFlagDebugGraphicsPreferVulkan":true}},
+{name:"OpenGL Rendering",category:"Renderer",status:"allowlisted",source:"Roblox published allowlist",desc:"Opt into OpenGL; compatibility and performance can differ.",flags:{"FFlagDebugGraphicsPreferOpenGL":true}},
+{name:"Alt+Enter Fullscreen",category:"Display & Windowing",status:"allowlisted",source:"Bloxstrap documentation",desc:"Allow fullscreen switching with Alt+Enter on supported Windows configurations.",flags:{"FFlagHandleAltEnterFullscreenManually":true}},
+{name:"Legacy FPS 240",category:"FPS / Historical",status:"archive",source:"Pre-2025 community flag collections",desc:"Historical FPS-target preset. Not on Roblox's published Player allowlist, so do not assume it can still change Roblox Player FPS.",flags:{"DFIntTaskSchedulerTargetFps":240}}
+];
+const CATEGORY_WORDS=[
+["Networking & Ping",/(?:net|packet|raknet|ping|connection|mtu|socket|tcp|udp|replicat|sender|receiver|latency|bandwidth|http|websocket|reliab|rtt)/i],
+["Caching & Memory",/(?:cach|memory|mem|heap|alloc|gc|garbage|pool|buffer|resident|reclaim|compress|decompress|warmup|preload)/i],
+["Physics & Movement",/(?:physic|humanoid|collision|gravity|force|raycast|solver|simulat|velocity|jump|movement|damping|penetrat|ragdoll|floor|stick|assembly|character|position|orientation|hipheight)/i],
+["FPS & Scheduling",/(?:fps|frame|task|schedul|thread|timing|renderstep|framerate|targetfps|vsync|tick|heartbeat)/i],
+["Textures & Lighting",/(?:texture|light|shadow|voxel|terrain|grass|material|postfx|bloom|sun|moon|sky|anti.alias|msaa|pixel|shader|luminance|irradian|reflect|ambient)/i],
+["Rendering & Graphics",/(?:graphic|render|vulkan|opengl|d3d|direct3d|gpu|csg|lod|draw|display|camera|viewport|quality|geometry|mesh|frustum)/i],
+["UI & Accessibility",/(?:gui|ui|menu|interface|font|chat|tooltip|chrome|topbar|badge|input|accessib|scroll|keyboard|focus|mouse|cursor|dialog|fullscreen|dpi|localiz|language)/i],
+["Audio & Voice",/(?:sound|audio|voice|microphone|vc|volume|spatialaudio|acoust|occlusi|haptic)/i],
+["Security & Telemetry",/(?:security|telemetry|anticheat|auth|permission|moderation|reportabuse|crash|logger|analytics|tracking|abuse)/i],
+["Assets & Loading",/(?:asset|load|stream|download|content|prefetch|request|download|api|cdn|fetch)/i]
+];
+let flags=[],filtered=[],page=0,tab="flags",cat="All Flags",statusFilter="all",search="",draft={};const perPage=60;
+function byId(s){return document.getElementById(s)}
+function toast(msg){const e=byId("toast");e.textContent=msg;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2400)}
+function normalizeKey(k){k=String(k).trim();if(k.charAt(0)==='"'){k=k.replace(/"/g,"").split(":")[0].trim()}return k}
+function typed(raw){if(typeof raw!=="string")return raw;const v=raw.trim();if(v==="True"||v==="true")return true;if(v==="False"||v==="false")return false;if(/^-?\d+(?:\.\d+)?$/.test(v)&&v.length<16)return Number(v);return raw}
+function inferCategory(k){for(const [c,re] of CATEGORY_WORDS)if(re.test(k))return c;return "Other & Experimental"}
+function titleCase(k){return k.replace(/^(?:DFFlag|FFlag|DFInt|FInt|FString|DString|FLog|DFLog|SFFlag|SInt|SString)/,"").replace(/([a-z0-9])([A-Z])/g,"$1 $2").replace(/([A-Z])([A-Z][a-z])/g,"$1 $2").trim()||k}
+function describe(x){if(labels[x.key])return labels[x.key];const phrase=titleCase(x.key);const scope={
+"FPS & Scheduling":"frame timing or scheduler behavior","Rendering & Graphics":"graphics/rendering behavior","Textures & Lighting":"visual materials, lighting or texture processing",
+"Networking & Ping":"network transport, communication or replication","Caching & Memory":"memory, cache or buffer management","Physics & Movement":"simulation, collision or motion behavior",
+"UI & Accessibility":"interface or input behavior","Audio & Voice":"audio, voice or spatial sound behavior","Security & Telemetry":"diagnostics, reporting or telemetry",
+"Assets & Loading":"asset loading or content transfer","Other & Experimental":"an internal feature or experimental behavior"
+}[x.category];return "Name suggests “"+phrase+"” controls "+scope+". This interpretation is inferred; its real purpose, supported values and effect have not been independently documented."}
+function statusOf(key,category){if(allowed.has(key))return "allowlisted";if(category==="Physics & Movement"||category==="Networking & Ping")return "high-risk";return "archive"}
+function makeCatalog(merged,old){
+const out=new Map();
+for(const [origin,obj] of [["Merged JSON",merged],["Earlier combined JSON",old]]){
+ for(const [raw,value] of Object.entries(obj)){
+  const key=normalizeKey(raw);if(!key)continue;
+  let item=out.get(key);
+  if(!item){item={key:key,rawKeys:[],sources:[],values:[],category:inferCategory(key),value:typed(value)};out.set(key,item)}
+  if(!item.sources.includes(origin))item.sources.push(origin);
+  if(raw!==key&&!item.rawKeys.includes(raw))item.rawKeys.push(raw);
+  const converted=typed(value);
+  if(!item.values.some(v=>JSON.stringify(v)===JSON.stringify(converted)))item.values.push(converted);
+ }
+}
+return Array.from(out.values()).map(o=>{o.status=statusOf(o.key,o.category);return o}).sort((a,b)=>a.key.localeCompare(b.key))}
+function saveDraft(){try{localStorage.setItem("zflag-library-draft",JSON.stringify(draft))}catch(e){}renderDraftBadge()}
+function addFlag(key,value){draft[key]=value;saveDraft();toast("Added "+key+" to configuration")}
+function addPreset(p){let overwritten=Object.keys(p.flags).filter(k=>Object.prototype.hasOwnProperty.call(draft,k)).length;Object.assign(draft,p.flags);saveDraft();toast("Added "+Object.keys(p.flags).length+" flags"+(overwritten?" · replaced "+overwritten+" existing values":""))}
+function renderDraftBadge(){const n=Object.keys(draft).length;byId("countDraft").textContent=n.toLocaleString();byId("draftButtonCount").textContent=n?"("+n+")":""}
+function setTab(name){tab=name;document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));["flagsPanel","presetsPanel","draftPanel"].forEach((id,i)=>byId(id).classList.toggle("hidden",["flags","presets","draft"][i]!==name));byId("statusFilter").disabled=name==="draft";byId("search").placeholder=name==="flags"?"Search flags, descriptions, values…":name==="presets"?"Search premade configs…":"Search not needed here";render()}
+function renderCategories(){const counts=new Map(CATS.map(c=>[c,0]));counts.set("All Flags",flags.length);for(const f of flags)counts.set(f.category,(counts.get(f.category)||0)+1);const root=byId("categories");root.replaceChildren();for(const c of CATS){const b=document.createElement("button");b.className="cat"+(cat===c?" active":"");b.innerHTML="<span></span><small></small>";b.firstChild.textContent=c;b.lastChild.textContent=(counts.get(c)||0).toLocaleString();b.onclick=()=>{cat=c;page=0;renderCategories();render()};root.appendChild(b)}}
+function clip(str){if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(str).then(()=>toast("Copied to clipboard")).catch(()=>toast("Clipboard blocked — use Download JSON"));toast("Clipboard unavailable — use Download JSON")}
+function downloadJSON(data,name){const blob=new Blob([JSON.stringify(data,null,2)+"\n"],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+function renderFlagCard(f){
+const card=document.createElement("article");card.className="card";
+const meta=document.createElement("div");meta.className="cardmeta";const cat=document.createElement("span");cat.className="chip";cat.textContent=f.category;const badge=document.createElement("span");badge.className="chip "+(f.status==="allowlisted"?"allow":f.status==="high-risk"?"risk":"legacy");badge.textContent=f.status==="allowlisted"?"Published allowlist":f.status==="high-risk"?"Advanced · not allowlisted":"Archive / unverified";meta.append(cat,badge);
+const name=document.createElement("div");name.className="flagname";name.textContent=f.key;const desc=document.createElement("p");desc.className="description";desc.textContent=describe(f);
+const value=document.createElement("div");value.className="val";const label=document.createElement("label");label.textContent="VALUE";const input=document.createElement("input");input.type="text";input.value=String(f.value??"");input.setAttribute("aria-label","Value for "+f.key);value.append(label,input);
+const buttons=document.createElement("div");buttons.className="actions";
+const add=document.createElement("button");add.className="btn primary";add.textContent="+ Add to config";add.onclick=()=>addFlag(f.key,typed(input.value));
+const cp=document.createElement("button");cp.className="btn";cp.textContent="Copy flag";cp.onclick=()=>clip(JSON.stringify({[f.key]:typed(input.value)},null,2));
+buttons.append(add,cp);
+if(f.values.length>1){const alt=document.createElement("button");alt.className="btn";alt.textContent=f.values.length+" archived values";alt.title="Choose among archived source values";alt.onclick=()=>{const next=(f.values.findIndex(x=>String(x)===input.value)+1)%f.values.length;input.value=String(f.values[next]);toast("Selected archived alternative "+(next+1)+"/"+f.values.length)};buttons.appendChild(alt)}
+const origin=document.createElement("div");origin.className="source";origin.textContent="SOURCE: "+f.sources.join(" + ")+(f.rawKeys.length?" · cleaned malformed import name":"");card.append(meta,name,desc,value,buttons,origin);return card
+}
+function filterItems(){const q=search.toLowerCase();filtered=flags.filter(f=>(cat==="All Flags"||f.category===cat)&&(statusFilter==="all"||f.status===statusFilter)&&(!q||(f.key+" "+f.category+" "+describe(f)+" "+f.value).toLowerCase().includes(q)))}
+function renderFlags(){filterItems();const grid=byId("flagsGrid");grid.replaceChildren();byId("resultsCount").textContent=filtered.length.toLocaleString()+" matching flags";const from=page*perPage;if(!filtered.length){const m=document.createElement("div");m.className="empty";m.textContent="No matching flags. Try a broader category or search.";grid.append(m)}else for(const f of filtered.slice(from,from+perPage))grid.append(renderFlagCard(f));
+const bar=byId("pagination");bar.replaceChildren();const pages=Math.max(1,Math.ceil(filtered.length/perPage));const a=document.createElement("button"),b=document.createElement("span"),c=document.createElement("button");a.className=c.className="btn";a.textContent="← Previous";c.textContent="Next →";b.textContent="Page "+(page+1)+" of "+pages;a.disabled=page===0;c.disabled=page+1>=pages;a.onclick=()=>{page--;renderFlags();scrollTo({top:360,behavior:"smooth"})};c.onclick=()=>{page++;renderFlags();scrollTo({top:360,behavior:"smooth"})};bar.append(a,b,c)}
+function renderPresets(){const grid=byId("presetGrid");grid.replaceChildren();const q=search.toLowerCase();for(const p of presets.filter(p=>(!q||(p.name+" "+p.category+" "+p.desc).toLowerCase().includes(q))&&(statusFilter==="all"||p.status===statusFilter))){const box=document.createElement("article");box.className="preset";const cap=document.createElement("div");cap.className="cardmeta";const badge=document.createElement("span");badge.className="chip "+(p.status==="allowlisted"?"allow":"legacy");badge.textContent=p.status==="allowlisted"?"Allowlisted names · no live test":"Legacy · likely ignored";const category=document.createElement("span");category.className="chip";category.textContent=p.category;cap.append(category,badge);
+const title=document.createElement("h3");title.textContent=p.name;const des=document.createElement("p");des.textContent=p.desc;const pre=document.createElement("pre");pre.textContent=JSON.stringify(p.flags,null,2);const foot=document.createElement("div");foot.className="actions";const add=document.createElement("button");add.className="btn primary";add.textContent="+ Add "+Object.keys(p.flags).length+" flags";add.onclick=()=>addPreset(p);const copy=document.createElement("button");copy.className="btn";copy.textContent="Copy JSON";copy.onclick=()=>clip(JSON.stringify(p.flags,null,2));const dl=document.createElement("button");dl.className="btn";dl.textContent="Download";dl.onclick=()=>downloadJSON(p.flags,"ZFLAG-"+p.name.replace(/[^a-z0-9]+/gi,"-")+".json");foot.append(add,copy,dl);const src=document.createElement("div");src.className="source";src.textContent="REFERENCE: "+p.source;box.append(cap,title,des,pre,foot,src);grid.append(box)}
+if(!grid.children.length){grid.innerHTML='<div class="empty">No matching premade configurations.</div>'}}
+function renderDraft(){byId("draftContent").textContent=JSON.stringify(draft,null,2);const grid=byId("draftList");grid.replaceChildren();const keys=Object.keys(draft).sort();for(const key of keys.slice(0,150)){const c=document.createElement("div");c.className="card";const n=document.createElement("div");n.className="flagname";n.textContent=key;const inp=document.createElement("input");inp.className="search";inp.value=String(draft[key]);inp.setAttribute("aria-label","Value for "+key);inp.onchange=()=>{draft[key]=typed(inp.value);saveDraft();renderDraft()};const rm=document.createElement("button");rm.className="btn";rm.textContent="Remove";rm.onclick=()=>{delete draft[key];saveDraft();renderDraft()};c.append(n,inp,rm);grid.append(c)}if(keys.length>150){const c=document.createElement("p");c.className="status";c.textContent="Showing first 150 of "+keys.length+" entries. The exported JSON contains every entry.";grid.append(c)}}
+function render(){if(tab==="flags")renderFlags();else if(tab==="presets")renderPresets();else renderDraft()}
+byId("search").addEventListener("input",e=>{search=e.target.value;page=0;render()});
+byId("statusFilter").addEventListener("change",e=>{statusFilter=e.target.value;page=0;render()});
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+byId("downloadDraft").onclick=()=>downloadJSON(draft,"ZFLAG-My-Config.json");
+byId("copyDraft").onclick=()=>clip(JSON.stringify(draft,null,2));
+byId("clearDraft").onclick=()=>{if(Object.keys(draft).length&&!confirm("Clear your entire configuration draft?"))return;draft={};saveDraft();renderDraft()};
+byId("importDraft").onclick=()=>byId("importFile").click();
+byId("importFile").onchange=async(e)=>{const f=e.target.files[0];if(!f)return;if(f.size>5*1024*1024){toast("JSON file over 5 MB");return}try{const data=JSON.parse(await f.text());if(!data||Array.isArray(data)||typeof data!=="object")throw Error("Expected object");Object.assign(draft,data);saveDraft();renderDraft();toast("Imported "+Object.keys(data).length+" entries")}catch(err){toast("Invalid JSON: "+err.message)}e.target.value=""};
+try{const old=JSON.parse(localStorage.getItem("zflag-library-draft")||"{}");if(old&&typeof old==="object"&&!Array.isArray(old))draft=old}catch(e){}
+renderDraftBadge();byId("countPresets").textContent=presets.length;
+Promise.all([
+fetch("./imports/ZFLAG_ALL_FLAGS_6_NEW_UPLOADS_MERGED.json",{cache:"force-cache"}).then(r=>{if(!r.ok)throw Error("merged archive HTTP "+r.status);return r.json()}),
+fetch("./imports/ALL_FFLAGS_EVERYTHING_COMBINED.json",{cache:"force-cache"}).then(r=>{if(!r.ok)throw Error("older archive HTTP "+r.status);return r.json()})
+]).then(([merged,previous])=>{flags=makeCatalog(merged,previous);
+byId("countFlags").textContent=flags.length.toLocaleString();
+byId("countAllowed").textContent=ALL_ALLOW.filter(k=>flags.some(f=>f.key===k)).length+" / 18";
+renderCategories();render()}).catch(err=>{byId("flagsGrid").innerHTML='<div class="empty">Library data could not be loaded. Refresh this page or check GitHub/Render publishing.</div>';byId("resultsCount").textContent="Load error";toast(err.message)});
+})();
+</script>
+</body></html>
