@@ -1,4 +1,4 @@
-name: Inspect ZFLAG navigation and value input code
+name: Inspect ZFLAG library value layout and nav animation
 on:
   push:
     paths: ['.github/workflows/inspect-library-ui.yml']
@@ -10,32 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Print App.tsx navigation switching and CSS rules
+      - name: Show library grid CSS and view animation toggles
         run: |
           python3 - <<'PY'
           import base64,io,zipfile,pathlib,re
-          payload=base64.b64decode(pathlib.Path('zflag-desktop-source.b64').read_text().strip())
-          with zipfile.ZipFile(io.BytesIO(payload)) as z:
-            root='ZFLAG-Studio/'
-            names=z.namelist()
-            app=z.read(root+'src/App.tsx').decode('utf-8')
-            lines=app.splitlines()
-            print('=== APP NAVIGATION PROBES ===')
-            keys=['function changeView(','const changeView','function TopIcon','function SidebarButton','<TopIcon ','<SidebarButton ','view-content','view === "home"','view === "library"','view === "presets"','className="topbar','className="nav','className="window','className="app-shell']
-            collected=set()
-            for i,line in enumerate(lines):
-              if any(k in line for k in keys):
-                start=max(0,i-6);end=min(len(lines),i+12)
-                for n in range(start,end):collected.add(n)
-            for n in sorted(collected):
-              print(f'APP:{n+1:04d}:'+lines[n][:550])
-            print('=== CSS NAV RULES ===')
-            css_files=[p for p in names if p.startswith(root+'src/') and p.endswith(('.css','.scss')) and 'node_modules' not in p]
-            print('CSS_FILES',*[p.removeprefix(root) for p in css_files])
-            for path in css_files:
-              content=z.read(path).decode('utf-8')
-              for m in re.finditer(r'([^{}]{3,160})\{([^{}]{4,1700})\}',content):
-                selector=m.group(1).strip().replace('\n',' ')
-                if any(k in selector for k in ('top-icon','topbar','top-nav','view-content','page-transition','tab-strip','sidebar-nav','nav-center','content-area','main-content','app-header','titlebar','top-toolbar','top-tabs')):
-                  print('CSS:'+path.removeprefix(root)+': '+selector[:200]+' { '+m.group(2).replace('\n',' ')[:450]+' }')
+          archive=base64.b64decode(pathlib.Path('zflag-desktop-source.b64').read_text().strip())
+          with zipfile.ZipFile(io.BytesIO(archive)) as z:
+            app=z.read('ZFLAG-Studio/src/App.tsx').decode()
+            css=z.read('ZFLAG-Studio/src/index.css').decode()
+          print('=== LAYOUT GRID ===')
+          tokens=['.library-row {','.library-row-copy {','.library-header {','.library-results {','.library-row code {','.library-state {','.top-nav {','.topbar {','.page-transition {','.app-shell {','@keyframes page-in','@media (prefers-reduced-motion']
+          for token in tokens:
+            pos=0
+            for j in range(12):
+              k=css.find(token,pos)
+              if k<0:break
+              print('STYLE',token,'at',k,'=>',css[max(0,k-100):k+800].replace(chr(10),' ')[:880])
+              pos=k+len(token)
+          print('=== APP TOGGLES ===')
+          for i,line in enumerate(app.splitlines()):
+            if any(x in line for x in ['settings.animations','pageKey','className={cn("app-shell','className="app-shell','className="page-transition','mainScrollRef','className="top-nav']):
+              print(f'LINE {i+1}: {line[:550]}')
           PY
