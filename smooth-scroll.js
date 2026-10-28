@@ -14,7 +14,8 @@
   let goal = window.scrollY;
   let frame = null;
   let lastTime = 0;
-  let easingMs = 115;
+  let easingMs = 100;
+  let lastProgrammedY = null;
 
   const scrollLimit = () => Math.max(0, root.scrollHeight - window.innerHeight);
   const limitToPage = y => Math.max(0, Math.min(scrollLimit(), y));
@@ -24,6 +25,7 @@
     frame = null;
     lastTime = 0;
     goal = window.scrollY;
+    lastProgrammedY = null;
   }
 
   function tick(now) {
@@ -32,15 +34,23 @@
     lastTime = now;
     goal = limitToPage(goal);
     const current = window.scrollY;
+    // If a link, page switch, browser or script moved the page directly,
+    // stop following an old wheel target instead of dragging it back.
+    if (lastProgrammedY !== null && Math.abs(current - lastProgrammedY) > 4) {
+      cancel();
+      return;
+    }
     const difference = goal - current;
     if (Math.abs(difference) < 0.6) {
       window.scrollTo({ top: goal, behavior: "instant" });
       frame = null;
       lastTime = 0;
+      lastProgrammedY = null;
       return;
     }
     const progress = 1 - Math.exp(-dt / easingMs);
     window.scrollTo({ top: current + difference * progress, behavior: "instant" });
+    lastProgrammedY = window.scrollY;
     frame = requestAnimationFrame(tick);
   }
 
@@ -88,9 +98,11 @@
 
     // No first-frame jump; inputs accumulate toward a target rather than
     // rendering an entire wheel notch instantly.
+    // Detect explicit external scrolling before accepting a new wheel notch.
+    if (lastProgrammedY !== null && Math.abs(window.scrollY - lastProgrammedY) > 4) cancel();
     if (frame === null) goal = window.scrollY;
     const precision = event.deltaMode === 0 && Math.abs(event.deltaY) < 48;
-    easingMs = precision ? 75 : 150;
+    easingMs = precision ? 55 : 100;
     goal = limitToPage(goal + Math.max(-680, Math.min(680, delta)));
     event.preventDefault();
     if (frame === null) frame = requestAnimationFrame(tick);
