@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="theme-color" content="#0b0c0e" />
-  <link rel="icon" type="image/svg+xml" href="./zflag-favicon.svg" />
-  <link rel="apple-touch-icon" href="./zflag-logo.png" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" type="image/png" href="./zflag-logo.png?v=black-v6" />
+  <link rel="apple-touch-icon" href="./zflag-logo.png?v=black-v6" />
   <meta name="application-name" content="ZFLAG" />
   <meta property="og:image" content="./zflag-logo.png" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.58" />
-  <meta name="zflag-site-build" content="2026-10-27-graphite-v5" />
+  <meta name="zflag-site-build" content="2026-10-27-trueblack-v6" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ZFLAG — Your flags. Your workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
@@ -506,6 +506,97 @@ html[data-theme=light] .atelier-pill b{color:#2b2e32!important}
 html[data-theme=light] .nav{background:var(--glass)!important;box-shadow:0 9px 24px #0001!important}
 html[data-theme=light] .product-stage{background:linear-gradient(180deg,#d6d8db,#fafafa)!important;border-color:#c3c6ca!important}
 
+
+/* ZFLAG TRUE BLACK V6 — PURE BLACK / WHITE / SILVER.
+   Preserve premium layout and original owner-supplied Z-logo PNG.
+   Applied after older legacy styling so all site sections stay consistent. */
+html[data-theme=dark]{
+--bg:#000000;--bg-2:#040404;--panel:#080808;--panel-2:#0d0d0d;--raised:#141414;
+--text:#f5f5f5;--muted:#a0a0a0;--soft:#777777;--line:#222222;--line-2:#363636;
+--button:#ededed;--button-text:#090909;--glass:rgba(0,0,0,.95);
+--grid:rgba(255,255,255,.015);--app-accent:#bebebe
+}
+html[data-theme=dark],html[data-theme=dark] body{background:#000!important}
+body{background:var(--bg)!important}
+body:before,body:after{background:none!important;display:none!important}
+.nav{background:var(--glass)!important;border:1px solid #242424!important;box-shadow:0 12px 30px #000b!important}
+.navlinks a:hover,.navlinks a.active{background:#151515!important;color:#fff!important}
+.hero:before,.product-stage:before{content:none!important;display:none!important}
+.hero h1 span{background:linear-gradient(105deg,#fff,#999,#ddd)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important}
+.hero .eyebrow,.hero-meta,.release-bridge-status,.atelier-scroll{color:#969696!important}
+.atelier-pill{background:#090909!important;border:1px solid #353535!important;color:#b5b5b5!important;box-shadow:none!important}
+.atelier-pill b{color:#f1f1f1!important}.atelier-pill i{background:#eee!important;box-shadow:0 0 0 3px #fff2!important}
+.atelier-scroll i{background:linear-gradient(90deg,transparent,#414141,transparent)!important}
+.product-stage{background:#050505!important;border:1px solid #292929!important;box-shadow:0 28px 65px #000!important}
+.stage-spark{background:#eee!important;box-shadow:0 0 0 4px #ffffff0b!important}
+.stage-revision{background:#111!important;border-color:#393939!important;color:#e6e6e6!important}
+.stage-guide{border-color:#303030!important;color:#b5b5b5!important}
+.brand .zmark,.zmark,.z2-mark,.z-mini-mark{background:#050505 url("./zflag-logo.png?v=black-v6") center/cover no-repeat!important;border:1px solid #303030!important;box-shadow:none!important;color:transparent!important;font-size:0!important}
+.brand .zmark:after,.zmark:before,.zmark:after{content:none!important;display:none!important}
+.btn.primary,html[data-theme=dark] .btn.primary{background:#ededed!important;border-color:#ededed!important;color:#0b0b0b!important;box-shadow:none!important}
+.btn.primary:hover{background:#fff!important;box-shadow:0 0 0 1px #fff4!important}
+.quality-strip{background:#050505!important;border:1px solid #252525!important;box-shadow:none!important}
+.quality-strip:before{background:#343434!important}
+.quality-k,.quality-v{color:#999!important}.quality-cell strong{color:#f4f4f4!important}
+.section,.site-library-section,.z-docs-section,.zflag-install-flow{background:#000!important;border-color:#202020!important}
+.site-library-section:before,.z-docs-section:before{content:none!important;background:none!important}
+.feature,.why-card{background:#080808!important;border:1px solid #242424!important;box-shadow:none!important}
+.feature:hover,.why-card:hover{background:#0e0e0e!important;border-color:#545454!important}
+.atelier-editorial h2 em,.z-docs-head h2 span{color:#aaa!important}
+.atelier-overline,.atelier-card-index{color:#b2b2b2!important}
+.atelier-editorial-card{background:#080808!important;border:1px solid #292929!important;box-shadow:none!important}
+.atelier-editorial-card:hover{border-color:#777!important;box-shadow:0 15px 40px #000b!important}
+.atelier-card-foot h3{color:#f4f4f4!important}.atelier-card-foot span{color:#b6b6b6!important}
+.atelier-code-art{background:#030303!important;border-color:#353535!important}
+.atelier-code-top{border-color:#252525!important}
+.atelier-code-art code b{color:#f0f0f0!important}
+.atelier-status-art strong i{background:#cfcfcf!important;box-shadow:none!important}
+.palette-panel,.palette-preview,.showcase-card,.site-library-preview,.z-doc-card,.zflag-install-wrap,.zflag-install-step{background:#080808!important;border-color:#282828!important;box-shadow:none!important}
+.z-doc-card:hover,.zflag-install-step:hover{border-color:#5f5f5f!important}
+.z-docs-live-dot{background:#ccc!important;box-shadow:0 0 0 4px #fff1!important}
+.z-mini{--maccent:#c6c6c6;background:#050505!important;border-color:#333!important;box-shadow:0 22px 55px #000!important}
+.z-mini-title{background:#0c0c0c!important;border-bottom:1px solid #2b2b2b!important}
+.z-mini-aside{background:#080808!important;border-right-color:#292929!important}
+.z-mini-main{background:#080808!important}
+.z-mini-breadcrumb{background:#090909!important;border-bottom-color:#2a2a2a!important}
+.z-mini-nav:hover{background:#151515!important}
+.z-mini-nav.active{background:#202020!important}
+.z-mini-nav-icon{color:#bababa!important}
+.z-mini-status{background:#090909!important;border-color:#2b2b2b!important}
+body .z2-window{--z2accent:#c8c8c8;--z2line:#292929;--z2muted:#999;background:#050505!important;border:1px solid #3a3a3a!important;box-shadow:0 27px 65px #000b!important}
+.z2-titlebar{background:#0c0c0c!important;border-bottom-color:#292929!important}
+.z2-side{background:#070707!important;border-right-color:#242424!important}
+.z2-workspace{background:#080808!important}
+.z2-top{background:#080808!important;border-bottom-color:#252525!important}
+.z2-nav:hover{background:#161616!important}
+.z2-nav.is-active{background:#1a1a1a!important;border-color:#303030!important;box-shadow:inset 2px 0 #ccc!important}
+.z2-body{background:#080808!important}
+.z2-surface,.z2-metric,.z2-editor-list,.z2-preset,.z2-note,.z2-agent{background:#0b0b0b!important;border-color:#292929!important}
+.z2-surface-title{border-bottom-color:#282828!important}
+.z2-file-icon,.z2-preset-icon,.z2-file button,.z2-flag-pill{background:#171717!important;border-color:#353535!important;color:#ccc!important}
+.z2-search,.z2-swatch{background:#101010!important;border-color:#333!important}
+.z2-search input{color:#fff!important}
+.z2-toggle.is-on{background:#525252!important;border-color:#929292!important}
+.z2-button{background:#171717!important;border-color:#3a3a3a!important;color:#f0f0f0!important}
+.z2-button:hover{background:#222!important}
+.z2-button.z2-primary{background:#eee!important;border-color:#eee!important;color:#0b0b0b!important}
+.z2-preset.is-selected{background:#171717!important;border-color:#777!important}
+.z2-statusbar{background:#090909!important;border-top-color:#292929!important}
+.z2-toast{background:#151515!important;border-color:#4c4c4c!important}
+.z2-file strong,.z2-activity b{color:#ededed!important}
+.z2-inline,.z2-log-row>span{color:#bbb!important}
+.z2-swatch.is-selected{border-color:#ddd!important}
+.engine-notice-card{background:#080808!important;border-color:#303030!important}
+footer,.cta{background:#000!important}
+.cta-box{border-color:#252525!important}
+footer .zmark{background:#050505 url("./zflag-logo.png?v=black-v6") center/cover no-repeat!important}
+.modal-card{background:#080808!important;border-color:#303030!important}
+html[data-theme=light] .brand .zmark,html[data-theme=light] .zmark{background:#070707 url("./zflag-logo.png?v=black-v6") center/cover no-repeat!important}
+@media(max-width:600px){
+ .product-stage{background:#050505!important}
+ .z2-window{box-shadow:none!important}
+ .atelier-pill{white-space:normal;text-align:center}
+}
 </style>
 </head>
 <body>
@@ -517,14 +608,14 @@ html[data-theme=light] .product-stage{background:linear-gradient(180deg,#d6d8db,
 
   <main id="home">
     <section class="hero"><div class="wrap hero-grid">
-      <div class="hero-copy"><div class="atelier-pill"><i></i><b>REIMAGINED ZFLAG</b><span>GRAPHITE EDITION · OCT 27</span></div>
+      <div class="hero-copy"><div class="atelier-pill"><i></i><b>REIMAGINED ZFLAG</b><span>BLACK EDITION · OCT 27</span></div>
         <div class="eyebrow" data-i18n="hero.eyebrow">Windows configuration utility · v2.0.58</div>
         <h1 data-i18n-html="hero.title">Your flags.<br><span>Your workspace.</span></h1>
         <p data-i18n="hero.body">A purpose-built Windows studio for editing configurations, managing presets, and understanding every result.</p>
         <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a><a class="btn hero-docs-button" href="./docs/"><span>Read documentation</span><span>↗</span></a></div><p class="release-bridge-status" id="releaseBridgeStatus" aria-live="polite">Latest: v2.0.58 · Windows x64 · one-click in-app updates · responsive toolbar · 13.6 MB</p>
         <div class="hero-meta"><span>Windows 10 / 11</span><span>x64</span><span data-i18n="hero.metaTheme">Website: Dark / Light</span><span data-i18n="hero.metaNoFake">No fake benchmarks</span></div><div class="atelier-scroll"><span>CRAFTED FOR THE DETAILS</span><i></i><span>SCROLL TO EXPLORE ↓</span></div>
       </div>
-      <div class="product-stage reveal" id="product"><div class="stage-overline"><div class="stage-indicator"><span class="stage-spark"></span> ZFLAG / STUDIO 2.0 <span class="stage-revision">GRAPHITE EDITION · OCT 27</span></div><span class="stage-note">01 / THE WORKSPACE</span><a href="./docs/#first-run" class="stage-guide">Product walkthrough ↗</a></div>
+      <div class="product-stage reveal" id="product"><div class="stage-overline"><div class="stage-indicator"><span class="stage-spark"></span> ZFLAG / STUDIO 2.0 <span class="stage-revision">BLACK EDITION · OCT 27</span></div><span class="stage-note">01 / THE WORKSPACE</span><a href="./docs/#first-run" class="stage-guide">Product walkthrough ↗</a></div>
 
         
 <div class="app-window studio-window z2-window" id="tiltWindow" aria-label="Interactive ZFLAG Studio preview">
@@ -804,8 +895,8 @@ html[data-theme=light] .product-stage{background:linear-gradient(180deg,#d6d8db,
     const root=document.documentElement;
     const systemLight=matchMedia('(prefers-color-scheme: light)').matches;
     const savedTheme=localStorage.getItem('zflag-site-theme');
-    root.dataset.theme=savedTheme || (systemLight?'light':'dark');
-    const setTheme=theme=>{root.dataset.theme=theme;localStorage.setItem('zflag-site-theme',theme);document.querySelector('meta[name=theme-color]').content=theme==='dark'?'#090b0e':'#f3f5f7'};
+    root.dataset.theme=savedTheme || 'dark';
+    const setTheme=theme=>{root.dataset.theme=theme;localStorage.setItem('zflag-site-theme',theme);document.querySelector('meta[name=theme-color]').content=theme==='dark'?'#000000':'#f3f5f7'};
     document.getElementById('themeToggle').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
     document.getElementById('footerTheme').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
 
