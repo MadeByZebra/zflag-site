@@ -4,16 +4,17 @@ This repository contains the [ZFLAG desktop website](index.html), its Render sta
 
 ## Download the latest ZFLAG for Windows 10/11 (x64)
 
-**[Download ZFLAG_Setup.exe — v2.0.59](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.59/ZFLAG_Setup.exe)**
+**[Download ZFLAG_Setup.exe — v2.0.60](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.60/ZFLAG_Setup.exe)**
 
 - **FastFlag Library is IN the installed Windows app**, not just the browser: click **Flag Library** in the sidebar.
+- **v2.0.60** corrects value-vs-description presentation, validates typed JSON values, keeps top navigation centered, and restores smooth page transitions (with reduced-motion support).
 - Contains **15,965** merged distinct flag names, archived values, inferred descriptions, category filters, pagination (80 rows/page), editable values, and categorized premade configurations.
 - Add a selected flag or premade configuration to the editor. Nothing is automatically injected by browsing.
 - The installer is a standalone Windows EXE and keeps the existing native engine, configuration workflows, and update behavior.
 - Automated offline tests, frontend/native builds, NSIS installation, and Windows smoke tests passed. In-game effectiveness of individual FastFlags was **not** verified.
-- The executable is unsigned; Windows SmartScreen may warn. Check the checksum on the [v2.0.59 release page](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.59).
+- The executable is unsigned; Windows SmartScreen may warn. Check the checksum on the [v2.0.60 release page](https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.60).
 
-**[Successful Windows build and integration tests](https://github.com/MadeByZebra/zflag-site/actions/runs/40636119147).**
+**[Successful Windows build and integration tests](https://github.com/MadeByZebra/zflag-site/actions/runs/40772406111).**
 
 ## True Black website refresh — October 27, 2026
 
