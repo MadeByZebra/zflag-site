@@ -30,7 +30,7 @@ jobs:
                   if "id" in d:self.ids.append(d["id"])
                   if tag=="a" and "href" in d:self.links.append(d["href"])
                   if tag=="script" and "src" in d:self.scripts.append(d["src"])
-          for name,expected in (("index.html","./smooth-scroll.js?v=3"),("docs/index.html","../smooth-scroll.js?v=3"),("library/index.html","../smooth-scroll.js?v=3")):
+          for name,expected in (("index.html","./smooth-scroll.js?v=4"),("docs/index.html","../smooth-scroll.js?v=4"),("library/index.html","../smooth-scroll.js?v=4")):
               html=Path(name).read_text(encoding="utf-8")
               scan=Scan(); scan.feed(html)
               assert scan.scripts.count(expected)==1,(name,"missing shared script")
@@ -38,11 +38,12 @@ jobs:
               unresolved=[link for link in scan.links if link.startswith("#") and link[1:] not in scan.ids]
               assert not unresolved,(name,"missing anchors",unresolved)
               assert "scroll-behavior:smooth" in html,(name,"missing native anchor scrolling")
-              assert expected.endswith("smooth-scroll.js?v=3")
+              assert expected.endswith("smooth-scroll.js?v=4")
               print(name, "PASS:", len(scan.ids),"ids,",len(scan.links),"links")
           js=Path("smooth-scroll.js").read_text(encoding="utf-8")
           for text in ("prefers-reduced-motion","Math.exp(-dt / easingMs)","deltaMode","data-native-scroll","requestAnimationFrame","passive: false"):
               assert text in js,("missing scroll safety feature",text)
+          assert "Math.abs(difference) <= 5" in js,"Animations must settle when pixels round near the target"
           assert "pointer: fine" not in js,"Wheel motion must not be skipped because of pointer-class detection"
           assert "Math.abs(event.deltaY) < 48) {" not in js,"Precision trackpad events must not bypass easing"
           library=Path("library/index.html").read_text(encoding="utf-8")
