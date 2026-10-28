@@ -1,8 +1,7 @@
-name: Inspect ZFLAG library UI integration points
+name: Inspect ZFLAG navigation and value input code
 on:
   push:
-    paths:
-      - '.github/workflows/inspect-library-ui.yml'
+    paths: ['.github/workflows/inspect-library-ui.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,28 +10,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Print desktop library component interface and navigation anchors
+      - name: Print App.tsx navigation switching and CSS rules
         run: |
           python3 - <<'PY'
-          import base64, io, zipfile, pathlib, re
-          archive=base64.b64decode(pathlib.Path("zflag-desktop-source.b64").read_text().strip())
-          with zipfile.ZipFile(io.BytesIO(archive)) as z:
-            files=z.namelist()
-            print("FLAG_LIBRARY_FILES",*[n for n in files if n.endswith("FlagLibrary.tsx") or n.endswith("App.tsx")],sep="\n")
-            lib=[n for n in files if n.endswith("FlagLibrary.tsx")]
-            if not lib: raise RuntimeError("No FlagLibrary.tsx found")
-            content=z.read(lib[0]).decode()
-            print("=== FLAG LIBRARY TOP ===")
-            print("\n".join(content.splitlines()[:280])[:18000])
-            app=[n for n in files if n.endswith("src/App.tsx")]
-            if not app: raise RuntimeError("No src/App.tsx found")
-            text=z.read(app[0]).decode()
-            print("=== APP REFERENCES ===")
-            lines=text.splitlines()
-            found=0
+          import base64,io,zipfile,pathlib,re
+          payload=base64.b64decode(pathlib.Path('zflag-desktop-source.b64').read_text().strip())
+          with zipfile.ZipFile(io.BytesIO(payload)) as z:
+            root='ZFLAG-Studio/'
+            names=z.namelist()
+            app=z.read(root+'src/App.tsx').decode('utf-8')
+            lines=app.splitlines()
+            print('=== APP NAVIGATION PROBES ===')
+            keys=['function changeView(','const changeView','function TopIcon','function SidebarButton','<TopIcon ','<SidebarButton ','view-content','view === "home"','view === "library"','view === "presets"','className="topbar','className="nav','className="window','className="app-shell']
+            collected=set()
             for i,line in enumerate(lines):
-              if any(term in line for term in ("FlagLibrary", "library", "setActiveView", 'useState<"')):
-                print(f"APP {i+1}: "+line[:300])
-                found+=1
-                if found>70:break
+              if any(k in line for k in keys):
+                start=max(0,i-6);end=min(len(lines),i+12)
+                for n in range(start,end):collected.add(n)
+            for n in sorted(collected):
+              print(f'APP:{n+1:04d}:'+lines[n][:550])
+            print('=== CSS NAV RULES ===')
+            css_files=[p for p in names if p.startswith(root+'src/') and p.endswith(('.css','.scss')) and 'node_modules' not in p]
+            print('CSS_FILES',*[p.removeprefix(root) for p in css_files])
+            for path in css_files:
+              content=z.read(path).decode('utf-8')
+              for m in re.finditer(r'([^{}]{3,160})\{([^{}]{4,1700})\}',content):
+                selector=m.group(1).strip().replace('\n',' ')
+                if any(k in selector for k in ('top-icon','topbar','top-nav','view-content','page-transition','tab-strip','sidebar-nav','nav-center','content-area','main-content','app-header','titlebar','top-toolbar','top-tabs')):
+                  print('CSS:'+path.removeprefix(root)+': '+selector[:200]+' { '+m.group(2).replace('\n',' ')[:450]+' }')
           PY
