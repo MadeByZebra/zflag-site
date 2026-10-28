@@ -104,7 +104,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
   check('Archive metadata properly classified',auditSource.notes===81&&auditSource.malformed===9&&auditSource.valid===15875,auditSource);
   const actualInput=lib.locator('#flagsGrid input[aria-label="Actual value for FFlagDebugGraphicsPreferD3D11"]');
   await actualInput.fill('this is a description, not a boolean');
-  const invalidBlocked=await actualInput.locator('xpath=../../following-sibling::div[contains(@class,"actions")]//button[contains(.,"Add to config")]').isDisabled().catch(()=>false);
+  const invalidBlocked=await lib.locator('#flagsGrid .card').filter({has:lib.locator('.flagname',{hasText:/^FFlagDebugGraphicsPreferD3D11$/})}).getByRole('button',{name:'+ Add to config'}).isDisabled();
   check('Invalid typed value blocked',invalidBlocked);
   await actualInput.fill('true');
   const sampleCard=lib.locator('#flagsGrid .card').filter({has:lib.locator('.flagname', {hasText:/^FFlagDebugGraphicsPreferD3D11$/})});
