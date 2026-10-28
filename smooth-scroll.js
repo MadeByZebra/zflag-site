@@ -1,5 +1,5 @@
 /**
- * ZFLAG Smooth Scroll v2 — desktop wheel and precision trackpad easing.
+ * ZFLAG Smooth Scroll v3 — desktop wheel and precision trackpad easing.
  * All vertical wheel deltas animate, including small trackpad deltas.
  * Mouse-wheel scrolling must NOT depend on pointer/hover device detection.
  * Touch, keyboard, nested scroll panes, reduced motion, and zoom stay native.
@@ -127,7 +127,7 @@
   Object.defineProperty(window, "__zflagScrollV2", {
     configurable: false,
     value: Object.freeze({
-      version: "2.0",
+      version: "3.0",
       isReducedMotion: () => reducedMotion.matches,
       isAnimating: () => frame !== null
     })
