@@ -1,0 +1,352 @@
+mxsynry
+UltimateFastFlagList
+Public
+forked from 1x4z/1
+Go to file
+t
+T
+This branch is up to date with 1x4z/1:main.
+vsvpp
+vsvpp
+buh buh buh
+fddcc5a
+ · 
+2 years ago
+Name		
+assets
+There has been an error generating the preview.
+2 years ago
+README.md
+buh buh buh
+2 years ago
+Repository files navigation
+README
+Important
+
+https://github.com/FastFlags/FastFlags-Collective/
+
+ Ultimate Fast Flags List
+https://discord.gg/Q5JKyzuNRC
+https://discord.gg/fastflags
+Version: 5.0.5 [2/9/2024]
+103 Currently Listed
+5 Textures Currently Listed
+New Formatting
+Removed Bloxstrap Presets Please use Bloxstrap
+How to use
+Open the Bloxstrap Menu
+Fast Flags >> Fast Flags Editor >> Import Json
+Paste in the JSON
+Then you should be good to go and save!
+
+
+List Navigation
+Rendering
+Graphical
+UI
+Textures
+Physics
+Other FFlags
+Links
+
+══════⊹⊱≼≽⊰⊹══════
+Rendering API
+Metal
+MacOS Only
+{ "FFlagDebugGraphicsPreferMetal": "True" }
+Vulkan
+{ "FFlagDebugGraphicsDisableDirect3D11": "True", "FFlagDebugGraphicsPreferVulkan": "True" }
+OpenGL
+{ "FFlagDebugGraphicsDisableDirect3D11": "True", "FFlagDebugGraphicsPreferOpenGL": "True" }
+Direct X 10
+{ "FFlagDebugGraphicsPreferD3D11FL10": "True" }
+Direct X 11
+{ "FFlagDebugGraphicsPreferD3D11": "True" }
+Graphical Settings & other stuff
+Smoother Terrain
+{ "FFlagDebugRenderingSetDeterministic": "True" }
+😍
+{ "FFlagDebugLuaHeapDump": "True" }
+Graphics Quality Level
+{ "FIntRomarkStartWithGraphicQualityLevel": "1" }
+Low Quallity Terrain Textures
+4 for less quality 16, 32, 64 for higher quality
+{ "FIntTerrainArraySliceSize": "4" }
+Disable Shadows
+{ "FIntRenderShadowIntensity": "0" }
+Set Fps Limit
+{ "DFIntTaskSchedulerTargetFps": "9999" }
+
+{ "DFIntTaskSchedulerTargetFps": "9999" }
+Enables Network Debug Tracker menu
+Instructions: CTRL+F8
+it's over.
+{ "DFFlagDebugEnableInterpolationVisualizer": "True" }
+Humanoid Outline
+Draws an outline around every part and every humanoid
+{ "DFFlagDebugDrawBroadPhaseAABBs": "True" }
+Buggy ZPlane Camera a.k.a xray
+{ "FIntCameraFarZPlane": "1" }
+Preserve rendering quality with display setting
+{ "DFFlagDisableDPIScale": "True" }
+Low Graphics Quality w/ Max Render Distance
+Explanation: 1-6 Are low graphics, Above 6 are high graphics. Like the 1-21 graphics slider
+{ "DFIntDebugFRMQualityLevelOverride": "1" }
+FRM Levels
+Low
+
+1 = 3
+2 = 2
+3 = 6
+
+High
+
+4 = 7
+5 = 11
+6 = 14
+7 = 15 
+8 = 17
+9 = 18
+10 = 21
+Low Render Distance
+FRM
+{ "DFIntDebugRestrictGCDistance": "1" }
+Disable Wind
+{ "FFlagGlobalWindRendering": "False", "FFlagGlobalWindActivated": "False" }
+Limits light updates
+{ "FIntRenderLocalLightUpdatesMax": "8", "FIntRenderLocalLightUpdatesMin": "6" }
+Disables fade in and fade out animation every light update
+changes fade in ms!!
+{ "FIntRenderLocalLightFadeInMs": "0" }
+Makes avatars shiny
+[everything goes black on <3] [DFIntDebugFRMQualityLevelOverride is there to set your graphics to 10, You can change it to anything above 3: Click here to view ]
+{ "DFIntRenderClampRoughnessMax": "-640000000", "DFIntDebugFRMQualityLevelOverride": "21" }
+Disable PostFX
+{ "FFlagDisablePostFx": "True" }
+Pause Voxelizer/Disable Baked Shadows
+{ "DFFlagDebugPauseVoxelizer": "True" }
+Gray Sky
+{ "FFlagDebugSkyGray": "True" }
+Disable Player Shadows
+{ "FIntRenderShadowIntensity": "0" }
+Force LOD on Meshes
+{ "DFIntCSGLevelOfDetailSwitchingDistance": "0", "FFlagGlobaDFIntCSGLevelOfDetailSwitchingDistanceL12lWindActivated": "0", "DFIntCSGLevelOfDetailSwitchingDistanceL23": "0", "DFIntCSGLevelOfDetailSwitchingDistanceL34": "0" }
+Lighting Attenuation
+{ "FFlagNewLightAttenuation": "True" }
+Enable GPULightCulling
+Combine with Lighting Attenuation for better vision
+{ "FFlagFastGPULightCulling3": "True" }
+Frame Buffer
+Explnation: 0 makes white screen 1-3 makes other players have laggy movement, 4 is stable has better performance than 10 and less input lag
+{ "DFIntMaxFrameBufferSize": "4" }
+High Quality Textures
+[1-3]
+{ "DFFlagTextureQualityOverrideEnabled": "True", "DFIntTextureQualityOverride": "3" }
+Lower Quality Textures
+[1-3]
+{ "DFIntPerformanceControlTextureQualityBestUtility": "-1" }
+Remove Grass
+{ "FIntFRMMinGrassDistance": "0", "FIntFRMMaxGrassDistance": "0", "FIntRenderGrassDetailStrands": "0", "FIntRenderGrassHeightScaler": "0" }
+Force MSAA
+[0, 1, 2, 4, 8]
+{ "FIntDebugForceMSAASamples": "4" }
+ShadowMap Bias
+[Future & ShadowMap]
+{ "FIntRenderShadowmapBias": "75" }
+User Interface
+No Transparency V4 Menu (2023)
+{ "FStringInGameMenuModernizationStickyBarForcedUserIds": "UserID" }
+Revert Old Report Menu
+{ "FStringReportAbuseMenuRoactForcedUserIds": "UserID_HERE", "FFlagEnableReportAbuseMenuRoactABTest2": "False", "FFlagEnableReportAbuseMenuRoact2": "False", "FFlagEnableReportAbuseMenuLayerOnV3": "False" }
+Custom MicroProfile Scale
+{ "DFIntMicroProfilerDpiScaleOverride": "100" }
+V1 Menu
+{ "FIntNewInGameMenuPercentRollout3": "10000" }
+Hides gui
+{ "FFlagDebugAdornsDisabled": "True" }
+Dont Render UI
+{ "FFlagDebugDontRenderUI": "True" }
+Enable Audio Controller
+{ "FFlagTrackerLodControllerDebugUI": "True" }
+Disable Autocomplete
+{ "FFlagEnableCommandAutocomplete": "False" }
+Chrome UI TopBar
+{ "FFlagEnableInGameMenuChrome": "True" }
+Better Chrome UI TopBar
+{ "FFlagChromeBetaFeature": "True", "FFlagEnableChromePinnedChat": "True", "FFlagEnableInGameMenuChrome": "True", "FFlagEnableInGameMenuChromeABTest": "True", "FFlagEnableInGameMenuChromeSignalAPI": "True", "FFlagPlayerListChromePushdown": "True", "FFlagEnableChromeEscapeFix": "True", "FFlagEnableChromeMicShimmer": "True", "FFlagPlayerListChromePushdown": "True" }
+Chrome UI Topbar Removal
+{ "FFlagChromeBetaFeature": "False", "FFlagEnableChromePinnedChat": "False", "FFlagEnableInGameMenuChrome": "False", "FFlagEnableInGameMenuChromeABTest": "False", "FFlagEnableInGameMenuChromeSignalAPI": "False", "FFlagPlayerListChromePushdown": "False" }
+Disable Bubble Chat
+{ "FFlagEnableBubbleChatFromChatService": "False" }
+Disable Selfview
+{ "FFlagCoreGuiTypeSelfViewPresent": "False" }
+Remove VC Beta Badge
+{ "FFlagVoiceBetaBadge": "False", "FFlagTopBarUseNewBadge": "False", "FFlagEnableBetaBadgeLearnMore": "False", "FFlagBetaBadgeLearnMoreLinkFormview": "False", "FFlagControlBetaBadgeWithGuac": "False", "FStringVoiceBetaBadgeLearnMoreLink": "null" }
+Pin Chat on Chrome UI
+{ "FFlagEnableChromePinnedChat": "True" }
+Hide guis
+Instructions: Replace "ID" with any group ID that you are in.
+{ "DFIntCanHideGuiGroupId": "ID_HERE" }
+Disable Fullscreen Title Bar
+{ "FIntFullscreenTitleBarTriggerDelayMillis": "3600000" }
+Set Custom Font Size
+{ "FIntFontSizePadding": "1" }
+Textures
+No Textures
+{
+    "FStringPartTexturePackTable2022": "{\"glass\":{\"ids\":[\"rbxassetid://9873284556\",\"rbxassetid://9438453972\"],\"color\":[254,254,254,7]}}",
+    "FStringPartTexturePackTablePre2022": "{\"glass\":{\"ids\":[\"rbxassetid://7547304948\",\"rbxassetid://7546645118\"],\"color\":[254,254,254,7]}}",
+    "FStringTerrainMaterialTable2022": "",
+    "FStringTerrainMaterialTablePre2022": ""
+}
+Others moved to Textures Branch
+Physics
+Stick unanchored parts to you
+- = up, + = down
+blame popbob he said it was ok to leak this
+{ "DFIntSolidFloorPercentForceApplication": "-1000", "DFIntNonSolidFloorPercentForceApplication": "-5000" }
+Breaks glitches stuff
+All type of wallhops, longjumps, headhitters and probably more stop working
+{ "DFFlagSimHumanoidPhysics": "True" }
+Max Raycast Distance
+Break legs collision from 2 to -inf, kinda break camera on values over 3
+noclip cam on 3
+{ "DFIntRaycastMaxDistance": "3" }
+Possible Super Jump
+i thought this was patched thats why i removed it lol
+{ "DFIntNewRunningBaseGravityReductionFactorHundredth": "1500" }
+Breaks movement on higher negative values
+{ "FIntPGSAngularDampingPermilPersecond": "-10000" }
+it does something to movement cant describe rn cus im busy
+{ "FIntPGSAngularDampingPermilPersecond": "0" }
+It allows you to fall quicker and ignore certain block designs
+{ "FFlagHumanoidOnlySetCollisionsOnStateChangeDefaultIsEnabled": "False", "FFlagHumanoidParallelFasterSetCollision": "True" }
+Gear Desync
+a.k.a dos not let you load games
+{ "DFIntDataSenderRate": "-1" }
+Fake Lag
+{ "DFIntS2PhysicsSenderRate": "1" }
+ultiamt desync flag!! 😱😱😱
+{ "DFIntS2PhysicsSenderRate": "1", "FIntPGSAngularDampingPermilPersecond": "0" }
+Noclip 1
+adjust the value so u dont fall through the ground
+{ "DFFlagAssemblyExtentsExpansionStudHundredth": "-50" }
+Noclip 2
+{
+{ "FIntPGSPenetrationMarginMax": "2147483647", "FIntPGSPenetrationMarginMin": "2147483647" }
+Noclip Combo
+adjust the value so u dont fall through the ground
+{ "FIntPGSPenetrationMarginMax": "2147483647", "FIntPGSPenetrationMarginMin": "2147483647", "DFFlagAssemblyExtentsExpansionStudHundredth": "-50" }
+Teleportation
+a.k.a control the unanchored
+{ "FIntPGSPenetrationMarginMax": "-100000000", "FIntPGSPenetrationMarginMin": "-100000000" }
+limited speed fflag that works only in a few games
+one of them being Phantom Forces, and it makes you only slightly faster
+{ "DFIntDebugSimPhysicsSteppingMethodOverride": "10000000" }
+Hip Height
+Very controllable bounce, only works with negative values, 0 allows you to hover
+{ "DFIntMaxAltitudePDStickHipHeightPercent": "-200" }
+Wallglide
+{ "DFFlagUnstickForceAttackInTenths": "-4" }
+other fflags
+Disable ADs
+{ "FFlagAdServiceEnabled": "False" }
+Disable Telemetry
+[This doesn't fully disable telemetry]
+{ "FFlagDebugDisableTelemetryEphemeralCounter": "True", "FFlagDebugDisableTelemetryEphemeralStat": "True", "FFlagDebugDisableTelemetryEventIngest": "True", "FFlagDebugDisableTelemetryPoint": "True", "FFlagDebugDisableTelemetryV2Counter": "True", "FFlagDebugDisableTelemetryV2Event": "True", "FFlagDebugDisableTelemetryV2Stat": "True" }
+Scroll Speed
+{ "FIntScrollWheelDeltaAmount": "140" }
+Surf the web inside of Roblox
+Click the Beta badge or the 13+ badge to open the webview browser.
+{ "FFlagTopBarUseNewBadge": "True", "FStringTopBarBadgeLearnMoreLink": "https://google.com/", "FStringVoiceBetaBadgeLearnMoreLink": "https://google.com/" }
+Sounds use physical velocity and become distorted
+{ "FFlagSoundsUsePhysicalVelocity": "True" }
+Shows the state of a flag
+{ "FStringDebugShowFlagState": "FLAG_HERE" }
+e.g
+{ "FStringDebugShowFlagState": "DFIntTaskSchedulerTargetFps, ChannelName" }
+MTU
+[Might Improve Ping]
+{ "DFIntConnectionMTUSize": "MTU_HERE" }
+No Internet Disconnect
+[You will still be kicked but the message wont show.]
+{ "DFFlagDebugDisableTimeoutDisconnect": "True" }
+Quick Game Launch
+[BUGGY]
+{ "FFlagEnableQuickGameLaunch": "True" }
+Allows you to change voice chat distance
+default: [Min 7 Max 80]
+{ "DFIntVoiceChatRollOffMinDistance": "7", "DFIntVoiceChatRollOffMaxDistance": "80" }
+Disable In-Game Purchases
+{ "DFFlagOrder66": "True" }
+Disable Chat
+{ "FFlagDebugForceChatDisabled": "True" }
+Limit audios that are being played
+{ "DFIntMaxLoadableAudioChannelCount": "1" }
+Adds an UI in game, which highlights any part player touches (like ground, Meshes etc.). It's a non-functioning UI too. Also adds a blue circle to your humanoid.
+{ "FFlagDebugHumanoidRendering": "True" }
+Custom Disconnect Message
+{ "FFlagReconnectDisabled": "True", "FStringReconnectDisabledReason": "You're stupid and I hate you" }
+Display FPS
+{ "FFlagDebugDisplayFPS": "True" }
+Verified Badge
+{ "FStringWhitelistVerifiedUserId": "UserID_HERE" }
+Verified Badge on everyone
+{ "FFlagOverridePlayerVerifiedBadge": "True" }
+Applies cool colors to stuff
+{ "FFlagDebugDisplayUnthemedInstances": "True" }
+Show Outlined Chunks
+{ "FFlagDebugLightGridShowChunks": "True" }
+Remove Disconnect Blur/Loading Blur
+{ "FIntRobloxGuiBlurIntensity": "0" }
+Disable Dynamic Heads Animations
+{ "DFFlagEnableDynamicHeadByDefault": "False" }
+failsafehumanoid
+gray avatars
+{ "FFlagFailsafeHumanoid_3": "True" }
+Automatically unmutes your mic on join
+{ "FFlagDebugDefaultChannelStartMuted": "False" }
+Overlay that shows what you type
+{ "FFlagDebugTextBoxServiceShowOverlay": "True" }
+opt-out Experience Language
+Removes the Experience Language option in settings
+{ "FIntV1MenuLanguageSelectionFeaturePerMillageRollout": "0" }
+Disable New Chat Translation Settings
+{ "FFlagChatTranslationSettingEnabled3 ": "False" }
+Lets you change the zoom out limit
+infinite zoom out!!
+{ "FIntCameraMaxZoomDistance": "9999" }
+Limits number of animations being played
+{ "DFIntMaxActiveAnimationTracks": "0" }
+Prevents Remote Events from running
+W SPECTRO
+{ "DFIntRemoteEventSingleInvocationSizeLimit": "1" }
+Clientsided Invisible
+{ "FIntParallelDynamicPartsFastClusterBatchSize": "1" }
+Links
+Make Your Own Custom Roblox Textures [Github Repo Link]
+MEGA FLAG LIST [Bloxstrap Server]
+Bloxstrap [Github Repo Link]
+NVIDIA Shaders Guide [Github Repo Link]
+EnableAnselForRoblox [Github Repo Link]
+potato fflags [Github Repo Link]
+Fake Roblox Player Internal Patcher [Download Link]
+Patched in 0, 608, 1, 6080485
+DFIntFreeFallBalanceP 
+DFIntFreeFallOrientationP
+DFIntGettingUpBalanceD
+DFIntGettingUpBalanceP
+DFIntLandedBalanceD
+DFIntLandedBalanceP
+DFIntNewRunningBaseAltitudeD
+DFIntNewRunningBaseAltitudeP
+DFIntRunningBaseAltitudeD
+DFIntRunningBaseAltitudeP
+DFIntRunningBaseOrientationP
+FFlagDebugSimIntegrationStabilityTesting
+FFlagSimIslandizerManager
+‧⁺̣˚̣̣*̣̩⋆̩·̩̩୨˚̣̣̣̣͙୧·̩̩⋆̩*̣̩˚̣̣⁺̣‧ You've reached the bottom of the list! ‧⁺̣˚̣̣*̣̩⋆̩·̩̩୨˚̣̣̣̣͙୧·̩̩⋆̩*̣̩˚̣̣⁺̣‧୨
+List Information
+Creation Date: 9:46 PM 08/25/2023
+Github Publish Date: 12/26/2023
+OG
