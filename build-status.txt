@@ -1,8 +1,8 @@
-ZFLAG website build: trueblack-v8
-Visual identity: pure black website, original silver Z logo
-Accent default: White (#ffffff) across both demo previews and all three accent pickers
-Accent choices: White, Silver, Blue, Violet, Red, Amber, Emerald, Rose, Ice
-Preference key: zflag-demo-accent-v8 (new default is White)
-Source: MadeByZebra/zflag-site main
-Documentation: original silver Z icon, unchanged
-Desktop installer: v2.0.58 unchanged
+ZFLAG website: flag-library-v1
+Website style: pure black and white-accent default
+FastFlag Library: /library/
+Archive source files: 8440 + 10518 entries = 15965 distinct names after deduplication
+Library: categories, descriptions, per-flag values, 12 presets, JSON builder
+Roblox allowlist baseline: 18 published keys, no in-game verification
+Documentation: /docs/
+Desktop installer v2.0.58 unchanged
