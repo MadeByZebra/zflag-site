@@ -4,7 +4,7 @@ services:
     runtime: static
     branch: main
     autoDeployTrigger: commit
-    buildCommand: test -s index.html && test -s docs/index.html && test -s zflag-favicon.svg && grep -q 'id="z-mini"' index.html && grep -q '2026-10-27-trueblack-v8' index.html && grep -q 'atelier-editorial-grid' index.html && grep -q 'function applyAccent(requested)' index.html && grep -q 'accentStatus' index.html && grep -q 'White accent' index.html && grep -q 'zflag-demo-accent-v8' index.html && grep -q '2026-10-27-trueblack-v6' docs/index.html && grep -q 'zflag-logo.png?v=black-v6' docs/index.html && test -s zflag-logo.png && test -s build-status.txt && echo "ZFLAG True Black v8 white default accent verified"
+    buildCommand: test -s index.html && test -s docs/index.html && test -s zflag-favicon.svg && grep -q 'id="z-mini"' index.html && grep -q '2026-10-27-flag-library-v1' index.html && grep -q 'atelier-editorial-grid' index.html && grep -q 'function applyAccent(requested)' index.html && grep -q 'accentStatus' index.html && grep -q 'White accent' index.html && grep -q 'zflag-demo-accent-v8' index.html && grep -q '2026-10-27-trueblack-v6' docs/index.html && grep -q 'zflag-logo.png?v=black-v6' docs/index.html && test -s zflag-logo.png && test -s library/index.html && test -s library/imports/ZFLAG_ALL_FLAGS_6_NEW_UPLOADS_MERGED.json && test -s library/imports/ALL_FFLAGS_EVERYTHING_COMBINED.json && grep -q 'Every flag.' library/index.html && test -s build-status.txt && echo "ZFLAG 15,965 flag library assets verified"
     staticPublishPath: .
     routes:
       - type: redirect
