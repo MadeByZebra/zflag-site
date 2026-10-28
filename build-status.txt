@@ -1,8 +1,8 @@
-ZFLAG website build: trueblack-v7
-Visual identity: Pure black #000000, silver Z and black icon backgrounds
-Live accent picker: synchronized across homepage swatches, full Studio and compact Studio
-Production pages: / and /docs/
+ZFLAG website build: trueblack-v8
+Visual identity: pure black website, original silver Z logo
+Accent default: White (#ffffff) across both demo previews and all three accent pickers
+Accent choices: White, Silver, Blue, Violet, Red, Amber, Emerald, Rose, Ice
+Preference key: zflag-demo-accent-v8 (new default is White)
 Source: MadeByZebra/zflag-site main
-Website build marker: 2026-10-27-trueblack-v7
-Docs page icon: original silver Z PNG
+Documentation: original silver Z icon, unchanged
 Desktop installer: v2.0.58 unchanged
