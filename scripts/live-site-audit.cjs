@@ -33,7 +33,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     jsLoaded:performance.getEntriesByType('resource').some(x=>x.name.includes('smooth-scroll.js'))
   }));
   check('Homepage black',home.rootBg==='rgb(0, 0, 0)',home);
-  check('Latest homepage deployed',home.build==='2026-10-28-real-smooth-scroll-v2',home.build);
+  check('Latest homepage deployed',home.build==='2026-10-28-real-smooth-scroll-v3',home.build);
   const homepageDownload=await page.locator('a[href*="/releases/download/v2.0.61/ZFLAG_Setup.exe"]').count();
   check('Homepage v2.0.61 downloads',homepageDownload>=1,{found:homepageDownload});
   check('Homepage original Z',home.logo.includes('zflag-logo.png'),home.logo);
@@ -53,7 +53,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
   await page.waitForTimeout(350);
   let persisted=await page.evaluate(()=>document.querySelector('[data-accent].active')?.dataset.accent);
   check('Picker persists after reload',persisted==='#4f8cff',persisted);
-  check('Smooth scroll V2 loaded',await page.evaluate(()=>window.__zflagScrollV2?.version==='2.0'));
+  check('Smooth scroll V2 loaded',await page.evaluate(()=>window.__zflagScrollV2?.version==='3.0'));
   await page.evaluate(()=>window.scrollTo({top:800,behavior:"instant"}));
   await page.waitForTimeout(100);
   await page.evaluate(()=>{
@@ -115,7 +115,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     scrollBehavior:getComputedStyle(document.documentElement).scrollBehavior
   }));
   check('Docs Z logo',docInfo.icon?.includes('zflag-logo.png')&&docInfo.logo.includes('zflag-logo.png'),docInfo);
-  check('Docs have smooth wheel v2',await docs.evaluate(()=>window.__zflagScrollV2?.version==='2.0'));
+  check('Docs have smooth wheel v2',await docs.evaluate(()=>window.__zflagScrollV2?.version==='3.0'));
   check('Docs v2.0.61 download',await docs.locator('a[href*="/releases/download/v2.0.61/ZFLAG_Setup.exe"]').count()>=1);
   check('Docs black and guides',docInfo.bg==='rgb(0, 0, 0)' && docInfo.docSections===15,docInfo);
   await docs.locator('a.side-link[href="#installation"]').first().click();
@@ -135,7 +135,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     script:performance.getEntriesByType('resource').some(x=>x.name.includes('smooth-scroll.js'))
   }));
   check('Library catalog loads',/\d/.test(libInfo.count)&&libInfo.cards>=10,libInfo);
-  check('Library has smooth wheel v2',await lib.evaluate(()=>window.__zflagScrollV2?.version==='2.0'));
+  check('Library has smooth wheel v2',await lib.evaluate(()=>window.__zflagScrollV2?.version==='3.0'));
   await lib.locator('#search').fill('_note');
   await lib.waitForTimeout(250);
   let noteCards=await lib.locator('#flagsGrid .card').count();
