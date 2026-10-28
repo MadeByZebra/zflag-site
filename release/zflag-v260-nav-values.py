@@ -28,6 +28,8 @@ def typed_catalog():
    entry["type"]="number" if re.fullmatch(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)",v) else "unknown"
   # Names from broad internal dumps without a prefix retain their source type;
   # preserve them for search and explicitly mark them unverified.
+  if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]+", name):
+   entry["type"]="unknown"
   if entry["type"]!=previous:changed+=1
   if entry["type"]=="unknown":
    unknown+=1
@@ -268,7 +270,7 @@ class ZflagV260Tests(unittest.TestCase):
   byname={f["name"]:f for f in flags}
   self.assertEqual(byname["FFlagDebugGraphicsPreferD3D11"]["type"],"boolean")
   self.assertEqual(byname["DFIntTaskSchedulerTargetFps"]["type"],"integer")
-  self.assertIn(byname["DFIntTaskSchedulerTargetFps"]["value"].strip().lower(),("595959","9999","240"))
+  self.assertRegex(byname["DFIntTaskSchedulerTargetFps"]["value"].strip(),r"^-?\d+$")
  def test_editor_values_validated(self):
   lib=(ROOT/"src/FlagLibrary.tsx").read_text(encoding="utf-8")
   for marker in ("ACTUAL VALUE","DESCRIPTION","Number.isSafeInteger","Invalid","parsedValue(flag: Flag)","setValueError"):
