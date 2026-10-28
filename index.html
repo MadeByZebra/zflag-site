@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark light" />
-  <meta name="theme-color" content="#090b0e" />
+  <meta name="theme-color" content="#05080e" />
   <link rel="icon" type="image/svg+xml" href="./zflag-favicon.svg" />
   <link rel="apple-touch-icon" href="./zflag-logo.png" />
   <meta name="application-name" content="ZFLAG" />
@@ -13,9 +13,9 @@
   <meta name="zflag-release" content="2.0.58" />
   <meta name="zflag-site-build" content="2026-10-27-atelier-v4" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="ZFLAG — The FastFlag workspace." />
+  <meta property="og:title" content="ZFLAG — Your flags. Your workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
-  <title>ZFLAG — FastFlags, without the noise.</title>
+  <title>ZFLAG — Your flags. Your workspace.</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;550;600;650;700&family=Geist+Mono:wght@400;500&display=swap');
     :root{
@@ -432,6 +432,13 @@ body .z2-window{transform:none!important;border:1px solid #6985a9b3!important;bo
 @media(max-width:600px){.nav-shell{top:7px}.nav{height:56px;border-radius:9px}.brand{font-size:12px}.brand .zmark{width:30px;height:30px}.hero{padding:111px 0 38px!important}.hero-grid{gap:29px!important}.atelier-pill{font-size:8px;padding:8px 10px;gap:7px;margin-bottom:15px}.hero h1{font-size:clamp(45px,12vw,72px)!important;margin:16px 0 22px!important;line-height:.98!important}.hero-copy>p:not(.release-bridge-status){font-size:14px;line-height:1.65}.hero-actions{gap:8px;margin-top:24px}.hero-actions .btn{height:42px;font-size:12px}.atelier-scroll{margin-top:24px;font-size:7px;gap:9px}.product-stage{padding:8px!important;border-radius:12px}.stage-overline{padding:0 3px 10px!important}.stage-guide,.stage-note{display:none}.atelier-editorial{padding:45px 0 75px}.atelier-editorial-grid,.features,.why-grid{grid-template-columns:1fr!important}.atelier-editorial-card:nth-child(3){grid-column:auto}.atelier-editorial h2{font-size:44px}.quality-strip{margin-bottom:35px!important}}
 @media(prefers-reduced-motion:reduce){.atelier-editorial-card{transition:none!important}}
 
+/* Light-mode contrast and a small-screen release badge fix for Atelier v4. */
+html[data-theme=light] .hero h1 span{background:linear-gradient(120deg,#22508a,#326cb9,#123865);-webkit-background-clip:text;background-clip:text}
+html[data-theme=light] .atelier-pill{color:#235386;border-color:#b6cde9;background:#e5effd}
+html[data-theme=light] .atelier-pill b{color:#153d71}
+html[data-theme=light] .hero .eyebrow,html[data-theme=light] .atelier-scroll{color:#567294}
+html[data-theme=light] .quality-strip{box-shadow:0 16px 48px #153a6619}
+@media(max-width:540px){.atelier-pill span{font-size:7px}.atelier-pill b{font-size:8px}}
 </style>
 </head>
 <body>
