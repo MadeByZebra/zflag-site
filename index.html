@@ -11,7 +11,7 @@
   <meta property="og:image" content="./zflag-logo.png" />
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.61" />
-  <meta name="zflag-site-build" content="2026-10-28-real-smooth-scroll-v4" />
+  <meta name="zflag-site-build" content="2026-10-28-locale-preview-v1" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ZFLAG — Your flags. Your workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
@@ -640,8 +640,19 @@ body .z2-window{--z2accent:var(--app-accent)!important}
 .z-mini-nav-icon{color:#e3e3e3!important}
 @media(max-width:600px){.palette-preview{padding-top:64px!important}}
 
+
+/* PREVIEW-ONLY ACCENT: website buttons, headings, and panels always stay black/white. */
+html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!important}
+.swatch.active{border-color:#e5e5e5!important;box-shadow:inset 0 0 0 1px #ffffffad!important;background:#111!important}
+.swatch:hover{border-color:#aaa!important}
+.site-library-copy h2 span,.site-library-preview-header span,.site-library-row>span,
+.zflag-install-pill,.zflag-install-number{color:#e5e5e5!important}
+.btn.primary{background:var(--button)!important;color:var(--button-text)!important;box-shadow:none!important}
+.btn.primary:hover{filter:brightness(1.06)}
+.z2-window,.z-mini,.palette-preview{--app-accent:#ffffff}
 </style>
 <script src="./smooth-scroll.js?v=4" defer></script>
+<script src="./site-language.js?v=1" defer></script>
 </head>
 <body>
   <header class="nav-shell"><div class="wrap nav">
@@ -965,8 +976,10 @@ body .z2-window{--z2accent:var(--app-accent)!important}
     function applyAccent(requested){
       const value=String(requested||'').toLowerCase();
       const color=Object.prototype.hasOwnProperty.call(accentNames,value)?value:'#ffffff';
-      document.documentElement.style.setProperty('--app-accent',color,'important');
-      document.querySelectorAll('.z2-window,.z-mini').forEach(preview=>{
+      // Website chrome remains monochrome. Accent is scoped to app previews only.
+      document.documentElement.style.removeProperty('--app-accent');
+      document.querySelectorAll('.z2-window,.z-mini,.palette-preview').forEach(preview=>{
+        preview.style.setProperty('--app-accent',color,'important');
         preview.style.setProperty('--z2accent',color,'important');
         preview.style.setProperty('--maccent',color,'important');
       });
@@ -1033,7 +1046,8 @@ body .z2-window{--z2accent:var(--app-accent)!important}
     ['languageTop','footerLanguage','languagePill'].forEach(id=>document.getElementById(id).onclick=openLanguage);
     document.querySelectorAll('[data-close="language"]').forEach(b=>b.onclick=()=>languageModal.classList.remove('open'));
     languageModal.onclick=e=>{if(e.target===languageModal)languageModal.classList.remove('open')};
-    function renderLanguageList(filter=''){const q=filter.trim().toLowerCase();document.getElementById('languageList').innerHTML=languages.filter(l=>!q||`${l.native} ${l.english} ${l.region}`.toLowerCase().includes(q)).map(l=>`<button class="language-option ${l.id===currentLang?'active':''}" data-lang="${l.id}"><span><b>${l.native}</b><small>${l.english}</small></span><span class="lang-check">✓</span></button>`).join('');document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{applyLanguage(b.dataset.lang);languageModal.classList.remove('open')})}
+    function renderLanguageList(filter=''){const q=filter.trim().toLowerCase();document.getElementById('languageList').innerHTML=languages.filter(l=>!q||`${l.native} ${l.english} ${l.region}`.toLowerCase().includes(q)).map(l=>`<button class="language-option ${l.id===currentLang?'active':''}" data-lang="${l.id}"><span><b>${l.native}</b><small>${l.english}</small></span><span class="lang-check">✓</span></button>`).join('');document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{applyLanguage(b.dataset.lang);window.dispatchEvent(new CustomEvent("zflag:languagechange",{detail:{lang:b.dataset.lang}}));languageModal.classList.remove('open')})}
+    window.zflagApplyHomeLanguage=applyLanguage;
     document.getElementById('langSearch').oninput=e=>renderLanguageList(e.target.value);applyLanguage(currentLang);
 
     const legalModal=document.getElementById('legalModal'),legalTitle=document.getElementById('legalTitle'),legalCopy=document.getElementById('legalCopy');
