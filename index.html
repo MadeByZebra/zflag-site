@@ -1040,7 +1040,18 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
     ['fr','de','pt','ru','tr','zh','ja','ko'].forEach(lang=>strings[lang]={...deepEnglish,...strings[lang]});
     strings.es={...deepEnglish,...strings.es};
     let currentLang=localStorage.getItem('zflag-language')||'en';
-    function applyLanguage(lang){currentLang=languages.some(x=>x.id===lang)?lang:'en';localStorage.setItem('zflag-language',currentLang);document.documentElement.lang=currentLang;const dict=strings[currentLang]||strings.en;document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(dict[k])el.textContent=dict[k]});document.querySelectorAll('[data-i18n-html]').forEach(el=>{const k=el.dataset.i18nHtml;if(dict[k])el.innerHTML=dict[k]});document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.dataset.i18nPlaceholder;if(dict[k])el.placeholder=dict[k]});const info=languages.find(x=>x.id===currentLang);document.getElementById('languageLabel').textContent=info.native;document.getElementById('languageRegion').textContent=info.region;renderLanguageList(document.getElementById('langSearch').value||'')}
+    function applyLanguage(lang){
+      currentLang=languages.some(x=>x.id===lang)?lang:'en';
+      try{localStorage.setItem('zflag-language',currentLang)}catch(error){}
+      document.documentElement.lang=currentLang;
+      const info=languages.find(x=>x.id===currentLang);
+      document.getElementById('languageLabel').textContent=info.native;
+      document.getElementById('languageRegion').textContent=info.region;
+      renderLanguageList(document.getElementById('langSearch').value||'');
+      // Full-site localizer translates every paragraph, guide and dynamic component.
+      // Do not partially replace text with the old 90-key homepage-only dictionary.
+      window.ZFLAGFullLanguage?.set(currentLang);
+    }
     const languageModal=document.getElementById('languageModal');
     function openLanguage(){languageModal.classList.add('open');document.getElementById('langSearch').value='';renderLanguageList('');setTimeout(()=>document.getElementById('langSearch').focus(),80)}
     ['languageTop','footerLanguage','languagePill'].forEach(id=>document.getElementById(id).onclick=openLanguage);
