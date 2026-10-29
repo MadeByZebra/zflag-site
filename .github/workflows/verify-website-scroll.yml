@@ -27,6 +27,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           from html.parser import HTMLParser
+          import json
           class Scan(HTMLParser):
               def __init__(self):
                   super().__init__(); self.ids=[]; self.links=[]; self.scripts=[]
@@ -51,10 +52,16 @@ jobs:
           assert "Math.abs(difference) <= 5" in js,"Animations must settle when pixels round near the target"
           assert "pointer: fine" not in js,"Wheel motion must not be skipped because of pointer-class detection"
           assert "Math.abs(event.deltaY) < 48) {" not in js,"Precision trackpad events must not bypass easing"
-          for name,expected in (("index.html","./site-language.js?v=1"),("docs/index.html","../site-language.js?v=1"),("library/index.html","../site-language.js?v=1")):
+          for name,expected in (("index.html","./site-language.js?v=2"),("docs/index.html","../site-language.js?v=2"),("library/index.html","../site-language.js?v=2")):
               html=Path(name).read_text(encoding="utf-8")
               scan=Scan();scan.feed(html)
               assert scan.scripts.count(expected)==1,(name,"language script missing")
+          for code in "es fr de pt ru tr zh ja ko".split():
+              data=json.loads(Path("i18n",code+".json").read_text(encoding="utf-8"))
+              assert len(data)>=850,(code,len(data))
+          for name,expected in (("index.html","./full-localize.js?v=2"),("docs/index.html","../full-localize.js?v=2"),("library/index.html","../full-localize.js?v=2")):
+              scan=Scan();scan.feed(Path(name).read_text(encoding="utf-8"))
+              assert expected in scan.scripts,(name,expected)
           language=Path("site-language.js").read_text(encoding="utf-8")
           assert "zflag-language" in language and 'zflag-locale-item' in language
           assert 'document.documentElement.lang' in language
