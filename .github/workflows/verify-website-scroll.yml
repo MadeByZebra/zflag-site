@@ -7,6 +7,7 @@ on:
       - 'docs/index.html'
       - 'library/index.html'
       - 'site-language.js'
+      - 'full-localize.js'
       - '.github/workflows/verify-website-scroll.yml'
   workflow_dispatch:
 permissions:
@@ -20,6 +21,7 @@ jobs:
         run: |
           node --check smooth-scroll.js
           node --check site-language.js
+          node --check full-localize.js
       - name: Validate all three website pages and accessibility fallbacks
         run: |
           python3 - <<'PY'
