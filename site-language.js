@@ -45,6 +45,7 @@ const mappings={
    home:'header nav a[href="../"]',docs:'header nav a[href="../docs/"]',library:'header nav a[href="./"]',
    libSub:'.container > p.sub',libNote:'.notice strong:first-child',
    flags:'[data-tab="flags"]',configs:'[data-tab="presets"]',myConfig:'#draftPanel .sectiontop h2',
+   flagsSection:'#flagsPanel .sectiontop h2',configsSection:'#presetsPanel .sectiontop h2',
    search:'#search',all:'#statusFilter option[value="all"]',
    allowed:'#statusFilter option[value="allowlisted"]',archived:'#statusFilter option[value="archive"]',
    advanced:'#statusFilter option[value="high-risk"]',categories:'.side-title',
@@ -68,7 +69,7 @@ function translate(){
  if(document.documentElement.lang!==current)document.documentElement.lang=current;
  for(const [key,selector] of Object.entries(mappings[page]||{})){
    const node=el(selector);if(!node)continue;
-   const actualKey=key==="libraryTitle"?"library":key;
+   const actualKey=key==="flagsSection"?"flags":key==="configsSection"?"configs":key;
    if(!d[actualKey])continue;
    if(node.tagName==="INPUT")node.placeholder=d[actualKey];
    else if(key==="flags"&&page==="library")node.textContent=d.flags;
@@ -120,6 +121,7 @@ if(page!=="home"){
    wrap.append(toggle,menu);nav.append(wrap);
  }
 }
+if(page==="library")document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>queueMicrotask(translate)));
 window.addEventListener("storage",event=>{if(event.key==="zflag-language"&&dict[event.newValue])setLanguage(event.newValue)});
 window.addEventListener("zflag:languagechange",event=>{if(dict[event.detail?.lang]){current=event.detail.lang;translate()}});
 if(page==="home"){
