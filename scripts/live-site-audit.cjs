@@ -33,12 +33,17 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     jsLoaded:performance.getEntriesByType('resource').some(x=>x.name.includes('smooth-scroll.js'))
   }));
   check('Homepage black',home.rootBg==='rgb(0, 0, 0)',home);
-  check('Latest homepage deployed',home.build==='2026-10-28-real-smooth-scroll-v4',home.build);
+  check('Latest homepage deployed',home.build==='2026-10-28-locale-preview-v1',home.build);
   const homepageDownload=await page.locator('a[href*="/releases/download/v2.0.61/ZFLAG_Setup.exe"]').count();
   check('Homepage v2.0.61 downloads',homepageDownload>=1,{found:homepageDownload});
   check('Homepage original Z',home.logo.includes('zflag-logo.png'),home.logo);
   check('White default chosen',home.pickerDefault==='#ffffff' && home.accent==='#ffffff',{pickerDefault:home.pickerDefault,accent:home.accent});
   check('Shared scroll JS loaded',home.jsLoaded,home.jsLoaded);
+  const websiteColorsBefore=await page.evaluate(()=>({
+    button:getComputedStyle(document.querySelector('.hero-actions .btn.primary')).background,
+    title:getComputedStyle(document.querySelector('.site-library-copy h2 span')).color,
+    body:getComputedStyle(document.body).backgroundColor
+  }));
   await page.locator('[data-accent="#4f8cff"]').first().click({timeout:5000});
   let changed=await page.evaluate(()=>({
     accent:getComputedStyle(document.documentElement).getPropertyValue('--app-accent').trim(),
@@ -49,6 +54,19 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     stageAccent:getComputedStyle(document.querySelector('.z2-window')).getPropertyValue('--z2accent').trim(),
   }));
   check('Click Blue updates all pickers',changed.accent==='#4f8cff'&&changed.selectedMain==='#4f8cff'&&changed.selectedFull==='#4f8cff'&&changed.selectedMini==='#4f8cff',changed);
+  const websiteColorsAfter=await page.evaluate(()=>({
+    button:getComputedStyle(document.querySelector('.hero-actions .btn.primary')).background,
+    title:getComputedStyle(document.querySelector('.site-library-copy h2 span')).color,
+    body:getComputedStyle(document.body).backgroundColor,
+    preview:getComputedStyle(document.querySelector('.z2-window')).getPropertyValue('--app-accent').trim(),
+    root:getComputedStyle(document.documentElement).getPropertyValue('--app-accent').trim()
+  }));
+  check('Accent stays INSIDE previews only',
+    websiteColorsAfter.button===websiteColorsBefore.button &&
+    websiteColorsAfter.title===websiteColorsBefore.title &&
+    websiteColorsAfter.body===websiteColorsBefore.body &&
+    websiteColorsAfter.root==='#ffffff'&&websiteColorsAfter.preview==='#4f8cff',
+    {before:websiteColorsBefore,after:websiteColorsAfter});
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForTimeout(350);
   let persisted=await page.evaluate(()=>document.querySelector('[data-accent].active')?.dataset.accent);
@@ -102,6 +120,18 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
   await page.waitForTimeout(900);
   let featurePos=await page.evaluate(()=>({hash:location.hash,y:window.scrollY,header:document.querySelector('#features')?.getBoundingClientRect().top}));
   check('Homepage anchor scroll',featurePos.hash==='#features' && Math.abs(featurePos.header)<180,featurePos);
+  // Real interaction: language picker, persistent choice across pages, and switching again.
+  await page.locator('#languageTop').click();
+  const chooseSpanish=page.locator('.language-option[data-lang="es"]');
+  check('Homepage language selector opens',await chooseSpanish.isVisible());
+  await chooseSpanish.click();
+  const spanish=await page.evaluate(()=>({
+    lang:document.documentElement.lang,
+    nav:document.querySelector('.navlinks a[href="./library/"]')?.textContent.trim(),
+    hero:document.querySelector('[data-i18n="hero.body"]')?.textContent.trim(),
+    saved:localStorage.getItem('zflag-language')
+  }));
+  check('Homepage Spanish selection actually translates',spanish.lang==='es'&&spanish.saved==='es'&&spanish.nav.includes('Biblioteca')&&spanish.hero.startsWith('ZFLAG'),spanish);
   check('No homepage JS exceptions',errors.length===0,errors.slice(0,8));
   await page.screenshot({path:'audit-home.png',fullPage:false});
   const docs=await context.newPage();
@@ -118,6 +148,14 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
   check('Docs have smooth wheel v2',await docs.evaluate(()=>window.__zflagScrollV2?.version==='4.0'));
   check('Docs v2.0.61 download',await docs.locator('a[href*="/releases/download/v2.0.61/ZFLAG_Setup.exe"]').count()>=1);
   check('Docs black and guides',docInfo.bg==='rgb(0, 0, 0)' && docInfo.docSections===15,docInfo);
+  const spanishDocs=await docs.evaluate(()=>({
+    lang:document.documentElement.lang,nav:document.querySelector('.toplinks a[href="./"]')?.textContent.trim(),
+    heading:document.querySelector('#overview>h2')?.textContent.trim(),hasPicker:!!document.querySelector('.zflag-locale-toggle')
+  }));
+  check('Docs inherit Spanish and translate guide navigation',spanishDocs.lang==='es'&&spanishDocs.nav==='Documentación'&&spanishDocs.heading==='Introducción'&&spanishDocs.hasPicker,spanishDocs);
+  await docs.locator('.zflag-locale-toggle').click();
+  await docs.locator('.zflag-locale-item[data-locale="zh"]').click();
+  check('Docs selector changes language to Chinese',await docs.evaluate(()=>document.documentElement.lang==='zh'&&document.querySelector('.toplinks a[href="./"]')?.textContent.trim()==='文档'));
   await docs.locator('a.side-link[href="#installation"]').first().click();
   await docs.waitForTimeout(700);
   check('Docs navigation scroll',await docs.evaluate(()=>location.hash==='#installation'));
@@ -135,6 +173,18 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     script:performance.getEntriesByType('resource').some(x=>x.name.includes('smooth-scroll.js'))
   }));
   check('Library catalog loads',/\d/.test(libInfo.count)&&libInfo.cards>=10,libInfo);
+  const chineseLibrary=await lib.evaluate(()=>({
+    lang:document.documentElement.lang,nav:document.querySelector('header nav a[href="./"]')?.textContent.trim(),
+    title:document.querySelector('.container>h1')?.textContent.trim(),
+    picker:!!document.querySelector('.zflag-locale-toggle')
+  }));
+  check('Library retains Chinese across navigation',chineseLibrary.lang==='zh'&&chineseLibrary.nav==='旗标库'&&chineseLibrary.title.startsWith('所有旗标')&&chineseLibrary.picker,chineseLibrary);
+  await lib.locator('.zflag-locale-toggle').click();
+  await lib.locator('.zflag-locale-item[data-locale="de"]').click();
+  const germanLibrary=await lib.evaluate(()=>({lang:document.documentElement.lang,
+    tab:document.querySelector('[data-tab="flags"]')?.textContent.trim(),
+    search:document.querySelector('#search')?.placeholder}));
+  check('Library selector changes UI without changing flag names',germanLibrary.lang==='de'&&germanLibrary.tab==='Einzelne Flags'&&germanLibrary.search.startsWith('Flags,'),germanLibrary);
   check('Library has smooth wheel v2',await lib.evaluate(()=>window.__zflagScrollV2?.version==='4.0'));
   await lib.locator('#search').fill('_note');
   await lib.waitForTimeout(250);
