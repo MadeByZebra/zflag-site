@@ -11,19 +11,45 @@ const TECH=/^(?:D?FFlag|D?FInt|D?FString|SFFlag|SInt|SString|FLog|DFLog)[a-zA-Z0
 const SPACES=/^(\s*)([\s\S]*?)(\s*)$/;
 const DESCRIPTION=/^Name suggests “(.+?)” controls (.+?)\. This interpretation is inferred; its real purpose, supported values and effect have not been independently documented\.$/;
 const TEMPLATE="Name suggests “ZZZFLAGNAMEZZZ” controls ZZZPURPOSEZZZ. This interpretation is inferred; its real purpose, supported values and effect have not been independently documented.";
+
+const CATEGORIES=["All Flags","FPS & Scheduling","Rendering & Graphics","Textures & Lighting","Networking & Ping","Caching & Memory","Physics & Movement","UI & Accessibility","Audio & Voice","Security & Telemetry","Assets & Loading","Other & Experimental"];
+const CATEGORY_IDS=["catAll","catFps","catGraphics","catTextures","catNetwork","catMemory","catPhysics","catUi","catAudio","catSecurity","catAssets","catOther"];
+const TYPES=["boolean","integer","number","string","unverified"];
+const TYPE_LOCALES={
+ es:["booleano","entero","número","texto","sin verificar"],
+ fr:["booléen","entier","nombre","texte","non vérifié"],
+ de:["Boolesch","Ganzzahl","Zahl","Text","ungeprüft"],
+ pt:["booleano","inteiro","número","texto","não verificado"],
+ ru:["логический","целое число","число","текст","не проверено"],
+ tr:["mantıksal","tamsayı","sayı","metin","doğrulanmamış"],
+ zh:["布尔值","整数","数字","文本","未经验证"],
+ ja:["真偽値","整数","数値","文字列","未確認"],
+ ko:["불리언","정수","숫자","문자열","미확인"]
+};
 const keys=new WeakMap(),attributes=new WeakMap();
 let current="en",loading=0,pack={},ready=false,observer=null,pending=new Set(),raf=0;
 const englishPageTitle=document.title;
 try{let stored=localStorage.getItem("zflag-language");if(LANGS.has(stored))current=stored;}catch(e){}
 const normalize=s=>String(s).replace(/\u00a0/g," ").replace(/\s+/g," ").trim();
 function technical(s){
- if(!s||TECH.test(s))return true;
+ if(!s||TECH.test(s)||["ZFLAG","Roblox","JSON","FPS"].includes(s))return true;
  if(/^(?:https?:\/\/|\.\/|\.\.\/|#|--|var\(|rgba?\(|\{|<)/.test(s))return true;
  return false;
 }
 function textTranslation(original){
  if(current==="en"||technical(original))return original;
  if(Object.prototype.hasOwnProperty.call(pack,original))return pack[original];
+
+ const cat=CATEGORIES.indexOf(original);
+ if(cat>=0)return window.ZFLAGChromeDictionary?.[current]?.[CATEGORY_IDS[cat]]||original;
+ const typ=TYPES.indexOf(original);
+ if(typ>=0)return TYPE_LOCALES[current]?.[typ]||original;
+ const label=original.match(/^ACTUAL JSON VALUE \((boolean|integer|number|string|unverified)\)$/);
+ if(label)return (pack["ACTUAL JSON VALUE"]||"ACTUAL JSON VALUE")+" ("+textTranslation(label[1])+")";
+ if(original.startsWith("SOURCE: "))return (pack["SOURCE:"]||"SOURCE:")+" "+original.slice(8);
+ const matches=original.match(/^(\d[\d,]*) matching flags$/);
+ if(matches)return matches[1]+" "+(pack["matching flags"]||"flags");
+
  const match=DESCRIPTION.exec(original);
  if(match){
    const format=pack[TEMPLATE];
@@ -117,7 +143,7 @@ function reportCoverage(){
   const original=keys.get(node)?.source||normalize(node.nodeValue);
   if(!original||!/[A-Za-z]/.test(original)||technical(original))continue;
   total++;
-  if(Object.prototype.hasOwnProperty.call(pack,original)||DESCRIPTION.test(original)||current==="en")covered++;
+  if(Object.prototype.hasOwnProperty.call(pack,original)||DESCRIPTION.test(original)||textTranslation(original)!==original||current==="en")covered++;
   else if(uncovered.length<35&&!uncovered.includes(original))uncovered.push(original);
  }
  return {language:current,covered,total,percentage:total?Math.round(100*covered/total):100,uncovered};
