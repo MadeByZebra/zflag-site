@@ -54,7 +54,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
     status:document.querySelector('#accentStatus')?.textContent,
     stageAccent:getComputedStyle(document.querySelector('.z2-window')).getPropertyValue('--z2accent').trim(),
   }));
-  check('Click Blue updates all pickers',changed.accent==='#4f8cff'&&changed.selectedMain==='#4f8cff'&&changed.selectedFull==='#4f8cff'&&changed.selectedMini==='#4f8cff',changed);
+  check('Click Blue updates only preview pickers',changed.accent==='#ffffff'&&changed.stageAccent==='#4f8cff'&&changed.selectedMain==='#4f8cff'&&changed.selectedFull==='#4f8cff'&&changed.selectedMini==='#4f8cff',changed);
   const websiteColorsAfter=await page.evaluate(()=>({
     button:getComputedStyle(document.querySelector('.hero-actions .btn.primary')).background,
     title:getComputedStyle(document.querySelector('.site-library-copy h2 span')).color,
@@ -215,6 +215,28 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
   await reducedPage.goto(base+'/?audit=reduce',{waitUntil:'domcontentloaded'});
   check('Reduced-motion users retain native wheel scrolling',await reducedPage.evaluate(()=>window.__zflagScrollV2?.isReducedMotion()===true));
   await reducedContext.close();
+  const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  mobile.setDefaultTimeout(6000);
+  const mobileHome=await mobile.newPage();
+  await mobileHome.goto(base+'/?audit=mobile-locale',{waitUntil:'domcontentloaded'});
+  const homeMobile=await mobileHome.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,langButton:!!document.getElementById('languageTop')}));
+  check('Mobile homepage layout fits screen',homeMobile.scrollWidth<=homeMobile.viewport+4&&homeMobile.langButton,homeMobile);
+  const mobileDocs=await mobile.newPage();
+  await mobileDocs.goto(base+'/docs/?audit=mobile-locale',{waitUntil:'domcontentloaded'});
+  const docMobile=await mobileDocs.evaluate(()=>({
+    scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,
+    langBtn:!!document.querySelector('.zflag-locale-toggle'),
+    langVisible:!!document.querySelector('.zflag-locale-toggle')&&getComputedStyle(document.querySelector('.zflag-locale-toggle')).display!=='none'
+  }));
+  check('Mobile documentation fits and shows language selector',docMobile.scrollWidth<=docMobile.viewport+4&&docMobile.langVisible,docMobile);
+  const mobileLib=await mobile.newPage();
+  await mobileLib.goto(base+'/library/?audit=mobile-locale',{waitUntil:'domcontentloaded'});
+  const libMobile=await mobileLib.evaluate(()=>({
+    scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,
+    localeVisible:!!document.querySelector('.zflag-locale-toggle')&&getComputedStyle(document.querySelector('.zflag-locale-toggle')).display!=='none'
+  }));
+  check('Mobile library fits and shows language selector',libMobile.scrollWidth<=libMobile.viewport+4&&libMobile.localeVisible,libMobile);
+  await mobile.close();
   await browser.close();
   const failed=results.filter(x=>!x.ok);
   console.log('\nSUMMARY '+JSON.stringify({passed:results.length-failed.length,total:results.length,failed:failed.map(x=>x.label)}));
