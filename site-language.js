@@ -20,6 +20,7 @@ for(const [id,row] of Object.entries(translations)){
  const items=row.split("|");if(items.length!==keys.length)throw new Error("Bad translations "+id+" "+items.length+"/"+keys.length);
  dict[id]=Object.fromEntries(keys.map((key,i)=>[key,items[i]]));
 }
+window.ZFLAGChromeDictionary=Object.freeze(dict);
 const page=location.pathname.includes("/docs/")?"docs":location.pathname.includes("/library/")?"library":"home";
 const el=(selector)=>document.querySelector(selector);
 const mappings={
