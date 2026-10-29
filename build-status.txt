@@ -1,4 +1,4 @@
-ZFLAG website build: real-smooth-scroll-v4
+ZFLAG website build: locale-preview-v1
 Latest official Windows installer: v2.0.61
 Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.61
 Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.61/ZFLAG_Setup.exe
@@ -12,3 +12,6 @@ Scrolling V4: real mouse-wheel and precision-trackpad easing with faster settlin
 Scrolling safety: native touch / keyboard / form controls / nested scroll panes / reduced motion
 Caveat: Cannot verify how an existing installed ZFLAG version appears without launching that local app
 Wheel animation now settles on the target (no infinite subpixel animation)
+Website: 10 shared language selections across home, docs and Flag Library
+Translations: site UI/navigation and guide headings; archived flag keys/values are never translated
+Accent picker: scoped to full and compact Studio previews only; website stays black/white
