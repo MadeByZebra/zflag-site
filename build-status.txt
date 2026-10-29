@@ -1,4 +1,4 @@
-ZFLAG website build: full-translation-v1
+ZFLAG website build: full-translation-v2
 Latest official Windows installer: v2.0.61
 Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.61
 Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.61/ZFLAG_Setup.exe
@@ -18,3 +18,4 @@ Accent picker: scoped to full and compact Studio previews only; website stays bl
 Comprehensive website localization: nine offline language packs (plus original English), 904 site-source text segments each
 Coverage: homepage, documentation article text, FAQ, legal dialogs, library UI, premade descriptions and dynamic flag description templates
 Technical data: FastFlag names and JSON values remain unchanged
+Latest pass: app-preview labels and dynamic library pagination, preset references and action buttons translated\n
