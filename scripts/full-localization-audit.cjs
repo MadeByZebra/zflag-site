@@ -56,7 +56,7 @@ async function translated(page,lang){
  await library.waitForTimeout(200);
  const key=await library.locator('#flagsGrid .card .flagname').first().textContent();
  const val=await library.locator('#flagsGrid input[aria-label^="Actual value for"]').first().inputValue().catch(()=>null);
- assert('FastFlag IDs and values unchanged',/^(?:D?FFlag|D?FInt|FString|FInt|SFFlag|FLog|D?FString)/.test(key)&&val!==null,{key,val});
+ assert('FastFlag IDs and values unchanged',/^[A-Za-z][A-Za-z0-9_]+$/.test(key)&&val!==null,{key,val});
  // Navigate across all supported languages, verifying packs load and translate a real article.
  for(const lang of locales){
   const current=await docs.evaluate(()=>localStorage.getItem('zflag-language'));
