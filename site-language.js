@@ -65,34 +65,12 @@ function setPreserving(el,text){
  else el.append(document.createTextNode(" "+text));
 }
 function translate(){
- const d=dict[current]||dict.en;
- if(document.documentElement.lang!==current)document.documentElement.lang=current;
- for(const [key,selector] of Object.entries(mappings[page]||{})){
-   const node=el(selector);if(!node)continue;
-   const actualKey=key==="flagsSection"?"flags":key==="configsSection"?"configs":key;
-   if(!d[actualKey])continue;
-   if(node.tagName==="INPUT")node.placeholder=d[actualKey];
-   else if(key==="flags"&&page==="library")node.textContent=d.flags;
-   else node.textContent=d[actualKey];
- }
- if(page==="docs"){
-   const mast=el(".mast h1");if(mast)mast.textContent=d.guideTitle;
-   ids.forEach((id,i)=>{const side=el('.side-link[href="#'+id+'"]');if(side)setPreserving(side,d[idsToKeys[i]])});
- }
- if(page==="library"){
-   const heading=el(".container > h1");if(heading)heading.textContent=d.libTitle;
-   const tab=el('[data-tab="draft"]');if(tab&&tab.firstChild)tab.firstChild.textContent=d.myConfig+" ";
-   const counter=el("#draftButtonCount");if(counter)counter.textContent=counter.textContent;
-   for(const b of document.querySelectorAll("#categories .cat")){
-     const item=b.dataset.categoryName;const idx=categories.indexOf(item);
-     if(idx!==-1&&b.firstElementChild)b.firstElementChild.textContent=d[categoryKeys[idx]];
-   }
- }
- if(page==="home"){
-   const p=el('.palette-panel p[data-i18n="appearance.note"]');if(p)p.textContent=d.previewNote;
- }
- document.querySelectorAll(".zflag-locale-current").forEach(node=>node.textContent=langs.find(x=>x[0]===current)?.[1]||"English");
- document.querySelectorAll(".zflag-locale-item").forEach(node=>node.setAttribute("aria-selected",String(node.dataset.locale===current)));
+  document.documentElement.lang=current;
+  document.querySelectorAll(".zflag-locale-current").forEach(node=>node.textContent=langs.find(x=>x[0]===current)?.[1]||"English");
+  document.querySelectorAll(".zflag-locale-item").forEach(node=>node.setAttribute("aria-selected",String(node.dataset.locale===current)));
+  // Full-site dictionaries own ALL content, including inner tabs and modal dialogs.
+  // This component only owns the language picker and saved preference.
+  window.ZFLAGFullLanguage?.set(current);
 }
 function setLanguage(lang){
  if(!dict[lang])return;
