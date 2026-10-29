@@ -224,7 +224,14 @@ buttons.append(add,cp);
 if(f.values.length>1){const alt=document.createElement("button");alt.className="btn";alt.textContent=f.values.length+" archived values";alt.title="Choose among archived source values";alt.onclick=()=>{const next=(f.values.findIndex(x=>String(x)===input.value)+1)%f.values.length;input.value=String(f.values[next]);checked();toast("Selected archived alternative "+(next+1)+"/"+f.values.length)};buttons.appendChild(alt)}
 const origin=document.createElement("div");origin.className="source";origin.textContent="SOURCE: "+f.sources.join(" + ")+(f.rawKeys.length?" · cleaned malformed import name":"");card.append(meta,name,desc,value,buttons,origin);return card
 }
-function filterItems(){const q=search.toLowerCase();filtered=flags.filter(f=>(cat==="All Flags"||f.category===cat)&&(statusFilter==="all"||f.status===statusFilter)&&(!q||(f.key+" "+f.category+" "+describe(f)+" "+f.value).toLowerCase().includes(q)))}
+function filterItems(){const q=search.toLowerCase();const tr=window.ZFLAGFullLanguage?.translate;filtered=flags.filter(f=>{
+ if((cat!=="All Flags"&&f.category!==cat)||(statusFilter!=="all"&&f.status!==statusFilter))return false;
+ if(!q)return true;
+ const original=f.key+" "+f.category+" "+describe(f)+" "+f.value;
+ if(original.toLowerCase().includes(q))return true;
+ if(!tr)return false;
+ return (tr(f.category)+" "+tr(describe(f))).toLowerCase().includes(q);
+})}
 function renderFlags(){filterItems();const grid=byId("flagsGrid");grid.replaceChildren();byId("resultsCount").textContent=filtered.length.toLocaleString()+" matching flags";const from=page*perPage;if(!filtered.length){const m=document.createElement("div");m.className="empty";m.textContent="No matching flags. Try a broader category or search.";grid.append(m)}else for(const f of filtered.slice(from,from+perPage))grid.append(renderFlagCard(f));
 const bar=byId("pagination");bar.replaceChildren();const pages=Math.max(1,Math.ceil(filtered.length/perPage));const a=document.createElement("button"),b=document.createElement("span"),c=document.createElement("button");a.className=c.className="btn";a.textContent="← Previous";c.textContent="Next →";b.textContent="Page "+(page+1)+" of "+pages;a.disabled=page===0;c.disabled=page+1>=pages;a.onclick=()=>{page--;renderFlags();byId("flagsPanel").scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"})};c.onclick=()=>{page++;renderFlags();byId("flagsPanel").scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"})};bar.append(a,b,c)}
 function renderPresets(){const grid=byId("presetGrid");grid.replaceChildren();const q=search.toLowerCase();for(const p of presets.filter(p=>(!q||(p.name+" "+p.category+" "+p.desc).toLowerCase().includes(q))&&(statusFilter==="all"||p.status===statusFilter))){const box=document.createElement("article");box.className="preset";const cap=document.createElement("div");cap.className="cardmeta";const badge=document.createElement("span");badge.className="chip "+(p.status==="allowlisted"?"allow":"legacy");badge.textContent=p.status==="allowlisted"?"Allowlisted names · no live test":"Legacy · likely ignored";const category=document.createElement("span");category.className="chip";category.textContent=p.category;cap.append(category,badge);
@@ -235,6 +242,7 @@ function render(){if(tab==="flags")renderFlags();else if(tab==="presets")renderP
 byId("search").addEventListener("input",e=>{search=e.target.value;page=0;render()});
 byId("statusFilter").addEventListener("change",e=>{statusFilter=e.target.value;page=0;render()});
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+window.addEventListener("zflag:translationready",()=>{if(search.trim()&&tab!=="draft")render()});
 byId("downloadDraft").onclick=()=>downloadJSON(draft,"ZFLAG-My-Config.json");
 byId("copyDraft").onclick=()=>clip(JSON.stringify(draft,null,2));
 byId("clearDraft").onclick=()=>{if(Object.keys(draft).length&&!confirm("Clear your entire configuration draft?"))return;draft={};saveDraft();renderDraft()};
