@@ -2,7 +2,7 @@ const { chromium }=require('playwright');
 const base=process.env.ZFLAG_AUDIT_BASE||'https://zflag.onrender.com';
 const locales=['es','fr','de','pt','ru','tr','zh','ja','ko'];
 let passed=0,failed=[];
-function assert(name,condition,data){console.log((condition?'PASS ':'FAIL ')+name+' '+JSON.stringify(data??'').slice(0,260));if(condition)passed++;else failed.push(name)}
+function assert(name,condition,data){console.log((condition?'PASS ':'FAIL ')+name+' '+JSON.stringify(data??'').slice(0,1600));if(condition)passed++;else failed.push(name)}
 async function translated(page,lang){
  await page.waitForFunction(lang=>document.documentElement.dataset.translatedLanguage===lang,lang,{timeout:16000});
  return page.evaluate(()=>window.ZFLAGFullLanguage.coverage());
