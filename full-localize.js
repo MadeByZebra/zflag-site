@@ -84,6 +84,7 @@ function translateSubtree(root){
 function flush(){
  raf=0;
  const roots=[...pending];pending.clear();
+ if(!ready)return;
  if(roots.some(node=>node===document.body))translateSubtree(document.body);
  else for(const root of roots)if(root.isConnected)translateSubtree(root);
  document.title=current==="en"?englishPageTitle:(pack[englishPageTitle]||englishPageTitle);
@@ -108,7 +109,7 @@ function startObserver(){
  observer.observe(document.body,{subtree:true,childList:true});
 }
 function reportCoverage(){
- let total=0,covered=0;
+ let total=0,covered=0;const uncovered=[];
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  let node;
  while((node=walker.nextNode())){
@@ -117,13 +118,16 @@ function reportCoverage(){
   if(!original||!/[A-Za-z]/.test(original)||technical(original))continue;
   total++;
   if(Object.prototype.hasOwnProperty.call(pack,original)||DESCRIPTION.test(original)||current==="en")covered++;
+  else if(uncovered.length<35&&!uncovered.includes(original))uncovered.push(original);
  }
- return {language:current,covered,total,percentage:total?Math.round(100*covered/total):100};
+ return {language:current,covered,total,percentage:total?Math.round(100*covered/total):100,uncovered};
 }
 async function setLanguage(next){
  if(!LANGS.has(next))next="en";
  if(next===current && (ready || loading>0))return;
  const ticket=++loading;
+ ready=false;
+ delete document.documentElement.dataset.translatedLanguage;
  current=next;
  document.documentElement.lang=next;
  try{localStorage.setItem("zflag-language",next)}catch(e){}
