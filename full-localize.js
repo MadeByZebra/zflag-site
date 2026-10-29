@@ -13,6 +13,7 @@ const DESCRIPTION=/^Name suggests “(.+?)” controls (.+?)\. This interpretati
 const TEMPLATE="Name suggests “ZZZFLAGNAMEZZZ” controls ZZZPURPOSEZZZ. This interpretation is inferred; its real purpose, supported values and effect have not been independently documented.";
 const keys=new WeakMap(),attributes=new WeakMap();
 let current="en",loading=0,pack={},ready=false,observer=null,pending=new Set(),raf=0;
+const englishPageTitle=document.title;
 try{let stored=localStorage.getItem("zflag-language");if(LANGS.has(stored))current=stored;}catch(e){}
 const normalize=s=>String(s).replace(/\u00a0/g," ").replace(/\s+/g," ").trim();
 function technical(s){
@@ -30,6 +31,9 @@ function textTranslation(original){
    if(format&&format.includes("ZZZFLAGNAMEZZZ")&&format.includes("ZZZPURPOSEZZZ"))
      return format.replaceAll("ZZZFLAGNAMEZZZ",match[1]).replaceAll("ZZZPURPOSEZZZ",scope);
  }
+ // Preserve technical identifiers while translating surrounding dynamically generated labels.
+ const dyn=original.match(/^(Added|Value for|Actual value for|Removed) ((?:D?FFlag|D?FInt|D?FString)[A-Za-z0-9_]+)(.*)$/);
+ if(dyn){return (pack[dyn[1]]||dyn[1])+" "+dyn[2]+(dyn[3]?(pack[dyn[3].trim()]||dyn[3]):"");}
  // Safety: never invent translations for unknown technical keys. The packs
  // contain all source copy and dynamic string templates from the website.
  return original;
@@ -80,8 +84,11 @@ function translateSubtree(root){
 function flush(){
  raf=0;
  const roots=[...pending];pending.clear();
- if(roots.some(node=>node===document.body)){translateSubtree(document.body);return;}
- for(const root of roots)if(root.isConnected)translateSubtree(root);
+ if(roots.some(node=>node===document.body))translateSubtree(document.body);
+ else for(const root of roots)if(root.isConnected)translateSubtree(root);
+ document.title=current==="en"?englishPageTitle:(pack[englishPageTitle]||englishPageTitle);
+ document.documentElement.dataset.translatedLanguage=current;
+ window.dispatchEvent(new CustomEvent("zflag:translationready",{detail:{lang:current,coverage:reportCoverage()}}));
 }
 function schedule(root){
  if(!root)return;
