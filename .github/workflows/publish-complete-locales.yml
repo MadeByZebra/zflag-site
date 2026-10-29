@@ -1,0 +1,74 @@
+name: Parallel French translation and publish all complete ZFLAG locales
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-complete-locales.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  fr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3,4,5]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Translate French segment in parallel
+        run: python3 scripts/generate-fr-shard.py --shard ${{ matrix.shard }} --count 6 --workers 10
+      - uses: actions/upload-artifact@v4
+        with:
+          name: french-shard-${{ matrix.shard }}
+          path: i18n/fr-shard-${{ matrix.shard }}.json
+  publish:
+    needs: fr
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download 8 completed locale packs from main run
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40813160003
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: pack-*
+          path: i18n
+          merge-multiple: true
+      - name: Download English source
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40813160003
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: source-text
+          path: i18n
+      - name: Download French segments
+        uses: actions/download-artifact@v4
+        with:
+          pattern: french-shard-*
+          path: i18n
+          merge-multiple: true
+      - name: Combine, check and publish translations
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path("i18n")
+          source=json.loads((p/"en-source.json").read_text())
+          fr={}
+          for path in p.glob("fr-shard-*.json"):
+            d=json.loads(path.read_text());fr.update(d);path.unlink()
+          assert len(fr)==len(source),("French shard coverage",len(fr),len(source))
+          (p/"fr.json").write_text(json.dumps(fr,ensure_ascii=False,separators=(",",":"))+"\n")
+          for code in "es fr de pt ru tr zh ja ko".split():
+            data=json.loads((p/f"{code}.json").read_text())
+            assert len(data)==len(source),(code,len(data),len(source))
+            print("COMPLETE_LANGUAGE",code,len(data),flush=True)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add i18n
+          git commit -m "Publish full-site ZFLAG offline packs for nine additional languages"
+          git pull --rebase origin main
+          git push origin HEAD:main
