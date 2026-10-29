@@ -242,7 +242,8 @@ function render(){if(tab==="flags")renderFlags();else if(tab==="presets")renderP
 byId("search").addEventListener("input",e=>{search=e.target.value;page=0;render()});
 byId("statusFilter").addEventListener("change",e=>{statusFilter=e.target.value;page=0;render()});
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
-window.addEventListener("zflag:translationready",()=>{if(search.trim()&&tab!=="draft")render()});
+let lastLibraryTranslationLanguage="";
+window.addEventListener("zflag:translationready",event=>{const language=event.detail?.lang||"en";if(language===lastLibraryTranslationLanguage)return;lastLibraryTranslationLanguage=language;if(search.trim()&&tab!=="draft")render()});
 byId("downloadDraft").onclick=()=>downloadJSON(draft,"ZFLAG-My-Config.json");
 byId("copyDraft").onclick=()=>clip(JSON.stringify(draft,null,2));
 byId("clearDraft").onclick=()=>{if(Object.keys(draft).length&&!confirm("Clear your entire configuration draft?"))return;draft={};saveDraft();renderDraft()};
