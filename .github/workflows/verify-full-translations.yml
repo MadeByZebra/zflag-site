@@ -1,0 +1,24 @@
+name: Verify complete ZFLAG website translations
+on:
+  push:
+    paths:
+      - 'scripts/full-localization-audit.cjs'
+      - '.github/workflows/verify-full-translations.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Test actual translated website and all 9 languages
+        run: node scripts/full-localization-audit.cjs
