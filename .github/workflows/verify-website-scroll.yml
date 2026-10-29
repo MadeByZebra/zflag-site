@@ -6,6 +6,7 @@ on:
       - 'index.html'
       - 'docs/index.html'
       - 'library/index.html'
+      - 'site-language.js'
       - '.github/workflows/verify-website-scroll.yml'
   workflow_dispatch:
 permissions:
@@ -16,7 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate smooth-scroll JavaScript syntax
-        run: node --check smooth-scroll.js
+        run: |
+          node --check smooth-scroll.js
+          node --check site-language.js
       - name: Validate all three website pages and accessibility fallbacks
         run: |
           python3 - <<'PY'
@@ -46,6 +49,13 @@ jobs:
           assert "Math.abs(difference) <= 5" in js,"Animations must settle when pixels round near the target"
           assert "pointer: fine" not in js,"Wheel motion must not be skipped because of pointer-class detection"
           assert "Math.abs(event.deltaY) < 48) {" not in js,"Precision trackpad events must not bypass easing"
+          for name,expected in (("index.html","./site-language.js?v=1"),("docs/index.html","../site-language.js?v=1"),("library/index.html","../site-language.js?v=1")):
+              html=Path(name).read_text(encoding="utf-8")
+              scan=Scan();scan.feed(html)
+              assert scan.scripts.count(expected)==1,(name,"language script missing")
+          language=Path("site-language.js").read_text(encoding="utf-8")
+          assert "zflag-language" in language and 'zflag-locale-item' in language
+          assert 'document.documentElement.lang' in language
           library=Path("library/index.html").read_text(encoding="utf-8")
           assert "flagsPanel" in library and "scrollIntoView" in library
           assert "top:360" not in library
