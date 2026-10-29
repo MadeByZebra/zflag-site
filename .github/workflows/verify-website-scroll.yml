@@ -59,7 +59,7 @@ jobs:
           for code in "es fr de pt ru tr zh ja ko".split():
               data=json.loads(Path("i18n",code+".json").read_text(encoding="utf-8"))
               assert len(data)>=850,(code,len(data))
-          for name,expected in (("index.html","./full-localize.js?v=2"),("docs/index.html","../full-localize.js?v=2"),("library/index.html","../full-localize.js?v=2")):
+          for name,expected in (("index.html","./full-localize.js?v=3"),("docs/index.html","../full-localize.js?v=3"),("library/index.html","../full-localize.js?v=3")):
               scan=Scan();scan.feed(Path(name).read_text(encoding="utf-8"))
               assert expected in scan.scripts,(name,expected)
           language=Path("site-language.js").read_text(encoding="utf-8")
