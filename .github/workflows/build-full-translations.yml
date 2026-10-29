@@ -1,0 +1,79 @@
+name: Build complete offline ZFLAG translations
+on:
+  push:
+    paths:
+      - 'scripts/generate-full-translations.py'
+      - '.github/workflows/build-full-translations.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract actual English site copy
+        run: python3 scripts/generate-full-translations.py --lang en
+      - uses: actions/upload-artifact@v4
+        with:
+          name: source-text
+          path: i18n/en-source.json
+  translate:
+    needs: extract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: [es, fr, de, pt, ru, tr, zh, ja, ko]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Translate complete website in ${{ matrix.lang }}
+        run: python3 scripts/generate-full-translations.py --lang ${{ matrix.lang }} --workers 9
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pack-${{ matrix.lang }}
+          path: i18n/${{ matrix.lang }}.json
+  publish:
+    needs: [extract,translate]
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pack-*
+          path: i18n
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: source-text
+          path: i18n
+      - name: Validate coverage and release
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path("i18n")
+          source=set(json.loads((root/"en-source.json").read_text()))
+          assert len(source)>250,("Missing page text extraction",len(source))
+          for lang in "es fr de pt ru tr zh ja ko".split():
+            data=json.loads((root/f"{lang}.json").read_text())
+            assert set(data)==source,(lang,"missing keys",len(source-set(data)))
+            assert all(v.strip() for v in data.values())
+            print("LANGUAGE_PACK",lang,"entries",len(data),"bytes",(root/f"{lang}.json").stat().st_size)
+          PY
+      - name: Commit translated static content packs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add i18n/en-source.json i18n/*.json
+          if git diff --cached --quiet; then
+            echo "No locale pack changes"
+            exit 0
+          fi
+          git commit -m "Publish complete offline ZFLAG translations for all website pages"
+          git pull --rebase origin main
+          git push origin HEAD:main
