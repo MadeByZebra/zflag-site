@@ -1,0 +1,44 @@
+name: Test full translations locally before deployment
+on:
+  push:
+    paths:
+      - 'i18n/*.json'
+      - 'full-localize.js'
+      - 'site-language.js'
+      - 'scripts/full-localization-audit.cjs'
+      - '.github/workflows/test-full-translations-local.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  localization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify translation engine syntax and packs
+        run: |
+          node --check full-localize.js
+          node --check site-language.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          source=json.loads(Path("i18n/en-source.json").read_text())
+          assert len(source)>=850,len(source)
+          for locale in "es fr de pt ru tr zh ja ko".split():
+            d=json.loads(Path("i18n",locale+".json").read_text())
+            assert len(d)==len(source),(locale,len(d),len(source))
+            assert all(len(v)>0 for v in d.values())
+            print(locale,"pack ready",len(d))
+          PY
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Test full website translations against local files
+        run: |
+          python3 -m http.server 8765 > /tmp/zflag-server.log 2>&1 &
+          ZFLAG_AUDIT_BASE=http://127.0.0.1:8765 node scripts/full-localization-audit.cjs
