@@ -82,6 +82,13 @@ kbd,.kbd,code,pre{border-color:#303030!important}
  .sidebar{background:#060606!important;border-right:1px solid #2f2f2f!important;box-shadow:20px 0 50px #000a!important}
  .toplinks .pill{font-size:11px}
 }
+/* Keep the locale switcher reachable in narrow documentation headers. */
+@media(max-width:580px){
+  header .brand em{display:none!important}
+  .toplinks .pill{display:none!important}
+  .toplinks{gap:9px!important}
+  header{padding:0 14px!important}
+}
 </style><script src="../smooth-scroll.js?v=4" defer></script>
 <script src="../site-language.js?v=1" defer></script>
 </head>
