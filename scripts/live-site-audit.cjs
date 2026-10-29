@@ -9,6 +9,7 @@ async function safe(fn){try{return await fn()}catch(e){return {error:String(e)}}
 (async()=>{
   const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const context=await browser.newContext({viewport:{width:1365,height:860},reducedMotion:'no-preference'});
+  context.setDefaultTimeout(8500);
   for(const route of ['/', '/docs/', '/library/', '/smooth-scroll.js','/zflag-logo.png','/build-status.txt']) {
     const resp=await context.request.get(base+route+'?audit=20261028', {timeout:25000});
     check('HTTP '+route,resp.status()===200,{status:resp.status(),type:resp.headers()['content-type'],bytes:(await resp.body()).length});
