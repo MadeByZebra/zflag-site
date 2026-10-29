@@ -122,6 +122,7 @@ function reportCoverage(){
 }
 async function setLanguage(next){
  if(!LANGS.has(next))next="en";
+ if(next===current && (ready || loading>0))return;
  const ticket=++loading;
  current=next;
  document.documentElement.lang=next;
@@ -151,6 +152,7 @@ window.ZFLAGFullLanguage=Object.freeze({
  set:setLanguage,
  get:()=>current,
  coverage:reportCoverage,
+ translate:textTranslation,
  languagePacks:true
 });
 setLanguage(current);
