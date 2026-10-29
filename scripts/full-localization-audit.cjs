@@ -12,6 +12,7 @@ async function translated(page,lang){
  const context=await browser.newContext({viewport:{width:1320,height:900}});
  const pack=JSON.parse(await (await context.request.get(base+'/i18n/es.json')).text());
  assert('Spanish full offline pack has 904 entries',Object.keys(pack).length>=850,{entries:Object.keys(pack).length});
+ assert("Pack includes long article text",Object.keys(pack).some(k=>k.length>220));
  const page=await context.newPage();
  page.on('pageerror',e=>{console.log('JS ERROR homepage',e.message);failed.push('homepage JS '+e.message)});
  await page.goto(base+'/?full-translation-audit=1',{waitUntil:'domcontentloaded'});
