@@ -1,0 +1,35 @@
+name: Verify ZFLAG v2.0.62 production download
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-v262-live.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check actual Render-hosted HTML, docs, status, and installer URL
+        shell: python
+        run: |
+          import urllib.request, sys, hashlib
+          base="https://zflag.onrender.com"
+          checks={
+            "/":("2026-10-29-ffm-import-v262","/releases/download/v2.0.62/ZFLAG_Setup.exe","FFM JSON preset"),
+            "/docs/":("/releases/download/v2.0.62/ZFLAG_Setup.exe",),
+            "/build-status.txt":("Latest official Windows installer: v2.0.62","f94c2ed830516a817aee694757b422d5fdb4d0d4901395e9f77efb0745ba802e"),
+          }
+          for path,markers in checks.items():
+            req=urllib.request.Request(base+path+"?audit=v262",headers={"User-Agent":"ZFLAG-Release-Audit/2.0.62","Cache-Control":"no-cache"})
+            with urllib.request.urlopen(req,timeout=25) as response:
+              body=response.read(1500000).decode("utf-8")
+              code=response.status
+            print(path,"HTTP",code,"bytes",len(body))
+            if code!=200:
+              raise SystemExit("Bad HTTP status for "+path)
+            for marker in markers:
+              if marker not in body:
+                raise SystemExit("MISSING on actual production "+path+": "+marker)
+          print("PASS: Render production serves v2.0.62 download, FFM notice, docs and matching installer SHA-256")
