@@ -17,6 +17,49 @@ def change(before, after):
         raise RuntimeError(f"Expected one matching location, found {count}: {before[:75]}")
     code = code.replace(before, after, 1)
 
+# On bulk runs, supervise the exact native helper created by ZFLAG. Stopping
+# must not kill Roblox and must never reuse an old process handle.
+helper = '''
+def _zflag_run_cancellable(command, timeout):
+    child = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             text=True, creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
+    began = time.monotonic()
+    try:
+        while True:
+            if _BULK_LIVE_CANCEL.is_set():
+                raise subprocess.TimeoutExpired(command, timeout)
+            if time.monotonic() - began >= timeout:
+                raise subprocess.TimeoutExpired(command, timeout)
+            try:
+                stdout, stderr = child.communicate(timeout=0.35)
+                return subprocess.CompletedProcess(command, child.returncode, stdout, stderr)
+            except subprocess.TimeoutExpired:
+                continue
+    finally:
+        if child.poll() is None:
+            child.kill()
+            try:
+                child.communicate(timeout=5)
+            except subprocess.TimeoutExpired:
+                pass
+
+
+'''
+change('def apply_enhanced(', helper+'def apply_enhanced(')
+change('''        result = subprocess.run(
+            [str(binary), "--zflag-headless", path],
+            capture_output=True, text=True, timeout=native_timeout,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), check=False,
+        )''',
+       '''        command = [str(binary), "--zflag-headless", path]
+        if source == "live-bulk":
+            result = _zflag_run_cancellable(command, native_timeout)
+        else:
+            result = subprocess.run(
+                command, capture_output=True, text=True, timeout=native_timeout,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), check=False,
+            )''')
+
 change('native_timeout = min(600, max(120, len(flags) * 0.25))',
        'native_timeout = 35 if source == "live-bulk" else min(600, max(120, len(flags) * 0.25))')
 change('result=apply_enhanced(batch,source)',
@@ -25,6 +68,12 @@ change('''            result=apply_enhanced(batch,"live-bulk")''',
        '''            with _BULK_LIVE_LOCK:
                 _BULK_LIVE_STATUS["nativeBatchStarted"] = time.monotonic()
             result=apply_enhanced(batch,"live-bulk")''')
+change('''            if done != len(batch) or result.get("interrupted") or result.get("outcome")=="unverified":''',
+       '''            if _BULK_LIVE_CANCEL.is_set():
+                outcome,message="cancelled","Cancelled active native helper; remaining flags unconfirmed"
+                break
+            if done != len(batch) or result.get("interrupted") or result.get("outcome")=="unverified":''')
+
 change('''    return {"ok":True,"message":"Stopping after the current native batch"}''',
        '''    return {"ok":True,"message":"Stop requested. The current native batch has a 35-second maximum."}''')
 change('''    snapshot["recentRows"] = recent[-_BULK_LIVE_OUTPUT_LIMIT:]
