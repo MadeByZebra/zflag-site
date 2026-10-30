@@ -1,4 +1,4 @@
-name: Build and publish ZFLAG v2.0.63 Windows installer
+name: Build and publish ZFLAG v2.0.64 Windows installer
 
 on:
   workflow_dispatch:
@@ -19,6 +19,7 @@ on:
       - 'release/zflag-v261-audited-catalog.py'
       - 'release/zflag-v262-ffm-compat.py'
       - 'release/zflag-v263-fallback-draft.py'
+      - 'release/zflag-v264-bounded-batches.py'
 
 permissions:
   contents: write
@@ -213,6 +214,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'v2.0.63 fallback planning patch failed' }
           $cfg = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
           if ($cfg.version -ne '2.0.63') { throw 'Expected v2.0.63 desktop app' }
+      - name: Fix first-batch stalls, Stop responsiveness, and progress display (v2.0.64)
+        shell: pwsh
+        run: |
+          $env:PYTHONUTF8 = '1'
+          python release/zflag-v264-bounded-batches.py _work/ZFLAG-Studio
+          if ($LASTEXITCODE -ne 0) { throw 'v2.0.64 stall repair failed' }
+          $cfg = Get-Content '_work/ZFLAG-Studio/src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
+          if ($cfg.version -ne '2.0.64') { throw 'Expected v2.0.64 desktop app' }
       - name: Validate bulk-safety, UI, and release regressions
         shell: pwsh
         working-directory: _work/ZFLAG-Studio
@@ -265,20 +274,20 @@ jobs:
       - name: Upload tested EXE
         uses: actions/upload-artifact@v4
         with:
-          name: ZFLAG-v2.0.63-Windows-EXE
+          name: ZFLAG-v2.0.64-Windows-EXE
           path: |
             _work/ZFLAG-Studio/release/ZFLAG_Setup.exe
             _work/ZFLAG-Studio/release/ZFLAG_Setup_SHA256.txt
           if-no-files-found: error
-      - name: Publish official v2.0.63 release after successful smoke test
+      - name: Publish official v2.0.64 release after successful smoke test
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.63
-          name: ZFLAG v2.0.63 for Windows
+          tag_name: v2.0.64
+          name: ZFLAG v2.0.64 for Windows
           draft: false
           prerelease: false
           body: |
-            ZFLAG v2.0.63 adds a confirmed-failure-only fallback draft in the installed editor. It creates a separate JSON tab for another manual attempt using the existing alternative engine, preserving successes and skipping unverified outcomes. No automatic second memory writer is enabled and no additional flag support or speed increase is claimed. ZFLAG v2.0.62 adds an independently implemented FFM-compatible JSON preset importer to the installed Flag Library. It accepts JSON flag maps and FFM-style preset arrays, validates flag names, deduplicates entries, and adds a draft to the editor only. It does not modify Roblox memory, merge version-specific offsets, or claim extra supported flags or increased speed. The existing C++ native injector and fallback diagnostics remain unchanged. ZFLAG v2.0.61 fixes the library import error discovered during live-browser testing: 81 archival notes and 9 malformed names had been mistakenly counted as selectable FastFlags. The library now has 15,875 valid-format flag identifiers; the notes are attached to relevant descriptions and malformed source records are retained separately for reference. It keeps v2.0.60 typed JSON value validation, smooth page transitions and centered top navigation. An archived flag name does not guarantee Roblox supports it. The prior v2.0.59 release introduced the complete searchable, paginated offline library and categorized premade configs. Names and archived values are not guarantees of current Roblox support. This UI-only library update retains the same native engine and does not bypass Roblox's local FastFlag allowlist. Previous v2.0.58 upstream compatibility panel: the third-party October 24 OMG binary and its claimed 23x speed improvement have not been integrated or benchmarked. This installer retains the ZFLAG native engine and reliable per-flag acknowledgements. It does not bundle or execute the unverified upstream binary.
+            ZFLAG v2.0.64 repairs a stalled bulk first batch by bounding native scan time to 35 seconds, supports stopping the exact running native helper, surfaces elapsed/stop progress and handles lost backend status without leaving the Stop button stuck. Confirmed acknowledgments are preserved; unknown flags remain unconfirmed. A build/installation test does not guarantee live Roblox writes. ZFLAG v2.0.63 adds a confirmed-failure-only fallback draft in the installed editor. It creates a separate JSON tab for another manual attempt using the existing alternative engine, preserving successes and skipping unverified outcomes. No automatic second memory writer is enabled and no additional flag support or speed increase is claimed. ZFLAG v2.0.62 adds an independently implemented FFM-compatible JSON preset importer to the installed Flag Library. It accepts JSON flag maps and FFM-style preset arrays, validates flag names, deduplicates entries, and adds a draft to the editor only. It does not modify Roblox memory, merge version-specific offsets, or claim extra supported flags or increased speed. The existing C++ native injector and fallback diagnostics remain unchanged. ZFLAG v2.0.61 fixes the library import error discovered during live-browser testing: 81 archival notes and 9 malformed names had been mistakenly counted as selectable FastFlags. The library now has 15,875 valid-format flag identifiers; the notes are attached to relevant descriptions and malformed source records are retained separately for reference. It keeps v2.0.60 typed JSON value validation, smooth page transitions and centered top navigation. An archived flag name does not guarantee Roblox supports it. The prior v2.0.59 release introduced the complete searchable, paginated offline library and categorized premade configs. Names and archived values are not guarantees of current Roblox support. This UI-only library update retains the same native engine and does not bypass Roblox's local FastFlag allowlist. Previous v2.0.58 upstream compatibility panel: the third-party October 24 OMG binary and its claimed 23x speed improvement have not been integrated or benchmarked. This installer retains the ZFLAG native engine and reliable per-flag acknowledgements. It does not bundle or execute the unverified upstream binary.
             Red Roblox offline status when no supported client process is found; green detected status when its PID exists. Activity now contains a fast scrolling native per-flag console with 160-record bounded history, color-coded native acknowledgments, and auto-follow. Current native checkpoint rows are shown as they arrive without fabricating successes. Green detected badge (without claiming memory access), real-time progress based on validated native checkpoint rows (500ms UI polling), live in-tab progress bar and accurate counts. Presets may contain up to 100,000 JSON entries but arbitrary flags may be unsupported or unsafe. No anti-cheat bypass or unverified success claims. Native injection now preserves verified per-flag failure details even if all flags fail, and accepts evidence-backed mixed legacy results instead of hiding them behind a generic error. This is a reporting/diagnostics fix, not a Roblox write bypass or guarantee. Tab-specific scores no longer reuse results from other JSONs; interrupted batches store their per-tab reported writes, failures, and unattempted flags. A read-only, best-effort current place ID detector and a reversible graphics tuner create a new copy retaining every original key. No game optimizations are applied automatically. The header now uses green for Roblox detected, with a separate diagnostic for memory access readiness. Large preset injection no longer shows a blocking browser confirmation; it displays live progress and estimated time remaining. Only the extra inter-batch wait is shortened from 0.5s to 0.25s; native batch size and crash-stop checks are unchanged. Updated Roblox status distinguishes a detected process from process-access readiness, adds diagnostics for failures, fixes the confirmation message, and hides results from a different preset. Standalone Windows installer. Large JSON presets now offer an explicitly confirmed experimental Inject action using paced 32-flag Enhanced native batches, per-batch progress and Stop control. A separate Stage safe config action retains allowlist-only startup staging. Includes one-click updater.
             Fixes the installer regression that left older ZFLAG backends running, locking fflag-backend.exe during upgrades. Includes a Windows smoke test that reinstalls with GUI/backend running. Live injection can still freeze or crash Roblox; this build does not guarantee 20k flags take effect. The live path is manually confirmed, stops if Roblox exits/restarts, and does not attempt a huge single memory-write batch.
             Automated offline regressions, Windows installer smoke test, backend startup, and update authorization tests passed. In-game Roblox injection is not covered by CI. Installer is unsigned.
