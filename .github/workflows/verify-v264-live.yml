@@ -1,0 +1,37 @@
+name: Verify ZFLAG v2.0.64 live site and installer
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-v264-live.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Inspect served production homepage, docs and build marker
+        shell: python
+        run: |
+          import urllib.request
+          base="https://zflag.onrender.com"
+          checks={
+            "/":("2026-10-30-bulk-stop-v264","releases/download/v2.0.64/ZFLAG_Setup.exe","ZFLAG v2.0.64 fixes stalled batches"),
+            "/docs/":("releases/download/v2.0.64/ZFLAG_Setup.exe",),
+            "/build-status.txt":("Latest official Windows installer: v2.0.64","3335c10d512f718543100873e2a39770db2be79c441e8ff5d9e57975298f8c57")
+          }
+          for path,markers in checks.items():
+            request=urllib.request.Request(base+path+"?verify=v264",headers={"Cache-Control":"no-cache","User-Agent":"ZFLAG-production-audit/2.0.64"})
+            with urllib.request.urlopen(request,timeout=25) as response:
+              content=response.read(2000000).decode("utf-8")
+              status=response.status
+            print(path,status,"bytes",len(content))
+            if status!=200:
+              raise SystemExit("HTTP failure: "+path)
+            for marker in markers:
+              if marker not in content:
+                raise SystemExit("Missing production marker: "+marker+" on "+path)
+            if "releases/download/v2.0.63/ZFLAG_Setup.exe" in content:
+              raise SystemExit("Stale download URL on "+path)
+          print("PASS: Live Render serves tested ZFLAG v2.0.64 website, documentation, download URL and checksum.")
