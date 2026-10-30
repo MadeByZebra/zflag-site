@@ -1,7 +1,7 @@
-ZFLAG website build: full-translation-v2+ffm-json-v262
-Latest official Windows installer: v2.0.62
-Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.62
-Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.62/ZFLAG_Setup.exe
+ZFLAG website build: full-translation-v2+fallback-draft-v263
+Latest official Windows installer: v2.0.63
+Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.63
+Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.63/ZFLAG_Setup.exe
 Successful Windows build & install tests: https://github.com/MadeByZebra/zflag-site/actions/runs/40782936802
 Live Chromium checks: 26/26 passed: https://github.com/MadeByZebra/zflag-site/actions/runs/40783581248
 Flag Library: 15,875 valid-format historical identifiers (NOT 15,965 actual flags)
@@ -19,6 +19,11 @@ Comprehensive website localization: nine offline language packs (plus original E
 Coverage: homepage, documentation article text, FAQ, legal dialogs, library UI, premade descriptions and dynamic flag description templates
 Technical data: FastFlag names and JSON values remain unchanged
 Latest pass: app-preview labels and dynamic library pagination, preset references and action buttons translated\n
-ZFLAG v2.0.62: FFM-compatible JSON presets import into desktop Library drafts only; native injector unchanged.
+ZFLAG v2.0.63: FFM-compatible JSON presets import into desktop Library drafts only; native injector unchanged.
 Windows CI run: https://github.com/MadeByZebra/zflag-site/actions/runs/40950201050
 Installer SHA-256: f94c2ed830516a817aee694757b422d5fdb4d0d4901395e9f77efb0745ba802e
+
+Windows v2.0.63 release: CI passed native builds, React, NSIS packaging, install and updater smoke tests.
+Fallback workflow: confirmed failures only -> separate draft -> manual alternative engine. No automatic secondary memory writes.
+v2.0.63 Windows CI run: https://github.com/MadeByZebra/zflag-site/actions/runs/40980204610
+v2.0.63 installer SHA-256: 597978ff20676f3dc81def10a3dc47dce0d09e6adb03c84646f97778648a2bb2
