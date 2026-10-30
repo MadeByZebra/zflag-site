@@ -52,7 +52,7 @@ s=s.replace(needle,'''  function createFallbackDraft() {
       showToast("Nothing eligible","Only explicit failed acknowledgments can be included. Unverified results are excluded.","info")
       return
     }
-    const base=activeTab.name.replace(/\\\\.json$/i,"")
+    const base=activeTab.name.replace(/\\.json$/i,"")
     newTab(JSON.stringify(plan.flags,null,2),base+"-confirmed-failures.json")
     showToast("Fallback draft ready",String(plan.eligible)+" confirmed failures copied. Select another engine in Settings to test manually; nothing was injected.","info")
   }
@@ -60,7 +60,7 @@ s=s.replace(needle,'''  function createFallbackDraft() {
   function renderPresets() {''',1)
 needle='        <div className="diff-strip">'
 assert s.count(needle)==1, "Editor results anchor changed"
-s=s.replace(needle,'''        {lastApplied?.results?.length > 0 && <section className="zflag-fallback-draft" aria-label="Engine fallback preparation">
+s=s.replace(needle,'''        {(lastApplied?.results?.length ?? 0) > 0 && <section className="zflag-fallback-draft" aria-label="Engine fallback preparation">
           <strong>Engine fallback · confirmed failures only</strong>
           <p>Prepare a separate JSON draft containing only flags whose native result explicitly failed. Select the alternate engine in Settings before another manual attempt. Unknown or interrupted outcomes are never retried automatically; the original tab is unchanged.</p>
           <button type="button" disabled={!parsed.ok || busy || liveBulkActive} onClick={createFallbackDraft}>Create fallback draft</button>
