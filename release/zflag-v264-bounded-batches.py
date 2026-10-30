@@ -47,6 +47,9 @@ def cancel_live_bulk():''',
 def cancel_live_bulk():''')
 # The 35-second timeout uses the existing TimeoutExpired recovery path.
 # Preserve its checkpoint-based confirmation of writes.
+if "import time" not in code:
+    code = code.replace("# Only explicit user-confirmed large live batches use this path.",
+                        "import time\\n# Only explicit user-confirmed large live batches use this path.",1)
 path.write_text(code, encoding="utf-8")
 for rel in ("package.json", "src-tauri/tauri.conf.json"):
     p = root / rel
@@ -56,7 +59,37 @@ for rel in ("package.json", "src-tauri/tauri.conf.json"):
     p.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 cargo = root / "src-tauri/Cargo.toml"
 data = cargo.read_text(encoding="utf-8")
-data, n = re.subn(r'(?m)^version = "2\\.0\\.63"$', 'version = "2.0.64"', data, count=1)
+data, n = re.subn(r'(?m)^version = "2\.0\.63"
+assert n == 1
+cargo.write_text(data, encoding="utf-8")
+app = root / "src/App.tsx"
+app.write_text(app.read_text(encoding="utf-8").replace("2.0.63", "2.0.64"), encoding="utf-8")
+for folder in ("tests", "scripts"):
+    for file in (root / folder).rglob("*"):
+        if file.suffix.lower() not in (".py", ".ps1", ".ts", ".tsx", ".js", ".json"):
+            continue
+        try:
+            old = file.read_text(encoding="utf-8")
+        except UnicodeError:
+            continue
+        if "2.0.63" in old:
+            file.write_text(old.replace("2.0.63", "2.0.64"), encoding="utf-8")
+(root / "tests/test_v264_stall.py").write_text('''import ast, json, unittest
+from pathlib import Path
+R=Path(__file__).resolve().parents[1]
+class TestStall(unittest.TestCase):
+ def test_backend_compiles(self):
+  ast.parse((R/"backend/server.py").read_text(encoding="utf-8"))
+ def test_bounded_first_batch(self):
+  s=(R/"backend/server.py").read_text(encoding="utf-8")
+  self.assertIn('native_timeout = 35 if source == "live-bulk"',s)
+  self.assertIn('result=apply_enhanced(batch,"live-bulk")',s)
+  self.assertIn("Scanning first batch:",s)
+ def test_version(self):
+  self.assertEqual(json.loads((R/"package.json").read_text(encoding="utf-8"))["version"],"2.0.64")
+''',encoding="utf-8")
+print("v2.0.64 bounded first batch and visible elapsed status")
+, 'version = "2.0.64"', data, count=1)
 assert n == 1
 cargo.write_text(data, encoding="utf-8")
 app = root / "src/App.tsx"
