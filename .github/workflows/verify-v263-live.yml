@@ -1,0 +1,34 @@
+name: Verify ZFLAG v2.0.63 actual production download
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-v263-live.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect production Render pages and installer checksum
+        shell: python
+        run: |
+          import urllib.request
+          base="https://zflag.onrender.com"
+          checks={
+            "/":("2026-10-30-fallback-draft-v263","/releases/download/v2.0.63/ZFLAG_Setup.exe","confirmed-failure fallback drafts"),
+            "/docs/":("/releases/download/v2.0.63/ZFLAG_Setup.exe",),
+            "/build-status.txt":("Latest official Windows installer: v2.0.63","597978ff20676f3dc81def10a3dc47dce0d09e6adb03c84646f97778648a2bb2"),
+          }
+          for path,markers in checks.items():
+            req=urllib.request.Request(base+path+"?audit=v263",headers={"User-Agent":"ZFLAG-Release-Audit/2.0.63","Cache-Control":"no-cache"})
+            with urllib.request.urlopen(req,timeout=25) as res:
+              data=res.read(1500000).decode("utf-8")
+              status=res.status
+            print(path,"HTTP",status,"bytes",len(data))
+            if status!=200:raise SystemExit("HTTP failure: "+path)
+            for marker in markers:
+              if marker not in data:raise SystemExit("Missing live marker "+repr(marker)+" at "+path)
+            if "/releases/download/v2.0.62/ZFLAG_Setup.exe" in data:raise SystemExit("Stale public download at "+path)
+          print("PASS: Live Render homepage, docs and build-status serve tested v2.0.63.")
