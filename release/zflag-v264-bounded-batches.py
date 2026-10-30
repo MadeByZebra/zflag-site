@@ -94,12 +94,55 @@ def cancel_live_bulk():''',
 
 
 def cancel_live_bulk():''')
+# A fresh job must not inherit the prior run's elapsed-time indicator.
+change('phase="Preparing first batch")',
+       'phase="Preparing first batch",nativeBatchStarted=0)')
+
 # The 35-second timeout uses the existing TimeoutExpired recovery path.
 # Preserve its checkpoint-based confirmation of writes.
 if "import time" not in code:
     code = code.replace("# Only explicit user-confirmed large live batches use this path.",
                         chr(10).join(("import time", "# Only explicit user-confirmed large live batches use this path.")), 1)
 path.write_text(code, encoding="utf-8")
+# Clear a stale Stop button if the local backend is no longer responding.
+ui_path = root / "src/App.tsx"
+ui = ui_path.read_text(encoding="utf-8")
+before = "    if (!liveBulkActive) return\n    let cancelled=false\n    const poll=async () => {"
+after = "    if (!liveBulkActive) return\n    let cancelled=false\n    let consecutiveErrors=0\n    const poll=async () => {"
+assert ui.count(before)==1, "UI bulk poll anchor changed"
+ui=ui.replace(before,after,1)
+before='''        if (!response.ok) return
+        const state=await response.json()'''
+after='''        if (!response.ok) throw new Error("Local backend rejected progress request")
+        const state=await response.json()
+        consecutiveErrors=0'''
+assert ui.count(before)==1, "UI bulk status HTTP anchor changed"
+ui=ui.replace(before,after,1)
+before='''      } catch {/* backend may be temporarily busy */}'''
+after='''      } catch {
+        consecutiveErrors++
+        if (!cancelled && consecutiveErrors >= 3) {
+          setLiveBulkActive(false)
+          showToast("Injection status unavailable","ZFLAG backend stopped responding. No additional flags are confirmed. Restart ZFLAG before another attempt.","error")
+        }
+      }'''
+assert ui.count(before)==1, "UI bulk request error anchor changed"
+ui=ui.replace(before,after,1)
+ui_path.write_text(ui,encoding="utf-8")
+
+# The small-screen toolbar may wrap instead of layering over existing text.
+css_path = root / "src/index.css"
+css_path.write_text(css_path.read_text(encoding="utf-8")+'''
+/* v2.0.64: status text and controls occupy separate flex items. */
+.zflag-inject-progress {position:static !important; display:inline-block !important;
+    flex:1 1 190px !important; max-width:100% !important; min-width:0 !important;
+    white-space:normal !important; overflow-wrap:anywhere !important;
+    line-height:1.4 !important;}
+.inject-engine-label {position:static !important; flex:0 0 auto !important;
+    max-width:120px !important; white-space:nowrap !important;}
+.zflag-inject-button {position:static !important; flex:0 0 auto !important;}
+''', encoding="utf-8")
+
 for rel in ("package.json", "src-tauri/tauri.conf.json"):
     p = root / rel
     obj = json.loads(p.read_text(encoding="utf-8"))
