@@ -1,7 +1,7 @@
-ZFLAG website build: full-translation-v2+fallback-draft-v263
-Latest official Windows installer: v2.0.63
-Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.63
-Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.63/ZFLAG_Setup.exe
+ZFLAG website build: full-translation-v2+bulk-stop-v264
+Latest official Windows installer: v2.0.64
+Verified release: https://github.com/MadeByZebra/zflag-site/releases/tag/v2.0.64
+Download: https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.64/ZFLAG_Setup.exe
 Successful Windows build & install tests: https://github.com/MadeByZebra/zflag-site/actions/runs/40782936802
 Live Chromium checks: 26/26 passed: https://github.com/MadeByZebra/zflag-site/actions/runs/40783581248
 Flag Library: 15,875 valid-format historical identifiers (NOT 15,965 actual flags)
@@ -27,3 +27,7 @@ Windows v2.0.63 release: CI passed native builds, React, NSIS packaging, install
 Fallback workflow: confirmed failures only -> separate draft -> manual alternative engine. No automatic secondary memory writes.
 v2.0.63 Windows CI run: https://github.com/MadeByZebra/zflag-site/actions/runs/40980204610
 v2.0.63 installer SHA-256: 597978ff20676f3dc81def10a3dc47dce0d09e6adb03c84646f97778648a2bb2
+
+ZFLAG v2.0.64: Native bulk first-batch 35-second cap; Stop terminates active ZFLAG helper; elapsed status and backend-disconnect recovery.
+Windows build and smoke tests: https://github.com/MadeByZebra/zflag-site/actions/runs/41008683476
+v2.0.64 installer SHA-256: 3335c10d512f718543100873e2a39770db2be79c441e8ff5d9e57975298f8c57
