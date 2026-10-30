@@ -49,7 +49,7 @@ def cancel_live_bulk():''')
 # Preserve its checkpoint-based confirmation of writes.
 if "import time" not in code:
     code = code.replace("# Only explicit user-confirmed large live batches use this path.",
-                        "import time\\n# Only explicit user-confirmed large live batches use this path.",1)
+                        chr(10).join(("import time", "# Only explicit user-confirmed large live batches use this path.")), 1)
 path.write_text(code, encoding="utf-8")
 for rel in ("package.json", "src-tauri/tauri.conf.json"):
     p = root / rel
@@ -59,8 +59,8 @@ for rel in ("package.json", "src-tauri/tauri.conf.json"):
     p.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 cargo = root / "src-tauri/Cargo.toml"
 data = cargo.read_text(encoding="utf-8")
-data, n = re.subn(r'(?m)^version = "2\.0\.63"
-assert n == 1
+assert 'version = "2.0.63"' in data
+data = data.replace('version = "2.0.63"', 'version = "2.0.64"', 1)
 cargo.write_text(data, encoding="utf-8")
 app = root / "src/App.tsx"
 app.write_text(app.read_text(encoding="utf-8").replace("2.0.63", "2.0.64"), encoding="utf-8")
