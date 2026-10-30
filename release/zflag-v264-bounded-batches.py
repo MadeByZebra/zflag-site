@@ -181,33 +181,3 @@ class TestStall(unittest.TestCase):
   self.assertEqual(json.loads((R/"package.json").read_text(encoding="utf-8"))["version"],"2.0.64")
 ''',encoding="utf-8")
 print("v2.0.64 bounded first batch and visible elapsed status")
-, 'version = "2.0.64"', data, count=1)
-assert n == 1
-cargo.write_text(data, encoding="utf-8")
-app = root / "src/App.tsx"
-app.write_text(app.read_text(encoding="utf-8").replace("2.0.63", "2.0.64"), encoding="utf-8")
-for folder in ("tests", "scripts"):
-    for file in (root / folder).rglob("*"):
-        if file.suffix.lower() not in (".py", ".ps1", ".ts", ".tsx", ".js", ".json"):
-            continue
-        try:
-            old = file.read_text(encoding="utf-8")
-        except UnicodeError:
-            continue
-        if "2.0.63" in old:
-            file.write_text(old.replace("2.0.63", "2.0.64"), encoding="utf-8")
-(root / "tests/test_v264_stall.py").write_text('''import ast, json, unittest
-from pathlib import Path
-R=Path(__file__).resolve().parents[1]
-class TestStall(unittest.TestCase):
- def test_backend_compiles(self):
-  ast.parse((R/"backend/server.py").read_text(encoding="utf-8"))
- def test_bounded_first_batch(self):
-  s=(R/"backend/server.py").read_text(encoding="utf-8")
-  self.assertIn('native_timeout = 35 if source == "live-bulk"',s)
-  self.assertIn('result=apply_enhanced(batch,"live-bulk")',s)
-  self.assertIn("Scanning first batch:",s)
- def test_version(self):
-  self.assertEqual(json.loads((R/"package.json").read_text(encoding="utf-8"))["version"],"2.0.64")
-''',encoding="utf-8")
-print("v2.0.64 bounded first batch and visible elapsed status")
