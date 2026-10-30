@@ -4,7 +4,9 @@ This repository contains the [ZFLAG desktop website](index.html), its Render sta
 
 ## Download the latest ZFLAG for Windows 10/11 (x64)
 
-**[Download ZFLAG_Setup.exe — v2.0.62](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.62/ZFLAG_Setup.exe)**
+**v2.0.63 adds a confirmed-failure-only fallback draft:** after a native apply result, the installed editor can copy explicit failures into a separate preset for another manual attempt using the alternative existing engine. Unverified outcomes are excluded, and automatic dual-engine memory writes, a faster engine, and broader Roblox flag support are not claimed.
+
+**[Download ZFLAG_Setup.exe — v2.0.63](https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.63/ZFLAG_Setup.exe)**
 
 - **FastFlag Library is IN the installed Windows app**, not just the browser: click **Flag Library** in the sidebar.
 - **v2.0.62** also corrects a proven data import error: 81 archive notes and 9 invalid-format names had been mistakenly presented as flags. It keeps separate value/description fields, typed JSON validation, centered top navigation and smoother transitions.
