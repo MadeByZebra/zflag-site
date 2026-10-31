@@ -36,7 +36,11 @@ def note_native_container_failure(pid, rows):
 once('def live_bulk_status():',helpers+'def live_bulk_status():','compatibility functions')
 once('''        runtime.log(f"Enhanced engine: {applied} applied, {errors} failed''',
      '''        if isinstance(details,list):
-            note_native_container_failure(find_pid(TARGET),details)
+            failure_reporter=globals().get("note_native_container_failure")
+            pid_lookup=globals().get("find_pid")
+            process_name=globals().get("TARGET")
+            if callable(failure_reporter) and callable(pid_lookup) and isinstance(process_name,str):
+                failure_reporter(pid_lookup(process_name),details)
         runtime.log(f"Enhanced engine: {applied} applied, {errors} failed''','native evidence recording')
 once('''            if first == 0 and ok == 0:
                 outcome,message="unsupported","First 32 flags had no confirmed writes; stopped expensive scans"
