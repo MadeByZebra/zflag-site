@@ -69,7 +69,7 @@ new='''def main() -> None:
         create=ctypes.windll.kernel32.CreateMutexW
         create.restype=ctypes.c_void_p
         create.argtypes=[ctypes.c_void_p,ctypes.c_bool,ctypes.c_wchar_p]
-        mutex=create(None,False,r"Local\\ZFLAG_Backend_18765")
+        mutex=create(None,False,r"Local\ZFLAG_Backend_18765")
         if not mutex: raise OSError("Could not initialize backend instance lock")
         if ctypes.windll.kernel32.GetLastError()==183:
             print("ZFLAG backend already running; not starting a duplicate.")
