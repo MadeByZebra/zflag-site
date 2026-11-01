@@ -1,0 +1,34 @@
+name: Verify ZFLAG FastFlag compatibility page
+on:
+  push:
+    paths:
+      - 'compatibility/index.html'
+      - 'index.html'
+      - '.github/workflows/verify-compatibility-site.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax and homepage links
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          page=Path('compatibility/index.html').read_text(encoding='utf-8')
+          home=Path('index.html').read_text(encoding='utf-8')
+          assert '<a href="./compatibility/"' in home, 'Homepage missing compatibility link'
+          assert page.count('<script>')==1 and page.count('</script>')==1
+          script=page.split('<script>',1)[1].split('</script>',1)[0]
+          Path('/tmp/zflag-compatibility.js').write_text(script,encoding='utf-8')
+          for marker in ('ClientVersion','inDump','allowlisted','Nothing was injected.'):
+            assert marker in script or marker in page, marker
+          print('PASS: compatibility page, links and release-honesty guards')
+          PY
+          node --check /tmp/zflag-compatibility.js
