@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070707">
+<title>FastFlag Compatibility · ZFLAG</title>
+<style>
+:root{font-family:Inter,"Segoe UI",Arial,sans-serif;background:#08090b;color:#eeeeef;color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 75% -12%,#20252b 0%,transparent 37%),#08090b;min-height:100vh}
+header{height:70px;border-bottom:1px solid #26292d;background:#0b0d10ec;display:flex;align-items:center;justify-content:space-between;padding:0 max(26px,calc((100vw - 1160px)/2))}
+a{color:#ddd;text-decoration:none}a:hover{color:#fff}.mark{font-size:18px;letter-spacing:.17em;font-weight:750}.back{font-size:13px;color:#a9aeb5}
+main{max-width:1160px;padding:65px 26px 85px;margin:auto}.eyebrow{color:#9ca2ab;text-transform:uppercase;letter-spacing:.17em;font-size:11px;font-weight:700}
+h1{font-size:clamp(29px,5vw,53px);letter-spacing:-.045em;line-height:1.09;font-weight:620;margin:15px 0 19px}
+.intro{max-width:780px;font-size:15px;line-height:1.7;color:#adb1b8}.panel{border:1px solid #292d32;background:#101215;border-radius:12px;padding:22px;margin-top:29px}
+.panel h2{font-size:16px;font-weight:620;margin:0 0 10px}.small{font-size:12px;color:#a8adb4;line-height:1.6}
+.uploads{display:grid;grid-template-columns:repeat(auto-fit,minmax(275px,1fr));gap:14px;margin-top:23px}
+.upload{display:block;background:#13161a;border:1px solid #35393d;border-radius:9px;padding:18px;min-height:155px}.upload label{display:block;font-weight:650;font-size:14px;margin-bottom:8px}
+.upload input{max-width:100%;font-size:12px;margin-top:14px}.meta{margin-top:12px;min-height:18px;overflow-wrap:anywhere;color:#b7c7d3;font-size:12px}
+button,.action{font:inherit;font-size:12px;padding:11px 15px;background:#f0f0f2;color:#0b0b0b;border:0;border-radius:7px;cursor:pointer;font-weight:650}
+button:disabled{cursor:not-allowed;opacity:.4}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:19px}.secondary{background:#20252b;border:1px solid #393e44;color:#f3f3f4}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:24px 0}
+.stat{background:#111417;border:1px solid #282c30;border-radius:10px;padding:19px;min-width:0}.stat b{display:block;font-size:clamp(23px,3.2vw,37px);font-weight:600;letter-spacing:-.05em}
+.stat span{display:block;font-size:11px;margin-top:7px;color:#a7adb5}.status{color:#aeb5c0;font-size:12px;min-height:20px;margin-top:13px}
+.filter{width:100%;max-width:360px;background:#191c20;border:1px solid #353941;border-radius:7px;padding:11px 13px;color:#eee}
+.tablewrap{border:1px solid #2a2d32;border-radius:10px;overflow:auto;max-height:480px}
+table{width:100%;border-collapse:collapse;min-width:600px;font-size:12px}th{text-align:left;background:#171a1e;position:sticky;top:0;color:#b7bac0;font-weight:500}th,td{padding:12px 15px;border-bottom:1px solid #292c31}td:first-child{font-family:Consolas,monospace;overflow-wrap:anywhere}.yes{color:#a9e8c5}.no{color:#d7b5a9}.muted{color:#9096a0}
+@media(max-width:630px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding-top:34px}header{padding:0 22px}}
+</style>
+</head>
+<body>
+<header><a class="mark" href="/">ZFLAG</a><a class="back" href="/">← Back to ZFLAG</a></header>
+<main>
+<div class="eyebrow">Desktop client · Diagnostics</div>
+<h1>FastFlag compatibility,<br>without fake success counts.</h1>
+<p class="intro">Check your exported ZFLAG JSON against a version-specific FastFlag offsets file. This browser tool reports matching names and Roblox's published startup-config allowlist. <strong>Matching an offset does not prove memory writes are permitted or that a flag works in-game.</strong></p>
+<section class="panel">
+<h2>Local files only</h2><p class="small">Your uploads stay inside your browser; this page does not send files to the ZFLAG server. For Roblox 0.745.0.7451137, use the offset data matching build <code>version-5a21b87bbc2641cf</code>. You may download the source file from <a href="https://github.com/4anti/Roblox-Fastflag-Manager/blob/main/data/FFlags.hpp" target="_blank" rel="noopener noreferrer"><u>4anti's FastFlag Manager repository</u></a>. Check the build identifier inside the header before interpreting results.</p>
+<div class="uploads">
+<div class="upload"><label for="preset">1. ZFLAG preset JSON</label><div class="small">Export the actual configuration containing your FastFlag names and values.</div><input type="file" id="preset" accept=".json,application/json"><div class="meta" id="preset-meta">No preset selected</div></div>
+<div class="upload"><label for="offsets">2. Matched FFlags.hpp</label><div class="small">Load the offset table for the exact Roblox version you're using; never substitute old offsets.</div><input type="file" id="offsets" accept=".hpp,.h,.txt,text/plain"><div class="meta" id="offsets-meta">No offsets selected</div></div>
+</div>
+<div class="row"><button id="run" disabled>Analyze selected files</button><button class="secondary" id="export" disabled>Export report JSON</button></div>
+<div role="status" id="status" class="status" aria-live="polite">Choose both files to begin.</div>
+</section>
+<section class="stats" aria-label="Results">
+<div class="stat"><b id="s-total">—</b><span>Imported flag names</span></div>
+<div class="stat"><b id="s-found">—</b><span>Found in matching offset dump</span></div>
+<div class="stat"><b id="s-absent">—</b><span>Not found in offset dump</span></div>
+<div class="stat"><b id="s-allow">—</b><span>Published startup allowlist</span></div>
+</section>
+<section class="panel"><h2>Per-flag results</h2><p class="small">No writes attempted. “Found” means an identifier exists in this offset dump, not that the associated memory is writable.</p>
+<div class="row"><input class="filter" type="search" placeholder="Filter flag names" id="search" aria-label="Search flags"></div>
+<div class="tablewrap"><table><thead><tr><th>Flag name</th><th>Offset dump</th><th>Startup allowlist</th><th>Data type</th></tr></thead><tbody id="rows"><tr><td colspan="4" class="muted">Load your files to analyze.</td></tr></tbody></table></div>
+</section>
+<section class="panel"><h2>Why ZFLAG reported zero writes</h2><p class="small">Your previous diagnostic reported <code>FastFlag container not found in memory</code>. The Enhanced engine searches for a Roblox memory structure before writing. That scan failed. A separate version-matched offset method could avoid that particular lookup, but Windows memory permissions, Roblox client protections, and the actual flag types still determine whether writes are possible. This page deliberately does not inject or bypass Roblox restrictions. For supported startup flags, use ZFLAG's <strong>Stage safe config</strong> feature and restart Roblox.</p>
+<p class="small">Sources: <a href="https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569" target="_blank" rel="noopener"><u>Roblox's official local-configuration allowlist</u></a> · <a href="https://rbxoffsets.com/windows" target="_blank" rel="noopener"><u>Roblox Windows build tracker</u></a>.</p></section>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const prefixes=["DFFlag","SFFlag","DFFloat","SFFloat","DFString","SFString","DFInt","SFInt","DFLog","SFLog","FFlag","FFloat","FString","FInt","FLog"];
+const allowed=new Set(["DFIntCSGLevelOfDetailSwitchingDistance","DFIntCSGLevelOfDetailSwitchingDistanceL12","DFIntCSGLevelOfDetailSwitchingDistanceL23","DFIntCSGLevelOfDetailSwitchingDistanceL34","FFlagHandleAltEnterFullscreenManually","DFFlagTextureQualityOverrideEnabled","DFIntTextureQualityOverride","FIntDebugForceMSAASamples","DFFlagDisableDPIScale","FFlagDebugGraphicsPreferD3D11","FFlagDebugSkyGray","DFFlagDebugPauseVoxelizer","DFIntDebugFRMQualityLevelOverride","FIntFRMMaxGrassDistance","FIntFRMMinGrassDistance","FFlagDebugGraphicsPreferVulkan","FFlagDebugGraphicsPreferOpenGL","FIntGrassMovementReducedMotionFactor"]);
+let records=[],report=null;
+const resultStatus=(s)=>{$("status").textContent=s;};
+function cleanKey(key){for(const p of prefixes)if(key.startsWith(p))return key.slice(p.length);return key;}
+function draw(){
+  const query=$("search").value.trim().toLowerCase(),body=$("rows");
+  body.replaceChildren();
+  const visible=records.filter(r=>r.name.toLowerCase().includes(query)).slice(0,750);
+  for(const item of visible){
+    const tr=document.createElement("tr");
+    for(const [v,cls] of [[item.name,""],[item.found?"Found":"Missing",item.found?"yes":"no"],[item.allowlisted?"Allowlisted":"Not allowlisted",item.allowlisted?"yes":"muted"],[item.type,"muted"]]){
+      const td=document.createElement("td");td.textContent=v;td.className=cls;tr.append(td);
+    }
+    body.append(tr);
+  }
+  if(!visible.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=4;td.textContent="No matching flags";tr.append(td);body.append(tr);}
+}
+function selected(){ $("run").disabled=!($("preset").files.length&&$("offsets").files.length); }
+$("preset").addEventListener("change",()=>{const f=$("preset").files[0];$("preset-meta").textContent=f?f.name:"No preset selected";selected()});
+$("offsets").addEventListener("change",()=>{const f=$("offsets").files[0];$("offsets-meta").textContent=f?f.name:"No offsets selected";selected()});
+$("search").addEventListener("input",draw);
+$("run").addEventListener("click",async()=>{
+ try{
+  $("export").disabled=true;records=[];report=null;
+  const presetFile=$("preset").files[0],dumpFile=$("offsets").files[0];
+  if(presetFile.size>5_000_000||dumpFile.size>6_000_000)throw Error("File size exceeds safety limit.");
+  const data=JSON.parse(await presetFile.text());
+  const flags=data?.flags&&typeof data.flags==="object"&&!Array.isArray(data.flags)?data.flags:data;
+  if(!flags||typeof flags!=="object"||Array.isArray(flags))throw Error("Preset must be a JSON object of name: value pairs.");
+  const hpp=await dumpFile.text();
+  const build=(hpp.match(/ClientVersion\s*=\s*"([^"]+)"/)||[])[1]||(hpp.match(/Roblox Version\s*:\s*(version-[a-f0-9]+)/i)||[])[1];
+  if(!build||!/^version-[a-f0-9]{16}$/i.test(build))throw Error("FFlags.hpp has no valid Roblox build identifier. Use a version-labeled dump.");
+  const section=hpp.includes("namespace FFlags")?hpp.slice(hpp.indexOf("namespace FFlags")):hpp;
+  const rx=/\b(?:inline\s+constexpr\s+)?uintptr_t\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*0x([a-fA-F0-9]+)\s*;/g;
+  const names=new Set();let m;
+  while((m=rx.exec(section))!==null)names.add(m[1]);
+  if(names.size<500)throw Error("Dump only yielded "+names.size+" entries; missing or unsupported format.");
+  records=Object.entries(flags).map(([name,value])=>({name,found:names.has(name)||names.has(cleanKey(name)),allowlisted:allowed.has(name),type:Array.isArray(value)?"array":value===null?"null":typeof value}));
+  const found=records.filter(x=>x.found).length,allow=records.filter(x=>x.allowlisted).length;
+  $("s-total").textContent=records.length.toLocaleString();$("s-found").textContent=found.toLocaleString();$("s-absent").textContent=(records.length-found).toLocaleString();$("s-allow").textContent=allow.toLocaleString();
+  report={build,offsetCount:names.size,summary:{total:records.length,inDump:found,notInDump:records.length-found,officialAllowlist:allow},entries:records,note:"Offset found != live memory write confirmed"};
+  $("export").disabled=false;draw();resultStatus("Analyzed "+records.length+" names against "+build+"; the dump has "+names.size.toLocaleString()+" identifiers. Nothing was injected.");
+ }catch(err){resultStatus("Cannot analyze: "+(err?.message||String(err)));$("export").disabled=true;}
+});
+$("export").addEventListener("click",()=>{
+ if(!report)return;
+ const blob=new Blob([JSON.stringify(report,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob);
+ const a=document.createElement("a");a.href=url;a.download="ZFLAG_compatibility_report.json";a.click();URL.revokeObjectURL(url);
+});
+</script>
+</body></html>
