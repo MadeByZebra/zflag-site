@@ -1,0 +1,33 @@
+name: Verify ZFLAG v2.0.65 production website
+on:
+  push:
+    paths: ['.github/workflows/verify-v265-live.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Check live homepage, docs and published installer checksum
+        shell: python
+        run: |
+          import urllib.request
+          base="https://zflag.onrender.com"
+          checks={
+            "/":("2026-10-31-native-compat-v265","releases/download/v2.0.65/ZFLAG_Setup.exe","reports Roblox compatibility accurately"),
+            "/docs/":("releases/download/v2.0.65/ZFLAG_Setup.exe","native container-discovery failures"),
+            "/build-status.txt":("Latest official Windows installer: v2.0.65","37f06da36c86f1c7e4950ca01361b79a9537394b7f9701d84f575821eb8af002")
+          }
+          for path, markers in checks.items():
+            req=urllib.request.Request(base+path+"?audit=v265",headers={"User-Agent":"ZFLAG-Release-Integrity/2.0.65","Cache-Control":"no-cache"})
+            with urllib.request.urlopen(req,timeout=30) as r:
+              body=r.read(2000000).decode("utf-8")
+              print(path,r.status,"bytes",len(body))
+              if r.status!=200:raise RuntimeError("Non-200 HTTP status")
+            for marker in markers:
+              if marker not in body: raise RuntimeError("Live site missing "+marker+" at "+path)
+            if "releases/download/v2.0.64/ZFLAG_Setup.exe" in body:
+              raise RuntimeError("Live page still serves old installer")
+          print("PASS: verified v2.0.65 live website, docs, and checksum")
