@@ -1,0 +1,93 @@
+name: Build ZFLAG Supported Config standalone Windows EXE
+
+on:
+  push:
+    paths:
+      - "safe_config/**"
+      - ".github/workflows/build-safe-config-windows.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zflag-safe-config-win
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run behavior, security and rollback tests
+        shell: pwsh
+        run: |
+          $env:PYTHONUTF8 = "1"
+          python -m unittest discover -s safe_config -p "test_*.py" -v
+          if ($LASTEXITCODE -ne 0) { throw "Supported config tests failed" }
+
+      - name: Build single-file GUI EXE
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check --no-input pyinstaller
+          if ($LASTEXITCODE -ne 0) { throw "PyInstaller setup failed" }
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name ZFLAG_Supported_Config --distpath safe_config/dist --workpath safe_config/build --specpath safe_config safe_config/zflag_supported_config.py
+          if ($LASTEXITCODE -ne 0) { throw "Windows EXE build failed" }
+          if (-not (Test-Path "safe_config/dist/ZFLAG_Supported_Config.exe")) { throw "Missing built EXE" }
+
+      - name: Smoke test packaged Windows executable
+        shell: pwsh
+        run: |
+          $marker = Join-Path $env:RUNNER_TEMP "zflag-supported-selftest.txt"
+          & "safe_config/dist/ZFLAG_Supported_Config.exe" "--self-test" $marker
+          Start-Sleep -Seconds 2
+          if (-not (Test-Path $marker)) { throw "Packaged EXE self-test did not run" }
+          $answer = (Get-Content -LiteralPath $marker -Raw).Trim()
+          if ($answer -ne "OK") { throw "Packaged EXE self-test failed: $answer" }
+          $exesize = (Get-Item "safe_config/dist/ZFLAG_Supported_Config.exe").Length
+          if ($exesize -lt 1000000) { throw "Packaged executable seems too small" }
+          Write-Host "PASS: EXE starts and validates allowlisted FastFlags; size=$exesize bytes"
+
+      - name: Stage EXE checksum and publish official standalone release
+        shell: pwsh
+        run: |
+          $exe = "safe_config/dist/ZFLAG_Supported_Config.exe"
+          $hash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -LiteralPath "safe_config/dist/ZFLAG_Supported_Config_SHA256.txt" -Value $hash -Encoding utf8
+          Write-Host "SHA-256: $hash"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ZFLAG-Supported-Config-Windows
+          path: |
+            safe_config/dist/ZFLAG_Supported_Config.exe
+            safe_config/dist/ZFLAG_Supported_Config_SHA256.txt
+
+      - name: Publish tested supported-config utility (not a live injector)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: safe-config-v1.0.0
+          name: ZFLAG Supported Config v1.0.0 for Windows
+          prerelease: false
+          body: |
+            Standalone Windows GUI for Roblox officially allowlisted FastFlag startup settings.
+            
+            Verified on Windows CI: unit tests, Python packaging, packaged EXE self-test.
+            
+            - Automatically discovers Roblox Player versions under LocalAppData.
+            - Imports ZFLAG JSON presets and rejects names outside Roblox's published allowlist.
+            - Validates flag types, stages to ClientAppSettings.json, backs up previous settings and verifies written file.
+            - Supports restoring earlier backups.
+            
+            IMPORTANT: This is NOT a live memory injector and cannot unlock all FastFlags.
+            Roblox can change its allowlist; client behavior must be checked after restarting Roblox.
+            
+            Existing ZFLAG v2.0.65 injector EXE remains unchanged and its in-game memory writes are not proven.
+          files: |
+            safe_config/dist/ZFLAG_Supported_Config.exe
+            safe_config/dist/ZFLAG_Supported_Config_SHA256.txt
+          fail_on_unmatched_files: true
