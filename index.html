@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#000000" />
-  <link rel="icon" type="image/png" href="./zflag-logo.png?v=black-v6" />
-  <link rel="apple-touch-icon" href="./zflag-logo.png?v=black-v6" />
+  <link rel="icon" href="data:," />
+  
   <meta name="application-name" content="ZFLAG" />
-  <meta property="og:image" content="./zflag-logo.png" />
+  
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.65" />
-  <meta name="zflag-site-build" content="2026-10-31-native-compat-v265" />
+  <meta name="zflag-site-build" content="2026-11-20-zebra-hub-access-preview-v1" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ZFLAG — Your flags. Your workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
@@ -650,6 +650,23 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
 .btn.primary{background:var(--button)!important;color:var(--button-text)!important;box-shadow:none!important}
 .btn.primary:hover{filter:brightness(1.06)}
 .z2-window,.z-mini,.palette-preview{--app-accent:#ffffff}
+
+/* Zebra 2026 shared visual system: exact original ZFLAG tones + motion tuning */
+html,html[data-theme="dark"]{--bg:#080808;--bg-2:#0c0c0c;--panel:#0f0f0f;--panel-2:#131313;--raised:#181818;--text:#f6f6f6;--muted:#8c8c8c;--soft:#626262;--line:#242424;--line-2:#353535;--glass:rgba(12,12,12,.78)}
+.nav-shell .brand,.footer-brand .brand{font-weight:650;letter-spacing:-.035em}
+.nav-shell .nav,.studio-window.app-window,.showcase-card,.feature,.why-card,.z2-window{backface-visibility:hidden}
+.navlinks a,.footer-link,.stage-guide{transition:color .26s ease,background-color .26s ease,transform .28s cubic-bezier(.2,.8,.2,1),padding .28s ease!important}
+.btn,.iconbtn,[data-download],.z2-feature-link,.z2-swatch,.z-mini-action{transition:transform .28s cubic-bezier(.2,.8,.2,1),background-color .28s ease,border-color .26s ease,color .28s ease,box-shadow .28s ease,filter .26s ease,opacity .25s ease!important}
+.btn:hover,.iconbtn:hover,[data-download]:hover{transform:translate3d(0,-2px,0)!important;box-shadow:0 10px 28px rgba(0,0,0,.15)!important}
+.btn:active,.iconbtn:active,[data-download]:active{transform:translate3d(0,0,0) scale(.985)!important}
+.navlinks a:hover{background:var(--panel-2)!important;color:var(--text)!important}
+.btn:focus-visible,.iconbtn:focus-visible,.navlinks a:focus-visible{outline:2px solid var(--text)!important;outline-offset:3px!important}
+.reveal{transition:opacity .78s cubic-bezier(.2,.7,.2,1),transform .78s cubic-bezier(.2,.7,.2,1),filter .78s cubic-bezier(.2,.7,.2,1)!important}
+.reveal:not(.in){filter:blur(3px)}
+.reveal.in{filter:none}
+@media(max-width:980px){.reveal:not(.in){filter:none}}
+@media(prefers-reduced-motion:reduce){.btn,.iconbtn,[data-download],.navlinks a,.footer-link,.z2-feature-link{transition:none!important}.btn:hover,.iconbtn:hover,[data-download]:hover{transform:none!important}.reveal:not(.in){filter:none!important}}
+
 </style>
 <script src="./smooth-scroll.js?v=4" defer></script>
 <script src="./site-language.js?v=2" defer></script>
@@ -657,8 +674,8 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
 </head>
 <body>
   <header class="nav-shell"><div class="wrap nav">
-    <a class="brand" href="#home"><span class="zmark">Z</span><span>ZFLAG</span></a>
-    <nav class="navlinks" aria-label="Main navigation"><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="./library/">Flag Library</a><a href="./compatibility/" title="Check exported FastFlags against build-matched offsets">Compatibility</a><a href="./docs/">Documentation <span aria-hidden="true">↗</span></a><a href="./docs/#releases">Changelog</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
+    <a class="brand" href="#home"><span>ZFLAG</span></a>
+    <nav class="navlinks" aria-label="Main navigation"><a href="./zebra/">Zebra Home ↗</a><a href="./zebra/scripts/">BL Scripts ↗</a><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="./library/">Flag Library</a><a href="./compatibility/" title="Check exported FastFlags against build-matched offsets">Compatibility</a><a href="./docs/">Documentation <span aria-hidden="true">↗</span></a><a href="./docs/#releases">Changelog</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
     <div class="nav-actions"><a class="docs-quick-link" href="./docs/">Docs ↗</a><button class="iconbtn lang-top" id="languageTop" aria-label="Select language" data-tooltip="Language"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></button><button class="iconbtn" id="themeToggle" aria-label="Toggle website theme">◐</button><button class="btn primary" data-download data-i18n="nav.download">Download</button></div>
   </div></header>
 
@@ -668,7 +685,7 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
         <div class="eyebrow" data-i18n="hero.eyebrow">Windows configuration utility · v2.0.65</div>
         <h1 data-i18n-html="hero.title">Your flags.<br><span>Your workspace.</span></h1>
         <p data-i18n="hero.body">A purpose-built Windows studio for editing configurations, managing presets, and understanding every result.</p>
-        <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a><a class="btn hero-docs-button" href="./docs/"><span>Read documentation</span><span>↗</span></a></div><p class="release-bridge-status" id="releaseBridgeStatus" aria-live="polite">Latest: v2.0.65 · Windows x64 · one-click in-app updates · responsive toolbar · 14.2 MB</p>
+        <div class="hero-actions"><button class="btn primary" data-download><span data-i18n="hero.download">Download for Windows</span> <span>↓</span></button><a class="btn" href="#product" data-i18n="hero.see">See ZFLAG</a><a class="btn hero-docs-button" href="./docs/"><span>Read documentation</span><span>↗</span></a></div><p class="release-bridge-status" id="releaseBridgeStatus" aria-live="polite">Latest published preview: v2.0.65 · Windows x64 · private licensing under development</p>
         <div class="hero-meta"><span>Windows 10 / 11</span><span>x64</span><span data-i18n="hero.metaTheme">Website: Dark / Light</span><span data-i18n="hero.metaNoFake">No fake benchmarks</span></div><div class="atelier-scroll"><span>CRAFTED FOR THE DETAILS</span><i></i><span>SCROLL TO EXPLORE ↓</span></div>
       </div>
       <div class="product-stage reveal" id="product"><div class="stage-overline"><div class="stage-indicator"><span class="stage-spark"></span> ZFLAG / STUDIO 2.0 <span class="stage-revision">BLACK EDITION · OCT 27</span></div><span class="stage-note">01 / THE WORKSPACE</span><a href="./docs/#first-run" class="stage-guide">Product walkthrough ↗</a></div>
@@ -764,8 +781,8 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
           <div class="engine-notice-actions">
             <a class="btn" href="./compatibility/">Check your FastFlag compatibility ↗</a>
             <a class="btn" href="https://github.com/davelovestars/oldinjector-version-working/releases/download/omg/fastflag_injector_gui_enhanced.exe" target="_blank" rel="noopener noreferrer" download>Download OMG developer EXE ↗</a>
-            <a class="text-link" href="https://github.com/davelovestars/oldinjector-version-working/releases/tag/omg" target="_blank" rel="noopener noreferrer">View original release and publisher ↗</a>
-            <button class="btn primary" data-download type="button">Download ZFLAG v2.0.65 ↓</button>
+            <a class="text-link" href="https://github.com/davelovestars/oldinjector-version-working/releases/tag/omg" target="_blank" rel="noopener noreferrer">ZFLAG access information ↗</a>
+            <button class="btn primary" data-download type="button">Review ZFLAG access ↗</button>
             <small>OMG EXE SHA-256: 418a52fe128b6cf3e8fe66142527dbf502512034817e1bec6e0eb21e32ee0249<br>External, unverified executable · not installed or supported by ZFLAG</small>
           </div>
         </div>
@@ -902,7 +919,7 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
             <div class="zflag-install-step"><div class="zflag-install-number"><span>02 / INSTALL</span><span>↘</span></div><h3>Set up ZFLAG</h3><p>Run the installer. Existing ZFLAG shortcuts are replaced with the current app shortcut.</p></div>
             <div class="zflag-install-step"><div class="zflag-install-number"><span>03 / OPEN</span><span>↗</span></div><h3>Start creating</h3><p>Open ZFLAG from the desktop or Start Menu to use the editor, native engine, AI tools, and flag library.</p></div>
           </div>
-          <p class="zflag-updater-release-note"><strong>New:</strong> Once installed, update future ZFLAG versions with one click in Settings → General. No repeated manual installers.</p>\n          <div class="zflag-install-footer"><button class="btn primary" data-download type="button">Download for Windows ↓</button><small>Download v2.0.65 (14.2 MB). Fixes the locked fflag-backend.exe issue when updating ZFLAG. Unsigned app: SmartScreen may display a warning.</small></div>
+          <p class="zflag-updater-release-note"><strong>New:</strong> Once installed, update future ZFLAG versions with one click in Settings → General. No repeated manual installers.</p>\n          <div class="zflag-install-footer"><button class="btn primary" data-download type="button">Download for Windows ↓</button><small>Paid access is being prepared. The existing website version is not a protected paid release. An updated private installer will be supplied before launch.</small></div>
         </div>
       </div>
     </section>
@@ -934,7 +951,7 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
 
   <footer><div class="wrap">
     <div class="footer-main">
-      <div class="footer-brand"><div class="brand"><span class="zmark">Z</span><span>ZFLAG</span></div><p data-i18n="footer.desc">A focused Windows configuration utility for FFlag browsing, profiles, editing, import/export, and launch control.</p><small>© 2026 ZFLAG · By Zebra</small></div>
+      <div class="footer-brand"><div class="brand"><span>ZFLAG</span></div><p data-i18n="footer.desc">A focused Windows configuration utility for FFlag browsing, profiles, editing, import/export, and launch control.</p><small>© 2026 ZFLAG · By Zebra</small></div>
       <div class="footer-col"><h4 data-i18n="footer.product">Product</h4><a href="#product" data-i18n="footer.overview">Overview</a><a href="#features" data-i18n="nav.features">Features</a><a href="#why" data-i18n="nav.why">Why ZFLAG</a><button data-download data-i18n="nav.download">Download</button></div>
       <div class="footer-col"><h4 data-i18n="footer.explore">Explore</h4><a href="#preview" data-i18n="nav.preview">Preview</a><a href="#appearance" data-i18n="footer.appearance">Appearance</a><a href="#faq" data-i18n="nav.faq">FAQ</a><a href="./docs/">Documentation ↗</a><button id="footerTheme" data-i18n="footer.theme">Toggle website theme</button></div>
       <div class="footer-col"><h4 data-i18n="footer.legal">Legal</h4><button data-legal="terms" data-i18n="footer.terms">Terms</button><button data-legal="privacy" data-i18n="footer.privacy">Privacy</button><button id="footerLanguage" data-i18n="footer.language">Language</button></div>
@@ -942,7 +959,7 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
     <div class="footer-bottom"><div class="footer-bottom-left"><button class="language-pill" id="languagePill"><span class="language-pill-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></span><span><b id="languageLabel">English</b><br><small id="languageRegion">United States</small></span></button></div><div class="footer-bottom-mid"><button class="footer-link" style="all:unset;cursor:pointer" data-legal="terms" data-i18n="footer.terms">Terms</button><button class="footer-link" style="all:unset;cursor:pointer" data-legal="privacy" data-i18n="footer.privacy">Privacy</button></div><div class="footer-bottom-right">ZFLAG v2.0.65 · WINDOWS X64</div></div>
   </div></footer>
 
-  <div class="modal" id="downloadModal" role="dialog" aria-modal="true"><div class="modal-card"><div class="modal-top"><div class="brand"><span class="zmark">Z</span><span>ZFLAG</span></div><button class="iconbtn" data-close="download">×</button></div><h3 data-i18n="download.title">Download ZFLAG</h3><p data-i18n="download.body">Prebuilt Windows installer for ZFLAG. No Node.js, Rust, Python, or Visual Studio Build Tools are required on the user PC.</p><div class="download-meta"><div class="meta-row"><span data-i18n="download.version">Version</span><span>2.0.65</span></div><div class="meta-row"><span data-i18n="download.platform">Platform</span><span>WINDOWS 10 / 11 X64</span></div><div class="meta-row"><span data-i18n="download.package">Package</span><span>ZFLAG SETUP</span></div></div><div class="modal-actions"><a class="btn primary" href="https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.65/ZFLAG_Setup.exe" download data-i18n="download.exe">Download .exe</a><button class="btn" data-close="download" data-i18n="download.cancel">Cancel</button></div></div></div>
+  <div class="modal" id="downloadModal" role="dialog" aria-modal="true"><div class="modal-card"><div class="modal-top"><div class="brand"><span>ZFLAG</span></div><button class="iconbtn" data-close="download">×</button></div><h3 data-i18n="download.title">Download ZFLAG</h3><p data-i18n="download.body">Prebuilt Windows installer for ZFLAG. No Node.js, Rust, Python, or Visual Studio Build Tools are required on the user PC.</p><div class="download-meta"><div class="meta-row"><span data-i18n="download.version">Version</span><span>2.0.65</span></div><div class="meta-row"><span data-i18n="download.platform">Platform</span><span>WINDOWS 10 / 11 X64</span></div><div class="meta-row"><span data-i18n="download.package">Package</span><span>ZFLAG SETUP</span></div></div><div class="modal-actions"><a class="btn primary" href="https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.65/ZFLAG_Setup.exe" download data-i18n="download.exe">Download .exe</a><button class="btn" data-close="download" data-i18n="download.cancel">Cancel</button></div></div></div>
 
   <div class="modal language-modal" id="languageModal" role="dialog" aria-modal="true"><div class="modal-card"><div class="modal-top"><h3 data-i18n="language.title">Select language</h3><button class="iconbtn" data-close="language">×</button></div><input class="lang-search" id="langSearch" data-i18n-placeholder="language.search" placeholder="Search language"/><div class="language-list" id="languageList" data-native-scroll></div></div></div>
 
@@ -958,17 +975,10 @@ html,html[data-theme="dark"],html[data-theme="light"]{--app-accent:#ffffff!impor
     document.getElementById('footerTheme').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
 
     const downloadModal=document.getElementById('downloadModal');
-    // Published and Windows CI-tested ZFLAG v2.0.65 release.
-    // Static, direct download: never fall back to an old installer on first click.
-    const publishedInstaller="https://github.com/MadeByZebra/zflag-site/releases/download/v2.0.65/ZFLAG_Setup.exe";
-    function downloadInstaller(){
-      const link=document.createElement('a');
-      link.href=publishedInstaller;
-      link.rel='noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    }
+    // Route visitors through the ZFLAG access information page. No installer is
+    // shipped by this static site. Existing historical GitHub releases remain
+    // public separately until the publisher retires them.
+    function downloadInstaller(){ window.location.assign('./zebra/injector/'); }
     document.querySelectorAll('[data-download]').forEach(b=>b.onclick=downloadInstaller);
     document.querySelectorAll('[data-close="download"]').forEach(b=>b.onclick=()=>downloadModal.classList.remove('open'));
     downloadModal.onclick=e=>{if(e.target===downloadModal)downloadModal.classList.remove('open')};
