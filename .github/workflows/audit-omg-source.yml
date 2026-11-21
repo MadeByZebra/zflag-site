@@ -1,0 +1,17 @@
+name: Audit ZFLAG native source and external omg release without executing binaries
+on:
+  push:
+    paths:
+      - 'scripts/audit-omg-inputs.py'
+      - '.github/workflows/audit-omg-source.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read-only source and upstream metadata audit
+        run: python3 scripts/audit-omg-inputs.py
