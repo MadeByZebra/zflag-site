@@ -11,7 +11,7 @@
   
   <meta name="description" content="ZFLAG FastFlag Studio — Windows injector, presets and categorized flag library and stable desktop experience." />
   <meta name="zflag-release" content="2.0.65" />
-  <meta name="zflag-site-build" content="2026-11-20-zebra-hub-access-preview-v1" />
+  <meta name="zflag-site-build" content="2026-11-21-zebras-shop-single-account-v2" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ZFLAG — Your flags. Your workspace." />
   <meta property="og:description" content="Explore ZFLAG for Windows. A refined FastFlag workspace with an interactive preview and searchable documentation." />
@@ -675,8 +675,8 @@ html,html[data-theme="dark"]{--bg:#080808;--bg-2:#0c0c0c;--panel:#0f0f0f;--panel
 <body>
   <header class="nav-shell"><div class="wrap nav">
     <a class="brand" href="#home"><span>ZFLAG</span></a>
-    <nav class="navlinks" aria-label="Main navigation"><a href="./zebra/">Zebra Home ↗</a><a href="https://zebra-bl-marketplace.onrender.com/">BL Scripts ↗</a><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="./library/">Flag Library</a><a href="./compatibility/" title="Check exported FastFlags against build-matched offsets">Compatibility</a><a href="./docs/">Documentation <span aria-hidden="true">↗</span></a><a href="./docs/#releases">Changelog</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
-    <div class="nav-actions"><a class="docs-quick-link" href="./docs/">Docs ↗</a><button class="iconbtn lang-top" id="languageTop" aria-label="Select language" data-tooltip="Language"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></button><button class="iconbtn" id="themeToggle" aria-label="Toggle website theme">◐</button><button class="btn primary" data-download data-i18n="nav.download">Download</button></div>
+    <nav class="navlinks" aria-label="Main navigation"><a href="https://zebra-bl-marketplace.onrender.com/">Zebra’s Shop ↗</a><a href="https://zebra-bl-marketplace.onrender.com/scripts/">BL Scripts ↗</a><a href="#product" data-i18n="nav.product">Product</a><a href="#features" data-i18n="nav.features">Features</a><a href="#preview" data-i18n="nav.preview">Preview</a><a href="./library/">Flag Library</a><a href="./compatibility/" title="Check exported FastFlags against build-matched offsets">Compatibility</a><a href="./docs/">Documentation <span aria-hidden="true">↗</span></a><a href="./docs/#releases">Changelog</a><a href="#faq" data-i18n="nav.faq">FAQ</a></nav>
+    <div class="nav-actions"><a class="docs-quick-link" href="./docs/">Docs ↗</a><button class="iconbtn lang-top" id="languageTop" aria-label="Select language" data-tooltip="Language"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.1 2.35 3.2 5.15 3.2 8.5S14.1 18.15 12 20.5M12 3.5C9.9 5.85 8.8 8.65 8.8 12S9.9 18.15 12 20.5"></path></svg></button><button class="iconbtn" id="themeToggle" aria-label="Toggle website theme">◐</button><a class="btn" href="https://zebra-bl-marketplace.onrender.com/account/" aria-label="Sign in to your Zebra shop account">Sign in ↗</a><button class="btn primary" data-download data-i18n="nav.download">Download</button></div>
   </div></header>
 
   <main id="home">
@@ -978,7 +978,7 @@ html,html[data-theme="dark"]{--bg:#080808;--bg-2:#0c0c0c;--panel:#0f0f0f;--panel
     // Route visitors through the ZFLAG access information page. No installer is
     // shipped by this static site. Existing historical GitHub releases remain
     // public separately until the publisher retires them.
-    function downloadInstaller(){ window.location.assign('./zebra/injector/'); }
+    function downloadInstaller(){ window.location.assign('https://zebra-bl-marketplace.onrender.com/zflag/'); }
     document.querySelectorAll('[data-download]').forEach(b=>b.onclick=downloadInstaller);
     document.querySelectorAll('[data-close="download"]').forEach(b=>b.onclick=()=>downloadModal.classList.remove('open'));
     downloadModal.onclick=e=>{if(e.target===downloadModal)downloadModal.classList.remove('open')};
