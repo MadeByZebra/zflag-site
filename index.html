@@ -969,8 +969,22 @@ html,html[data-theme="dark"]{--bg:#080808;--bg-2:#0c0c0c;--panel:#0f0f0f;--panel
     const root=document.documentElement;
     const systemLight=matchMedia('(prefers-color-scheme: light)').matches;
     const savedTheme=localStorage.getItem('zflag-site-theme');
-    root.dataset.theme=savedTheme || 'dark';
-    const setTheme=theme=>{root.dataset.theme=theme;localStorage.setItem('zflag-site-theme',theme);document.querySelector('meta[name=theme-color]').content=theme==='dark'?'#000000':'#f3f5f7'};
+    root.dataset.theme=savedTheme==='light'?'light':'dark';
+    // Marketplace is on another origin: its localStorage cannot read ZFLAG's.
+    // Carry only a whitelisted appearance preference on first-party shop links.
+    const marketplaceWithTheme=raw=>{
+      const url=new URL(raw,location.href);
+      if(url.origin!=='https://zebra-bl-marketplace.onrender.com')return raw;
+      url.searchParams.set('theme',root.dataset.theme==='light'?'light':'dark');
+      return url.toString();
+    };
+    const syncMarketplaceLinks=()=>{
+      document.querySelectorAll('a[href^="https://zebra-bl-marketplace.onrender.com/"]').forEach(link=>{
+        link.href=marketplaceWithTheme(link.href);
+      });
+    };
+    const setTheme=theme=>{root.dataset.theme=theme==='light'?'light':'dark';localStorage.setItem('zflag-site-theme',root.dataset.theme);document.querySelector('meta[name=theme-color]').content=root.dataset.theme==='dark'?'#000000':'#f3f5f7';syncMarketplaceLinks();};
+    syncMarketplaceLinks();
     document.getElementById('themeToggle').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
     document.getElementById('footerTheme').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
 
@@ -978,7 +992,7 @@ html,html[data-theme="dark"]{--bg:#080808;--bg-2:#0c0c0c;--panel:#0f0f0f;--panel
     // Route visitors through the ZFLAG access information page. No installer is
     // shipped by this static site. Existing historical GitHub releases remain
     // public separately until the publisher retires them.
-    function downloadInstaller(){ window.location.assign('https://zebra-bl-marketplace.onrender.com/zflag/'); }
+    function downloadInstaller(){ window.location.assign(marketplaceWithTheme('https://zebra-bl-marketplace.onrender.com/zflag/')); }
     document.querySelectorAll('[data-download]').forEach(b=>b.onclick=downloadInstaller);
     document.querySelectorAll('[data-close="download"]').forEach(b=>b.onclick=()=>downloadModal.classList.remove('open'));
     downloadModal.onclick=e=>{if(e.target===downloadModal)downloadModal.classList.remove('open')};
